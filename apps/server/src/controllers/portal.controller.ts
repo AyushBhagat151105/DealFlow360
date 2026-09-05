@@ -62,4 +62,3 @@ export async function confirmPortalQuoteController(c: Context) {
   const confirmed = await confirmPortalQuote(token);
   return sendSuccess(c, confirmed, 200, "Quotation accepted and confirmed.");
 }
-

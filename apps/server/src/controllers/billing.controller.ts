@@ -66,4 +66,3 @@ export async function cancelSubscriptionController(c: Context) {
   const result = await cancelSubscription(contractId);
   return sendSuccess(c, result, 200, "Subscription cancelled.");
 }
-

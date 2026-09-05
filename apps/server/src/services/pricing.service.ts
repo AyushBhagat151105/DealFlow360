@@ -215,4 +215,3 @@ function roundToTwo(value: number): number {
 function roundToOne(value: number): number {
   return Math.round((value + Number.EPSILON) * 10) / 10;
 }
-

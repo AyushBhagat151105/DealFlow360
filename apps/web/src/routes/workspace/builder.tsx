@@ -42,32 +42,12 @@ import { Separator } from "@/components/ui/separator";
 import type { Customer, Product, ProductCategory, UpsellSuggestion } from "@/lib/api-types";
 import { useAuthStore } from "@/stores/auth-store";
 
+import { CartTable, type CartLine, calcLineSubtotal, calcLineMarginPercent } from "@/components/cart-table";
+import { CustomerSelector, TIER_BADGE_STYLES } from "@/components/customer-selector";
+
 export const Route = createFileRoute("/workspace/builder")({
   component: BuilderComponent,
 });
-
-interface CartLine {
-  productId: string;
-  productName: string;
-  sku: string;
-  category: ProductCategory;
-  quantity: number;
-  unitPrice: number;
-  costPrice: number;
-  minMarginThreshold: number;
-  discountPercent: number;
-}
-
-function calcLineSubtotal(line: CartLine): number {
-  return line.unitPrice * line.quantity * (1 - line.discountPercent / 100);
-}
-
-function calcLineMarginPercent(line: CartLine): number {
-  const subtotal = calcLineSubtotal(line);
-  const cost = line.costPrice * line.quantity;
-  if (subtotal <= 0) return 0;
-  return ((subtotal - cost) / subtotal) * 100;
-}
 
 function calcBlendedRiskScore(
   lines: CartLine[],
@@ -96,66 +76,6 @@ function calcBlendedMargin(lines: CartLine[]): number {
   const totalCost = lines.reduce((s, l) => s + l.costPrice * l.quantity, 0);
   if (totalSubtotal <= 0) return 0;
   return ((totalSubtotal - totalCost) / totalSubtotal) * 100;
-}
-
-const TIER_BADGE_STYLES: Record<string, string> = {
-  GOLD: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
-  SILVER: "bg-slate-400/15 text-slate-500 dark:text-slate-300 border-slate-400/30",
-  BRONZE: "bg-orange-700/15 text-orange-700 dark:text-orange-400 border-orange-700/30",
-};
-
-function CustomerSelector({
-  customers,
-  selected,
-  onSelect,
-}: {
-  customers: Customer[];
-  selected: Customer | null;
-  onSelect: (c: Customer) => void;
-}) {
-  const [search, setSearch] = useState("");
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  return (
-    <div className="space-y-3">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-        <Input
-          placeholder="Search customers..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-8 h-8 text-xs"
-        />
-      </div>
-      <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
-        {filtered.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => onSelect(c)}
-            className={`w-full text-left p-2.5 rounded-none border text-xs transition-colors cursor-pointer ${
-              selected?.id === c.id
-                ? "border-primary/60 bg-primary/5"
-                : "border-border hover:border-border/80 hover:bg-muted/40 bg-card"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-foreground">{c.name}</span>
-              <Badge className={`text-[10px] px-1.5 py-0 border ${TIER_BADGE_STYLES[c.tier]}`}>
-                {c.tier}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-3 mt-1 text-muted-foreground">
-              <span>{c.contactName}</span>
-              <span className="font-mono">Discount ceiling: {c.allowedDiscountCeiling}%</span>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 function BuilderComponent() {
@@ -359,9 +279,7 @@ function BuilderComponent() {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-4">
-          {/* LEFT: Product Catalog + Cart */}
           <div className="space-y-4">
-            {/* Customer Selector */}
             <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
               <CardHeader className="p-4 pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
@@ -382,8 +300,6 @@ function BuilderComponent() {
                 />
               </CardContent>
             </Card>
-
-            {/* Product Catalog Tabs */}
             <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
               <CardHeader className="p-4 pb-0">
                 <div className="flex items-center justify-between gap-4">
@@ -421,9 +337,8 @@ function BuilderComponent() {
                           return (
                             <div
                               key={product.id}
-                              className={`flex items-center justify-between gap-3 p-3 border rounded-none transition-colors ${
-                                isInCart ? "border-primary/30 bg-primary/5" : "border-border bg-card hover:bg-muted/30"
-                              }`}
+                              className={`flex items-center justify-between gap-3 p-3 border rounded-none transition-colors ${isInCart ? "border-primary/30 bg-primary/5" : "border-border bg-card hover:bg-muted/30"
+                                }`}
                             >
                               <div className="min-w-0 space-y-0.5">
                                 <div className="flex items-center gap-2">
@@ -460,142 +375,15 @@ function BuilderComponent() {
                 </Tabs>
               </CardContent>
             </Card>
-
-            {/* Cart Table */}
-            <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
-              <CardHeader className="p-4 pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-                    <ShoppingCart className="h-4 w-4 text-sky-400" />
-                    Line Items
-                    {cart.length > 0 && (
-                      <Badge variant="secondary" className="text-[10px] font-mono ml-1">
-                        {cart.length} items
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <UpsellDrawer
-                    onAddUpsell={addUpsellToCart}
-                    addedProductIds={cartProductIds}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {cart.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-muted-foreground">
-                    No products added yet. Select from the catalog above.
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader className="bg-muted/40">
-                      <TableRow>
-                        <TableHead className="text-xs font-bold pl-4">Product</TableHead>
-                        <TableHead className="text-xs font-bold text-center">Qty</TableHead>
-                        <TableHead className="text-xs font-bold text-right">Unit Price</TableHead>
-                        <TableHead className="text-xs font-bold text-right w-28">Discount %</TableHead>
-                        <TableHead className="text-xs font-bold text-right">Net Total</TableHead>
-                        <TableHead className="text-xs font-bold text-right">Line Margin</TableHead>
-                        <TableHead className="w-10" />
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {cart.map((line) => {
-                        const lineMargin = calcLineMarginPercent(line);
-                        const lineTotal = calcLineSubtotal(line);
-                        const isBelowThreshold = lineMargin < line.minMarginThreshold;
-                        const isDiscountAboveCeiling =
-                          selectedCustomer &&
-                          selectedCustomer.allowedDiscountCeiling !== undefined &&
-                          line.discountPercent > selectedCustomer.allowedDiscountCeiling;
-
-                        return (
-                          <TableRow
-                            key={line.productId}
-                            className={isBelowThreshold ? "bg-destructive/5" : ""}
-                          >
-                            <TableCell className="pl-4">
-                              <div>
-                                <p className="text-xs font-semibold text-foreground">{line.productName}</p>
-                                <p className="text-[10px] text-muted-foreground font-mono">{line.sku}</p>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                <Button
-                                  variant="outline"
-                                  size="icon-xs"
-                                  onClick={() => updateQuantity(line.productId, -1)}
-                                  disabled={line.quantity <= 1}
-                                  className="h-6 w-6"
-                                >
-                                  <Minus className="h-3 w-3" />
-                                </Button>
-                                <span className="font-mono text-xs w-6 text-center">{line.quantity}</span>
-                                <Button
-                                  variant="outline"
-                                  size="icon-xs"
-                                  onClick={() => updateQuantity(line.productId, 1)}
-                                  className="h-6 w-6"
-                                >
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                              ${line.unitPrice.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  step="0.5"
-                                  value={line.discountPercent}
-                                  onChange={(e) => updateDiscount(line.productId, e.target.value)}
-                                  className={`h-7 w-20 text-right font-mono text-xs ${
-                                    isDiscountAboveCeiling ? "border-amber-500/60 text-amber-600" : ""
-                                  }`}
-                                />
-                                <span className="text-xs text-muted-foreground">%</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right font-mono font-bold text-xs">
-                              ${lineTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <span
-                                className={`text-xs font-mono font-bold ${
-                                  isBelowThreshold
-                                    ? "text-destructive"
-                                    : lineMargin < 30
-                                    ? "text-amber-500"
-                                    : "text-emerald-500"
-                                }`}
-                              >
-                                {lineMargin.toFixed(1)}%
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="icon-xs"
-                                onClick={() => removeLine(line.productId)}
-                                className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Notes */}
+            <CartTable
+              cart={cart}
+              selectedCustomer={selectedCustomer}
+              onUpdateQuantity={updateQuantity}
+              onUpdateDiscount={updateDiscount}
+              onRemoveLine={removeLine}
+              onAddUpsell={addUpsellToCart}
+              cartProductIds={cartProductIds}
+            />
             {cart.length > 0 && (
               <Card className="border-border bg-card">
                 <CardContent className="p-4 space-y-1.5">
@@ -610,10 +398,7 @@ function BuilderComponent() {
               </Card>
             )}
           </div>
-
-          {/* RIGHT SIDEBAR: Live Metrics + Upsell */}
           <div className="space-y-4">
-            {/* Live Margin + Risk */}
             <Card className="border-slate-800 bg-[#0d141b] sticky top-4 shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
               <CardHeader className="p-4 pb-3">
                 <CardTitle className="text-sm font-semibold text-white">Live Quotation Analytics</CardTitle>
@@ -632,8 +417,6 @@ function BuilderComponent() {
                     />
 
                     <Separator />
-
-                    {/* Totals Summary */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">Subtotal (Discounted)</span>
@@ -664,8 +447,6 @@ function BuilderComponent() {
                     </div>
 
                     <Separator />
-
-                    {/* Line Violations Alert */}
                     {cart.some(
                       (l) =>
                         calcLineMarginPercent(l) < l.minMarginThreshold ||
@@ -673,23 +454,23 @@ function BuilderComponent() {
                           selectedCustomer.allowedDiscountCeiling !== undefined &&
                           l.discountPercent > selectedCustomer.allowedDiscountCeiling)
                     ) && (
-                      <div className="text-[11px] bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-2.5 rounded-none space-y-1">
-                        <p className="font-semibold">Discount Ceiling Violations:</p>
-                        {cart
-                          .filter(
-                            (l) =>
-                              calcLineMarginPercent(l) < l.minMarginThreshold ||
-                              (selectedCustomer &&
-                                selectedCustomer.allowedDiscountCeiling !== undefined &&
-                                l.discountPercent > selectedCustomer.allowedDiscountCeiling)
-                          )
-                          .map((l) => (
-                            <p key={l.productId} className="font-mono">
-                              · {l.productName}: {l.discountPercent}% discount
-                            </p>
-                          ))}
-                      </div>
-                    )}
+                        <div className="text-[11px] bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-2.5 rounded-none space-y-1">
+                          <p className="font-semibold">Discount Ceiling Violations:</p>
+                          {cart
+                            .filter(
+                              (l) =>
+                                calcLineMarginPercent(l) < l.minMarginThreshold ||
+                                (selectedCustomer &&
+                                  selectedCustomer.allowedDiscountCeiling !== undefined &&
+                                  l.discountPercent > selectedCustomer.allowedDiscountCeiling)
+                            )
+                            .map((l) => (
+                              <p key={l.productId} className="font-mono">
+                                · {l.productName}: {l.discountPercent}% discount
+                              </p>
+                            ))}
+                        </div>
+                      )}
 
                     <Button
                       className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2 font-semibold"
@@ -707,8 +488,6 @@ function BuilderComponent() {
                 )}
               </CardContent>
             </Card>
-
-            {/* Upsell Suggestions (inline for sidebar) */}
             {cart.length > 0 && (
               <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
                 <CardHeader className="p-4 pb-2">
@@ -725,8 +504,6 @@ function BuilderComponent() {
           </div>
         </div>
       </div>
-
-      {/* Submit Confirmation Dialog */}
       <Dialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
         <DialogContent className="sm:max-w-lg bg-card text-card-foreground border-border">
           <DialogHeader>

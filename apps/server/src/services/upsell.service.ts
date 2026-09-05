@@ -125,4 +125,3 @@ export async function getQuoteUpsellSuggestions(quoteId: string): Promise<Upsell
     return b.marginDeltaPercent - a.marginDeltaPercent;
   });
 }
-

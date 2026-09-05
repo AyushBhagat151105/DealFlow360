@@ -369,4 +369,3 @@ async function generateContractNumber(
   const sequence = String(count + 1).padStart(4, "0");
   return `SUB-${year}-${sequence}`;
 }
-

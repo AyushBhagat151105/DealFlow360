@@ -87,4 +87,3 @@ fulfillmentRoutes.openapi(replenishStockRoute, async (c) => {
   await requireRole(["manager", "admin", "operations"])(c, async () => { });
   return replenishStockController(c);
 });
-

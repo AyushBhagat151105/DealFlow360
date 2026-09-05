@@ -45,4 +45,3 @@ export class ConflictError extends AppError {
     super("CONFLICT", message, 409);
   }
 }
-

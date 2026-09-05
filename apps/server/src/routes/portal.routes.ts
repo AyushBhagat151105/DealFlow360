@@ -99,4 +99,3 @@ portalRoutes.openapi(getPortalQuoteRoute, getPortalQuoteController);
 portalRoutes.openapi(addPortalCommentRoute, addPortalCommentController);
 portalRoutes.openapi(submitPortalCounterRoute, submitPortalCounterController);
 portalRoutes.openapi(confirmPortalQuoteRoute, confirmPortalQuoteController);
-

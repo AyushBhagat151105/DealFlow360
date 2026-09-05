@@ -46,4 +46,3 @@ export async function replenishStockController(c: Context) {
   );
   return sendSuccess(c, result, 200, "Stock replenished successfully.");
 }
-

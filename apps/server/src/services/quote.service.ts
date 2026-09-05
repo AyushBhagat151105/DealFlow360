@@ -317,4 +317,3 @@ async function generateQuoteNumber(): Promise<string> {
   const sequence = String(count + 1).padStart(4, "0");
   return `QT-${year}-${sequence}`;
 }
-

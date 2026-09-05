@@ -143,4 +143,3 @@ export async function optionalAuth(c: Context, next: Next) {
 
   await next();
 }
-

@@ -53,7 +53,6 @@ export function LiveMarginIndicator({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {/* Margin Bar */}
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-foreground">Blended Margin</span>
@@ -75,8 +74,6 @@ export function LiveMarginIndicator({
           <span>100%</span>
         </div>
       </div>
-
-      {/* Risk Score Pill */}
       <div className={cn("flex items-center gap-2 px-3 py-2 rounded-none border text-xs font-medium", risk.badgeBg, risk.badgeText)}>
         <span className={cn("h-2 w-2 rounded-full shrink-0", risk.barColor)} />
         <span>{risk.label}</span>

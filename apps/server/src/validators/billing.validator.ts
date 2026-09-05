@@ -9,4 +9,3 @@ export const recordPaymentSchema = z.object({
 export const modifySeatsSchema = z.object({
   newSeatCount: z.number().int().positive("Seats must be at least 1"),
 });
-

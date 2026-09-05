@@ -9,10 +9,11 @@ import {
   ChevronDown,
   LogOut,
   User,
+  ExternalLink,
 } from "lucide-react";
 import { ModeToggle } from "./mode-toggle";
 import { authClient } from "@/lib/auth-client";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuthStore, USER_ROLES, type UserRole } from "@/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,25 +25,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function Header() {
+type NavItem = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles: readonly UserRole[];
+};
+
+const NAV_ITEMS: readonly NavItem[] = [
+  { to: "/workspace/builder", label: "Quotations", icon: FileText, roles: ["rep", "manager", "finance", "admin"] },
+  { to: "/workspace/pipeline", label: "Pipeline", icon: Kanban, roles: ["rep", "manager", "finance", "admin"] },
+  { to: "/workspace/approvals", label: "Approvals", icon: CheckCircle2, roles: ["manager", "finance", "admin"] },
+  { to: "/dashboard", label: "Deal Health", icon: Activity, roles: ["manager", "finance", "admin"] },
+  { to: "/admin", label: "Admin Config", icon: ShieldCheck, roles: ["admin"] },
+];
+
+export function Header() {
   const routerState = useRouterState();
   const navigate = useNavigate();
   const currentPath = routerState.location.pathname;
   const { data: session } = authClient.useSession();
-  const { user, logout } = useAuthStore();
+  const { user, switchRole, logout } = useAuthStore();
 
   const displayUserEmail = session?.user?.email || user.email;
   const displayUserName = session?.user?.name || user.name;
+  const currentRoleInfo = USER_ROLES[user.role] || USER_ROLES.rep;
 
-  const navItems = [
-    { to: "/workspace/builder", label: "Quotations", icon: FileText },
-    { to: "/workspace/pipeline", label: "Pipeline", icon: Kanban },
-    { to: "/workspace/approvals", label: "Approvals", icon: CheckCircle2 },
-    { to: "/workspace/fulfillment", label: "Fulfillment", icon: Activity },
-    { to: "/workspace/billing", label: "Billing", icon: Activity },
-    { to: "/dashboard", label: "Deal Health", icon: Activity },
-    { to: "/admin", label: "Admin Config", icon: ShieldCheck },
-  ];
+  const visibleNavItems = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
 
   const handleSignOut = () => {
     authClient.signOut({
@@ -57,6 +66,13 @@ export default function Header() {
         },
       },
     });
+  };
+
+  const handleRoleSwitch = (newRole: UserRole) => {
+    switchRole(newRole);
+    if (newRole === "rep" && (currentPath === "/admin" || currentPath === "/workspace/approvals" || currentPath === "/dashboard")) {
+      navigate({ to: "/workspace/builder" });
+    }
   };
 
   return (
@@ -76,18 +92,16 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
-            {navItems.map(({ to, label, icon: Icon }) => {
-              const isActive =
-                currentPath === to || (to !== "/" && currentPath.startsWith(to));
+            {visibleNavItems.map(({ to, label, icon: Icon }) => {
+              const isActive = currentPath === to || (to !== "/" && currentPath.startsWith(to));
               return (
                 <Link
                   key={to}
                   to={to}
-                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${
-                    isActive
+                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${isActive
                       ? "bg-slate-800 text-white border border-sky-500/30 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.15)]"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/70"
-                  }`}
+                    }`}
                 >
                   <Icon className={`h-3.5 w-3.5 ${isActive ? "text-sky-400" : "text-slate-400"}`} />
                   <span>{label}</span>
@@ -98,19 +112,59 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <div className="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+            <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 px-1.5">Demo Role:</span>
+            {(Object.keys(USER_ROLES) as UserRole[]).map((roleKey) => {
+              const roleItem = USER_ROLES[roleKey];
+              const isSelected = user.role === roleKey;
+              return (
+                <button
+                  key={roleKey}
+                  type="button"
+                  onClick={() => handleRoleSwitch(roleKey)}
+                  className={`px-2 py-1 text-xs rounded font-medium transition-all ${isSelected
+                      ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-sm"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                    }`}
+                >
+                  {roleItem.badge}
+                </button>
+              );
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs gap-1.5 border-emerald-500/30 text-emerald-400 hover:bg-emerald-950/40 hover:text-emerald-300"
+            onClick={() => window.open("/portal/quote/acme_negotiation_token_2026", "_blank")}
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            <span className="hidden xl:inline">Portal View</span>
+          </Button>
+
           <ModeToggle />
 
           <DropdownMenu>
             <DropdownMenuTrigger className="h-8 gap-2 px-2.5 bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 inline-flex items-center justify-center rounded-md text-xs font-medium cursor-pointer">
               <User className="h-3.5 w-3.5 text-sky-400" />
               <span className="font-medium hidden md:inline">{displayUserName}</span>
+              <Badge variant="outline" className={`text-[10px] px-1 py-0 border-none ${currentRoleInfo.avatarColor} text-white`}>
+                {currentRoleInfo.badge}
+              </Badge>
               <ChevronDown className="h-3 w-3 opacity-60" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-[#101923] text-foreground border border-slate-700">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-xs font-semibold leading-none text-white">{displayUserName}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold leading-none text-white">{displayUserName}</p>
+                    <Badge variant="outline" className="text-[10px] text-sky-400 border-sky-500/30">
+                      {currentRoleInfo.badge}
+                    </Badge>
+                  </div>
                   <p className="text-[11px] leading-none text-slate-400 font-mono">{displayUserEmail}</p>
+                  <p className="text-[10px] leading-tight text-slate-500 pt-1">{currentRoleInfo.description}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-slate-700" />

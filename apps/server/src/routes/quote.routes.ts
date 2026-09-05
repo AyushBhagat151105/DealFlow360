@@ -181,4 +181,3 @@ quoteRoutes.openapi(upsellSuggestionsRoute, async (c) => {
   await requireAuth(c, async () => { });
   return getQuoteUpsellSuggestionsController(c);
 });
-

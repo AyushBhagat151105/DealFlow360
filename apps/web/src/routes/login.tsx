@@ -11,8 +11,8 @@ import {
   CheckCircle2,
   Building2,
 } from "lucide-react";
-import SignInForm from "@/components/sign-in-form";
-import SignUpForm from "@/components/sign-up-form";
+import { SignInForm } from "@/components/sign-in-form";
+import { SignUpForm } from "@/components/sign-up-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -135,18 +135,16 @@ function RouteComponent() {
                   <button
                     type="button"
                     onClick={() => setShowSignIn(true)}
-                    className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                      showSignIn ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                    }`}
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${showSignIn ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                      }`}
                   >
                     Sign in
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowSignIn(false)}
-                    className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                      !showSignIn ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                    }`}
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${!showSignIn ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                      }`}
                   >
                     Create account
                   </button>
