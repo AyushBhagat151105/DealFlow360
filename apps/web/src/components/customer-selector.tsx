@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import type { Customer } from "@/lib/api-types";
 
 export const TIER_BADGE_STYLES: Record<string, string> = {
-  GOLD: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
-  SILVER: "bg-slate-400/15 text-slate-500 dark:text-slate-300 border-slate-400/30",
-  BRONZE: "bg-orange-700/15 text-orange-700 dark:text-orange-400 border-orange-700/30",
+  GOLD: "bg-highlighter-yellow text-forest-ink border-highlighter-yellow/60",
+  SILVER: "bg-whisper-gray text-forest-ink/70 border-pencil-gray/40",
+  BRONZE: "bg-terracotta/10 text-terracotta border-terracotta/30",
 };
 
 type CustomerSelectorProps = {

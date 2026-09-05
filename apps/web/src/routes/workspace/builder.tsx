@@ -73,13 +73,13 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 });
 
 const STATUS_BADGE_STYLES: Record<string, string> = {
-  DRAFT: "bg-slate-500/15 text-slate-400 border-slate-500/30",
-  PENDING_APPROVAL: "bg-amber-500/15 text-amber-500 border-amber-500/30",
-  APPROVED: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
-  UNDER_NEGOTIATION: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  CONFIRMED: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-  REJECTED: "bg-red-500/15 text-red-400 border-red-500/30",
-  FULFILLED: "bg-teal-500/15 text-teal-400 border-teal-500/30",
+  DRAFT: "bg-whisper-gray text-forest-ink border-pencil-gray/40",
+  PENDING_APPROVAL: "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60",
+  APPROVED: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
+  UNDER_NEGOTIATION: "bg-sticky-note-teal text-forest-ink border-sticky-note-teal/60",
+  CONFIRMED: "bg-sticky-note-blush text-forest-ink border-sticky-note-blush/60",
+  REJECTED: "bg-terracotta/10 text-terracotta border-terracotta/30",
+  FULFILLED: "bg-whisper-gray text-forest-ink/50 border-pencil-gray/40",
 };
 
 function calcBlendedRiskScore(
@@ -339,28 +339,28 @@ function BuilderComponent() {
   // VIEW 1: QUOTATIONS LIST VIEW (DEFAULT)
   if (viewMode === "LIST") {
     return (
-      <div className="min-h-full overflow-y-auto bg-[#090d13] text-foreground">
+      <div className="min-h-full overflow-y-auto bg-background text-foreground">
         <div className="max-w-[1600px] mx-auto p-4 sm:p-6 space-y-6">
           {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-800 bg-[#0d141b] p-5 shadow-[0_0_0_1px_rgba(148,163,184,0.04)]">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-pencil-gray/40 bg-card p-5 ">
             <div>
               <div className="mb-1 flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-mono">
+                <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground font-mono">
                   SALES OPERATIONS
                 </span>
-                <Badge variant="outline" className="text-[10px] border-sky-500/30 text-sky-400">
+                <Badge variant="outline" className="text-[10px] border-pencil-gray text-forest-ink/60">
                   DEAL MANAGER
                 </Badge>
               </div>
-              <h1 className="text-2xl font-black tracking-tight text-white">Quotations Overview</h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <h1 className="text-2xl font-black tracking-tight text-foreground">Quotations Overview</h1>
+              <p className="text-xs text-muted-foreground mt-1">
                 Browse customer deal quotes, inspect line discounts, or build a new quotation.
               </p>
             </div>
 
             <Button
               onClick={() => setViewMode("CREATE")}
-              className="gap-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-4 py-2 text-xs shadow-md cursor-pointer"
+              className="gap-2 bg-sky-500 hover:bg-sky-400 text-cream-paper font-bold px-4 py-2 text-xs shadow-md cursor-pointer"
             >
               <Plus className="h-4 w-4 stroke-[2.5]" />
               Create New Quotation
@@ -369,52 +369,52 @@ function BuilderComponent() {
 
           {/* Metric KPI Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-slate-800 bg-[#0d141b] shadow-none">
+            <Card className="border-pencil-gray/40 bg-card shadow-none">
               <CardContent className="p-4 space-y-1">
-                <div className="flex items-center justify-between text-slate-400">
+                <div className="flex items-center justify-between text-muted-foreground">
                   <span className="text-xs">Total Quotations</span>
-                  <FileText className="h-4 w-4 text-sky-400" />
+                  <FileText className="h-4 w-4 text-forest-ink/70" />
                 </div>
-                <p className="text-2xl font-bold text-white">{quotes.length}</p>
-                <p className="text-[11px] text-slate-400">Active deal quotes in workspace</p>
+                <p className="text-2xl font-bold text-foreground">{quotes.length}</p>
+                <p className="text-[11px] text-muted-foreground">Active deal quotes in workspace</p>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-800 bg-[#0d141b] shadow-none">
+            <Card className="border-pencil-gray/40 bg-card shadow-none">
               <CardContent className="p-4 space-y-1">
-                <div className="flex items-center justify-between text-slate-400">
+                <div className="flex items-center justify-between text-muted-foreground">
                   <span className="text-xs">Pending Approvals</span>
                   <Clock className="h-4 w-4 text-amber-400" />
                 </div>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {quotes.filter((q) => q.status === "PENDING_APPROVAL").length}
                 </p>
-                <p className="text-[11px] text-slate-400">Requires Manager/Finance review</p>
+                <p className="text-[11px] text-muted-foreground">Requires Manager/Finance review</p>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-800 bg-[#0d141b] shadow-none">
+            <Card className="border-pencil-gray/40 bg-card shadow-none">
               <CardContent className="p-4 space-y-1">
-                <div className="flex items-center justify-between text-slate-400">
+                <div className="flex items-center justify-between text-muted-foreground">
                   <span className="text-xs">Active Pipeline Value</span>
                   <DollarSign className="h-4 w-4 text-emerald-400" />
                 </div>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {currencyFormatter.format(
                     quotes.reduce((acc, q) => acc + (q.totalSubtotal || 0), 0)
                   )}
                 </p>
-                <p className="text-[11px] text-slate-400">Total net quotation value</p>
+                <p className="text-[11px] text-muted-foreground">Total net quotation value</p>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-800 bg-[#0d141b] shadow-none">
+            <Card className="border-pencil-gray/40 bg-card shadow-none">
               <CardContent className="p-4 space-y-1">
-                <div className="flex items-center justify-between text-slate-400">
+                <div className="flex items-center justify-between text-muted-foreground">
                   <span className="text-xs">Avg Blended Margin</span>
                   <Percent className="h-4 w-4 text-purple-400" />
                 </div>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {quotes.length > 0
                     ? (
                         quotes.reduce((acc, q) => acc + (q.totalMarginPercent || 0), 0) /
@@ -423,7 +423,7 @@ function BuilderComponent() {
                     : 0}
                   %
                 </p>
-                <p className="text-[11px] text-slate-400">Blended margin performance</p>
+                <p className="text-[11px] text-muted-foreground">Blended margin performance</p>
               </CardContent>
             </Card>
           </div>
@@ -432,18 +432,18 @@ function BuilderComponent() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3 flex-1 max-w-lg">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                 <Input
                   placeholder="Search by quote # or customer name..."
                   value={listSearch}
                   onChange={(e) => setListSearch(e.target.value)}
-                  className="pl-8 h-9 text-xs bg-slate-900/80 border-slate-800 text-white"
+                  className="pl-8 h-9 text-xs bg-whisper-gray border-pencil-gray/40 text-foreground"
                 />
               </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-9 px-3 text-xs bg-slate-900 border border-slate-800 text-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 rounded-md"
+                className="h-9 px-3 text-xs bg-whisper-gray border border-pencil-gray/40 text-foreground focus:outline-none focus:ring-1 focus:ring-forest-ink/40 rounded-md"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="DRAFT">Draft</option>
@@ -457,30 +457,30 @@ function BuilderComponent() {
           </div>
 
           {/* Quotations Table */}
-          <Card className="border-slate-800 bg-[#0d141b] shadow-none overflow-hidden">
+          <Card className="border-pencil-gray/40 bg-card shadow-none overflow-hidden">
             <Table>
-              <TableHeader className="bg-slate-900/60 border-slate-800">
-                <TableRow className="border-slate-800 hover:bg-transparent">
-                  <TableHead className="text-xs font-mono text-slate-400">Quote #</TableHead>
-                  <TableHead className="text-xs text-slate-400">Customer Account</TableHead>
-                  <TableHead className="text-xs text-slate-400">Created Date</TableHead>
-                  <TableHead className="text-xs text-slate-400 text-right">Net Subtotal</TableHead>
-                  <TableHead className="text-xs text-slate-400 text-right">Margin %</TableHead>
-                  <TableHead className="text-xs text-slate-400 text-center">Risk Score</TableHead>
-                  <TableHead className="text-xs text-slate-400">Status</TableHead>
-                  <TableHead className="text-xs text-slate-400 text-right">Action</TableHead>
+              <TableHeader className="bg-whisper-gray border-pencil-gray/40">
+                <TableRow className="border-pencil-gray/40 hover:bg-transparent">
+                  <TableHead className="text-xs font-mono text-muted-foreground">Quote #</TableHead>
+                  <TableHead className="text-xs text-muted-foreground">Customer Account</TableHead>
+                  <TableHead className="text-xs text-muted-foreground">Created Date</TableHead>
+                  <TableHead className="text-xs text-muted-foreground text-right">Net Subtotal</TableHead>
+                  <TableHead className="text-xs text-muted-foreground text-right">Margin %</TableHead>
+                  <TableHead className="text-xs text-muted-foreground text-center">Risk Score</TableHead>
+                  <TableHead className="text-xs text-muted-foreground">Status</TableHead>
+                  <TableHead className="text-xs text-muted-foreground text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-slate-800/60">
                 {isQuotesLoading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12 text-xs text-slate-400">
+                    <TableCell colSpan={8} className="text-center py-12 text-xs text-muted-foreground">
                       Loading quotations list...
                     </TableCell>
                   </TableRow>
                 ) : filteredQuotes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12 text-xs text-slate-400">
+                    <TableCell colSpan={8} className="text-center py-12 text-xs text-muted-foreground">
                       No quotations found. Click "+ Create New Quotation" to build one.
                     </TableCell>
                   </TableRow>
@@ -492,23 +492,23 @@ function BuilderComponent() {
                         setSelectedQuoteId(quote.id);
                         setViewMode("DETAILS");
                       }}
-                      className="border-slate-800 hover:bg-slate-900/50 cursor-pointer transition-colors"
+                      className="border-pencil-gray/40 hover:bg-whisper-gray/50 cursor-pointer transition-colors"
                     >
-                      <TableCell className="font-mono text-xs font-bold text-sky-400">
+                      <TableCell className="font-mono text-xs font-bold text-forest-ink/70">
                         {quote.quoteNumber}
                       </TableCell>
                       <TableCell>
                         <div>
-                          <p className="text-xs font-semibold text-white">{quote.customerName}</p>
+                          <p className="text-xs font-semibold text-foreground">{quote.customerName}</p>
                           <Badge className={`text-[9px] px-1 py-0 border ${TIER_BADGE_STYLES[quote.customerTier]}`}>
                             {quote.customerTier}
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-400 font-mono">
+                      <TableCell className="text-xs text-muted-foreground font-mono">
                         {new Date(quote.createdAt).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="text-right font-mono text-xs font-semibold text-white">
+                      <TableCell className="text-right font-mono text-xs font-semibold text-foreground">
                         {currencyFormatter.format(quote.totalSubtotal)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs font-semibold">
@@ -529,10 +529,10 @@ function BuilderComponent() {
                           variant="outline"
                           className={`font-mono text-[10px] border ${
                             quote.blendedRiskScore === 0
-                              ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10"
+                              ? "border-sticky-note-mint/60 text-forest-ink bg-sticky-note-mint"
                               : quote.blendedRiskScore <= 10
-                              ? "border-amber-500/30 text-amber-400 bg-amber-500/10"
-                              : "border-red-500/30 text-red-400 bg-red-500/10"
+                              ? "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/40"
+                              : "border-terracotta/30 text-terracotta bg-terracotta/10"
                           }`}
                         >
                           Risk: {quote.blendedRiskScore}
@@ -547,7 +547,7 @@ function BuilderComponent() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-xs text-sky-400 hover:text-sky-300 gap-1"
+                          className="h-7 text-xs text-forest-ink/70 hover:text-forest-ink gap-1"
                         >
                           Details
                           <ChevronRight className="h-3 w-3" />
@@ -567,7 +567,7 @@ function BuilderComponent() {
   // VIEW 2: QUOTATION DETAILS VIEW
   if (viewMode === "DETAILS") {
     return (
-      <div className="min-h-full overflow-y-auto bg-[#090d13] text-foreground">
+      <div className="min-h-full overflow-y-auto bg-background text-foreground">
         <div className="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6">
           {/* Back Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -578,7 +578,7 @@ function BuilderComponent() {
                 setSelectedQuoteId(null);
                 setViewMode("LIST");
               }}
-              className="gap-2 text-xs border-slate-800 text-slate-300 hover:bg-slate-800 cursor-pointer"
+              className="gap-2 text-xs border-pencil-gray/40 text-forest-ink/70 hover:bg-whisper-gray cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to Quotations List
@@ -602,25 +602,25 @@ function BuilderComponent() {
           </div>
 
           {isDetailLoading || !quoteDetail ? (
-            <div className="text-center py-16 text-slate-400 text-xs">
+            <div className="text-center py-16 text-muted-foreground text-xs">
               Loading quotation details...
             </div>
           ) : (
             <>
               {/* Quote Main Info Header */}
-              <div className="rounded-xl border border-slate-800 bg-[#0d141b] p-6 space-y-4">
-                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="rounded-xl border border-pencil-gray/40 bg-card p-6 space-y-4">
+                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-pencil-gray/40 pb-4">
                   <div>
                     <div className="flex items-center gap-3">
-                      <h1 className="text-2xl font-black tracking-tight text-white font-mono">
+                      <h1 className="text-2xl font-black tracking-tight text-foreground font-mono">
                         Quote #{quoteDetail.quoteNumber}
                       </h1>
                       <Badge className={`text-xs border ${STATUS_BADGE_STYLES[quoteDetail.status]}`}>
                         {quoteDetail.status.replaceAll("_", " ")}
                       </Badge>
                     </div>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Customer: <span className="text-white font-semibold">{quoteDetail.customerName}</span> · Created on {new Date(quoteDetail.createdAt).toLocaleDateString()}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Customer: <span className="text-foreground font-semibold">{quoteDetail.customerName}</span> · Created on {new Date(quoteDetail.createdAt).toLocaleDateString()}
                     </p>
                   </div>
 
@@ -641,7 +641,7 @@ function BuilderComponent() {
                           size="sm"
                           onClick={() => handleReviewQuote(quoteDetail.id, "APPROVE")}
                           disabled={approveMutation.isPending}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs gap-1.5"
+                          className="bg-emerald-600 hover:bg-emerald-500 text-foreground font-semibold text-xs gap-1.5"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           Approve Quote
@@ -652,29 +652,29 @@ function BuilderComponent() {
 
                 {/* KPI Metrics */}
                 <div className="grid gap-4 sm:grid-cols-4">
-                  <div className="bg-slate-900/60 p-3.5 border border-slate-800 rounded-lg">
-                    <span className="text-[11px] text-slate-400">Net Subtotal</span>
-                    <p className="text-xl font-bold font-mono text-white mt-1">
+                  <div className="bg-whisper-gray p-3.5 border border-pencil-gray/40 rounded-lg">
+                    <span className="text-[11px] text-muted-foreground">Net Subtotal</span>
+                    <p className="text-xl font-bold font-mono text-foreground mt-1">
                       {currencyFormatter.format(quoteDetail.totalSubtotal)}
                     </p>
                   </div>
 
-                  <div className="bg-slate-900/60 p-3.5 border border-slate-800 rounded-lg">
-                    <span className="text-[11px] text-slate-400">Standard Cost</span>
-                    <p className="text-xl font-bold font-mono text-slate-300 mt-1">
+                  <div className="bg-whisper-gray p-3.5 border border-pencil-gray/40 rounded-lg">
+                    <span className="text-[11px] text-muted-foreground">Standard Cost</span>
+                    <p className="text-xl font-bold font-mono text-forest-ink/70 mt-1">
                       {currencyFormatter.format(quoteDetail.totalCost)}
                     </p>
                   </div>
 
-                  <div className="bg-slate-900/60 p-3.5 border border-slate-800 rounded-lg">
-                    <span className="text-[11px] text-slate-400">Blended Margin</span>
+                  <div className="bg-whisper-gray p-3.5 border border-pencil-gray/40 rounded-lg">
+                    <span className="text-[11px] text-muted-foreground">Blended Margin</span>
                     <p className="text-xl font-bold font-mono text-emerald-400 mt-1">
                       {quoteDetail.totalMarginPercent.toFixed(1)}%
                     </p>
                   </div>
 
-                  <div className="bg-slate-900/60 p-3.5 border border-slate-800 rounded-lg">
-                    <span className="text-[11px] text-slate-400">Risk Score & Routing</span>
+                  <div className="bg-whisper-gray p-3.5 border border-pencil-gray/40 rounded-lg">
+                    <span className="text-[11px] text-muted-foreground">Risk Score & Routing</span>
                     <p className="text-xl font-bold font-mono text-amber-400 mt-1 flex items-center gap-2">
                       Score: {quoteDetail.blendedRiskScore}
                     </p>
@@ -683,22 +683,22 @@ function BuilderComponent() {
               </div>
 
               {/* Line Items Table */}
-              <Card className="border-slate-800 bg-[#0d141b] shadow-none overflow-hidden">
-                <CardHeader className="p-4 border-b border-slate-800">
-                  <CardTitle className="text-xs font-mono tracking-wider uppercase text-slate-400">
+              <Card className="border-pencil-gray/40 bg-card shadow-none overflow-hidden">
+                <CardHeader className="p-4 border-b border-pencil-gray/40">
+                  <CardTitle className="text-xs font-mono tracking-wider uppercase text-muted-foreground">
                     Quotation Line Items ({quoteDetail.lines.length})
                   </CardTitle>
                 </CardHeader>
                 <Table>
-                  <TableHeader className="bg-slate-900/60 border-slate-800">
-                    <TableRow className="border-slate-800">
-                      <TableHead className="text-xs text-slate-400">Product</TableHead>
-                      <TableHead className="text-xs text-slate-400">Category</TableHead>
-                      <TableHead className="text-xs text-slate-400 text-right">Quantity</TableHead>
-                      <TableHead className="text-xs text-slate-400 text-right">Unit Price</TableHead>
-                      <TableHead className="text-xs text-slate-400 text-right">Discount %</TableHead>
-                      <TableHead className="text-xs text-slate-400 text-right">Line Margin %</TableHead>
-                      <TableHead className="text-xs text-slate-400 text-right">Subtotal</TableHead>
+                  <TableHeader className="bg-whisper-gray border-pencil-gray/40">
+                    <TableRow className="border-pencil-gray/40">
+                      <TableHead className="text-xs text-muted-foreground">Product</TableHead>
+                      <TableHead className="text-xs text-muted-foreground">Category</TableHead>
+                      <TableHead className="text-xs text-muted-foreground text-right">Quantity</TableHead>
+                      <TableHead className="text-xs text-muted-foreground text-right">Unit Price</TableHead>
+                      <TableHead className="text-xs text-muted-foreground text-right">Discount %</TableHead>
+                      <TableHead className="text-xs text-muted-foreground text-right">Line Margin %</TableHead>
+                      <TableHead className="text-xs text-muted-foreground text-right">Subtotal</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y divide-slate-800/60">
@@ -706,11 +706,11 @@ function BuilderComponent() {
                       const lineCost = (line.costPrice || 0) * line.quantity;
                       const lineMargin = line.lineSubtotal > 0 ? ((line.lineSubtotal - lineCost) / line.lineSubtotal) * 100 : 0;
                       return (
-                        <TableRow key={line.id} className="border-slate-800">
+                        <TableRow key={line.id} className="border-pencil-gray/40">
                           <TableCell>
                             <div>
-                              <p className="text-xs font-semibold text-white">{line.productName}</p>
-                              <p className="text-[10px] font-mono text-slate-400">{line.productId}</p>
+                              <p className="text-xs font-semibold text-foreground">{line.productName}</p>
+                              <p className="text-[10px] font-mono text-muted-foreground">{line.productId}</p>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -718,10 +718,10 @@ function BuilderComponent() {
                               {line.category}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right font-mono text-xs text-white">
+                          <TableCell className="text-right font-mono text-xs text-foreground">
                             {line.quantity}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-xs text-slate-300">
+                          <TableCell className="text-right font-mono text-xs text-forest-ink/70">
                             {currencyFormatter.format(line.unitPrice)}
                           </TableCell>
                           <TableCell className="text-right font-mono text-xs text-amber-400">
@@ -730,7 +730,7 @@ function BuilderComponent() {
                           <TableCell className="text-right font-mono text-xs text-emerald-400">
                             {lineMargin.toFixed(1)}%
                           </TableCell>
-                          <TableCell className="text-right font-mono text-xs font-bold text-white">
+                          <TableCell className="text-right font-mono text-xs font-bold text-foreground">
                             {currencyFormatter.format(line.lineSubtotal)}
                           </TableCell>
                         </TableRow>
@@ -742,10 +742,10 @@ function BuilderComponent() {
 
               {/* Audit History Timeline */}
               {quoteDetail.auditLogs && quoteDetail.auditLogs.length > 0 && (
-                <Card className="border-slate-800 bg-[#0d141b] shadow-none">
-                  <CardHeader className="p-4 border-b border-slate-800">
-                    <CardTitle className="text-xs font-mono tracking-wider uppercase text-slate-400 flex items-center gap-2">
-                      <History className="h-3.5 w-3.5 text-sky-400" />
+                <Card className="border-pencil-gray/40 bg-card shadow-none">
+                  <CardHeader className="p-4 border-b border-pencil-gray/40">
+                    <CardTitle className="text-xs font-mono tracking-wider uppercase text-muted-foreground flex items-center gap-2">
+                      <History className="h-3.5 w-3.5 text-forest-ink/70" />
                       Approval Audit Trail History
                     </CardTitle>
                   </CardHeader>
@@ -753,8 +753,8 @@ function BuilderComponent() {
                     {quoteDetail.auditLogs.map((log) => (
                       <div key={log.id} className="py-3 first:pt-0 last:pb-0 flex items-start justify-between gap-4 text-xs">
                         <div>
-                          <p className="font-semibold text-white">{log.action.replaceAll("_", " ")}</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="font-semibold text-foreground">{log.action.replaceAll("_", " ")}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
                             By {log.actorName} ({log.actorRole}) {log.reason ? `— "${log.reason}"` : ""}
                           </p>
                         </div>
@@ -775,16 +775,16 @@ function BuilderComponent() {
 
   // VIEW 3: QUOTATION BUILDER VIEW (`viewMode === "CREATE"`)
   return (
-    <div className="h-full overflow-y-auto bg-[#090d13] text-foreground">
+    <div className="h-full overflow-y-auto bg-background text-foreground">
       <div className="max-w-[1600px] mx-auto p-4 sm:p-6 space-y-4">
         {/* Creation Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-800 bg-[#0d141b] p-4 shadow-[0_0_0_1px_rgba(148,163,184,0.04)]">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-pencil-gray/40 bg-card p-4 ">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setViewMode("LIST")}
-              className="gap-2 text-xs border-slate-800 text-slate-300 hover:bg-slate-800 cursor-pointer"
+              className="gap-2 text-xs border-pencil-gray/40 text-forest-ink/70 hover:bg-whisper-gray cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to List
@@ -792,25 +792,25 @@ function BuilderComponent() {
             <div>
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-sky-400" />
-                <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-mono">
+                <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground font-mono">
                   NEW QUOTATION
                 </span>
               </div>
-              <h1 className="text-xl font-black tracking-tight text-white">Create New Quotation</h1>
+              <h1 className="text-xl font-black tracking-tight text-foreground">Create New Quotation</h1>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-300 rounded-md border border-slate-700 bg-slate-900 px-3 py-2">
-            <UserCircle className="h-4 w-4 text-sky-400" />
-            <span>Rep: <span className="font-semibold text-white">{user.name}</span></span>
+          <div className="flex items-center gap-2 text-xs text-forest-ink/70 rounded-md border border-pencil-gray/40 bg-whisper-gray px-3 py-2">
+            <UserCircle className="h-4 w-4 text-forest-ink/70" />
+            <span>Rep: <span className="font-semibold text-foreground">{user.name}</span></span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-4">
           <div className="space-y-4">
-            <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
+            <Card className="border-pencil-gray/40 bg-card ">
               <CardHeader className="p-4 pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-                  <UserCircle className="h-4 w-4 text-sky-400" />
+                <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                  <UserCircle className="h-4 w-4 text-forest-ink/70" />
                   Select Customer Account
                   {selectedCustomer && (
                     <Badge className={`ml-2 text-[10px] px-1.5 py-0 border ${TIER_BADGE_STYLES[selectedCustomer.tier]}`}>
@@ -828,11 +828,11 @@ function BuilderComponent() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
+            <Card className="border-pencil-gray/40 bg-card ">
               <CardHeader className="p-4 pb-0">
                 <div className="flex items-center justify-between gap-4">
-                  <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-                    <Package className="h-4 w-4 text-sky-400" />
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                    <Package className="h-4 w-4 text-forest-ink/70" />
                     Product Catalog
                   </CardTitle>
                   <div className="relative w-48">
@@ -902,11 +902,11 @@ function BuilderComponent() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
+            <Card className="border-pencil-gray/40 bg-card ">
               <CardHeader className="p-4 pb-2">
-                <CardTitle className="text-sm font-semibold flex items-center justify-between text-white">
+                <CardTitle className="text-sm font-semibold flex items-center justify-between text-foreground">
                   <span>Quotation Shopping Cart ({cart.length} items)</span>
-                  <span className="font-mono text-sky-400 text-xs font-bold">
+                  <span className="font-mono text-forest-ink/70 text-xs font-bold">
                     Net: {currencyFormatter.format(totalSubtotal)}
                   </span>
                 </CardTitle>
@@ -926,9 +926,9 @@ function BuilderComponent() {
           </div>
 
           <div className="space-y-4">
-            <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
+            <Card className="border-pencil-gray/40 bg-card ">
               <CardHeader className="p-4 pb-2">
-                <CardTitle className="text-sm font-semibold text-white">Live Margin & Governance Meter</CardTitle>
+                <CardTitle className="text-sm font-semibold text-foreground">Live Margin & Governance Meter</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0 space-y-4">
                 <LiveMarginIndicator
@@ -938,7 +938,7 @@ function BuilderComponent() {
                 />
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="q-notes" className="text-xs text-slate-300">
+                  <Label htmlFor="q-notes" className="text-xs text-forest-ink/70">
                     Deal Notes / Approval Context
                   </Label>
                   <textarea
@@ -946,14 +946,14 @@ function BuilderComponent() {
                     placeholder="Enter deal justification or custom discount reasoning..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full min-h-[70px] p-2.5 text-xs bg-slate-900/80 border border-slate-800 text-white rounded-md focus:outline-none focus:ring-1 focus:ring-sky-500"
+                    className="w-full min-h-[70px] p-2.5 text-xs bg-whisper-gray border border-pencil-gray/40 text-foreground rounded-md focus:outline-none focus:ring-1 focus:ring-forest-ink/40"
                   />
                 </div>
 
                 <Button
                   onClick={handleSubmit}
                   disabled={cart.length === 0 || !selectedCustomer}
-                  className="w-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs py-2.5 shadow-md cursor-pointer"
+                  className="w-full bg-sky-500 hover:bg-sky-400 text-cream-paper font-bold text-xs py-2.5 shadow-md cursor-pointer"
                 >
                   Submit Quotation for Approval
                 </Button>
@@ -966,23 +966,23 @@ function BuilderComponent() {
 
         {/* Submit Modal */}
         <Dialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
-          <DialogContent className="sm:max-w-md bg-[#0d141b] border-slate-800 text-white">
+          <DialogContent className="sm:max-w-md bg-card border-pencil-gray/40 text-foreground">
             <DialogHeader>
               <DialogTitle className="text-base">Confirm Quotation Submission</DialogTitle>
-              <DialogDescription className="text-xs text-slate-400">
+              <DialogDescription className="text-xs text-muted-foreground">
                 Review line discount ceilings and approval routing before submitting.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-3 py-3 text-xs">
-              <div className="p-3 bg-slate-900/80 border border-slate-800 rounded-md space-y-1">
+              <div className="p-3 bg-whisper-gray border border-pencil-gray/40 rounded-md space-y-1">
                 <div className="flex justify-between font-medium">
                   <span>Customer:</span>
-                  <span className="text-white">{selectedCustomer?.name}</span>
+                  <span className="text-foreground">{selectedCustomer?.name}</span>
                 </div>
                 <div className="flex justify-between font-medium">
                   <span>Net Total:</span>
-                  <span className="font-mono text-sky-400">{currencyFormatter.format(totalSubtotal)}</span>
+                  <span className="font-mono text-forest-ink/70">{currencyFormatter.format(totalSubtotal)}</span>
                 </div>
                 <div className="flex justify-between font-medium">
                   <span>Blended Margin:</span>
@@ -996,10 +996,10 @@ function BuilderComponent() {
             </div>
 
             <DialogFooter>
-              <Button variant="outline" size="sm" onClick={() => setSubmitDialogOpen(false)} className="border-slate-800 text-slate-300">
+              <Button variant="outline" size="sm" onClick={() => setSubmitDialogOpen(false)} className="border-pencil-gray/40 text-forest-ink/70">
                 Cancel
               </Button>
-              <Button size="sm" onClick={handleConfirmSubmit} disabled={createQuoteMutation.isPending} className="bg-sky-500 text-slate-950 font-bold">
+              <Button size="sm" onClick={handleConfirmSubmit} disabled={createQuoteMutation.isPending} className="bg-sky-500 text-cream-paper font-bold">
                 {createQuoteMutation.isPending ? "Submitting..." : "Confirm & Submit"}
               </Button>
             </DialogFooter>

@@ -33,19 +33,19 @@ export const Route = createFileRoute("/workspace/approvals")({
 });
 
 const STATUS_BADGE: Record<string, string> = {
-  DRAFT: "bg-muted text-muted-foreground border-border",
-  PENDING_APPROVAL: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
-  APPROVED: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-  REJECTED: "bg-destructive/15 text-destructive border-destructive/30",
-  UNDER_NEGOTIATION: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
-  CONFIRMED: "bg-emerald-600/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/40",
-  FULFILLED: "bg-slate-500/15 text-slate-500 border-slate-500/30",
+  DRAFT: "bg-whisper-gray text-forest-ink border-pencil-gray/40",
+  PENDING_APPROVAL: "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60",
+  APPROVED: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
+  REJECTED: "bg-terracotta/10 text-terracotta border-terracotta/30",
+  UNDER_NEGOTIATION: "bg-sticky-note-teal text-forest-ink border-sticky-note-teal/60",
+  CONFIRMED: "bg-sticky-note-blush text-forest-ink border-sticky-note-blush/60",
+  FULFILLED: "bg-whisper-gray text-forest-ink/60 border-pencil-gray/40",
 };
 
 const RISK_BADGE: Record<string, string> = {
-  NONE: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-  SALES_MANAGER: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
-  FINANCE: "bg-destructive/15 text-destructive border-destructive/30",
+  NONE: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
+  SALES_MANAGER: "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60",
+  FINANCE: "bg-terracotta/10 text-terracotta border-terracotta/30",
 };
 
 function getRiskScore(quote: Quote): number {
@@ -81,7 +81,7 @@ function ApprovalsComponent() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-black tracking-tight text-foreground">
-              Governance & Deal Operations
+              Governance &amp; Deal Operations
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Review discount approval queues, monitor deal health telemetry, and manage anomaly alerts.
@@ -89,13 +89,13 @@ function ApprovalsComponent() {
           </div>
           <div className="flex items-center gap-2">
             {pendingCount > 0 && (
-              <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 font-semibold gap-1.5 px-2.5 py-1">
+              <Badge className="bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60 font-semibold gap-1.5 px-2.5 py-1">
                 <Clock className="h-3.5 w-3.5" />
                 {pendingCount} Pending Review
               </Badge>
             )}
             {!canApprove && (
-              <Badge className="bg-muted text-muted-foreground border-border text-xs px-2.5 py-1">
+              <Badge className="bg-whisper-gray text-muted-foreground border-pencil-gray/40 text-xs px-2.5 py-1">
                 View-Only Mode — Switch to Manager/Finance role to act
               </Badge>
             )}
@@ -105,13 +105,19 @@ function ApprovalsComponent() {
         {/* Top Level Navigation Tabs */}
         <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as "queue" | "health")}>
           <TabsList className="bg-muted p-1 max-w-md">
-            <TabsTrigger value="queue" className="text-xs font-semibold gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-amber-500" />
+            <TabsTrigger
+              value="queue"
+              className="text-xs font-semibold gap-1.5 data-[state=active]:bg-forest-ink data-[state=active]:text-cream-paper"
+            >
+              <Clock className="h-3.5 w-3.5" />
               <span>Discount Approval Queue</span>
             </TabsTrigger>
-            <TabsTrigger value="health" className="text-xs font-semibold gap-1.5">
+            <TabsTrigger
+              value="health"
+              className="text-xs font-semibold gap-1.5 data-[state=active]:bg-forest-ink data-[state=active]:text-cream-paper"
+            >
               <Activity className="h-3.5 w-3.5 text-primary" />
-              <span>Deal Health & Anomalies</span>
+              <span>Deal Health &amp; Anomalies</span>
             </TabsTrigger>
           </TabsList>
 
@@ -121,29 +127,29 @@ function ApprovalsComponent() {
                 {
                   label: "Pending",
                   count: quotes.filter((q) => q.status === "PENDING_APPROVAL").length,
-                  color: "text-amber-500",
+                  color: "text-forest-ink",
                   icon: Clock,
                 },
                 {
                   label: "Approved",
                   count: quotes.filter((q) => q.status === "APPROVED").length,
-                  color: "text-emerald-500",
+                  color: "text-forest-ink",
                   icon: CheckCircle2,
                 },
                 {
                   label: "Rejected",
                   count: quotes.filter((q) => q.status === "REJECTED").length,
-                  color: "text-destructive",
+                  color: "text-terracotta",
                   icon: XCircle,
                 },
                 {
                   label: "High Risk",
                   count: quotes.filter((q) => q.requiredApprovalLevel === "FINANCE").length,
-                  color: "text-destructive",
+                  color: "text-terracotta",
                   icon: TrendingDown,
                 },
               ].map((stat) => (
-                <Card key={stat.label} className="border-border bg-card">
+                <Card key={stat.label} className="border-pencil-gray/40 bg-card rounded-xl">
                   <CardContent className="p-3.5 flex items-center gap-3">
                     <stat.icon className={`h-5 w-5 ${stat.color} shrink-0`} />
                     <div>
@@ -155,7 +161,7 @@ function ApprovalsComponent() {
               ))}
             </div>
 
-            <Card className="border-border bg-card">
+            <Card className="border-pencil-gray/40 bg-card rounded-xl">
               <CardHeader className="p-4 pb-0">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -173,7 +179,11 @@ function ApprovalsComponent() {
                       { value: "REJECTED", label: "Rejected" },
                       { value: "ALL", label: "All Quotes" },
                     ].map((t) => (
-                      <TabsTrigger key={t.value} value={t.value} className="text-xs font-medium">
+                      <TabsTrigger
+                        key={t.value}
+                        value={t.value}
+                        className="text-xs font-medium data-[state=active]:bg-forest-ink data-[state=active]:text-cream-paper"
+                      >
                         {t.label}
                       </TabsTrigger>
                     ))}
@@ -186,16 +196,16 @@ function ApprovalsComponent() {
                       </div>
                     ) : (
                       <Table>
-                        <TableHeader className="bg-muted/40">
+                        <TableHeader className="bg-whisper-gray">
                           <TableRow>
-                            <TableHead className="text-xs font-bold">Quote #</TableHead>
-                            <TableHead className="text-xs font-bold">Customer</TableHead>
-                            <TableHead className="text-xs font-bold">Tier</TableHead>
-                            <TableHead className="text-xs font-bold text-right">Value</TableHead>
-                            <TableHead className="text-xs font-bold text-right">Blended Margin</TableHead>
-                            <TableHead className="text-xs font-bold text-center">Risk Score</TableHead>
-                            <TableHead className="text-xs font-bold text-center">Approval Level</TableHead>
-                            <TableHead className="text-xs font-bold text-center">Status</TableHead>
+                            <TableHead className="text-xs font-bold text-forest-ink/60">Quote #</TableHead>
+                            <TableHead className="text-xs font-bold text-forest-ink/60">Customer</TableHead>
+                            <TableHead className="text-xs font-bold text-forest-ink/60">Tier</TableHead>
+                            <TableHead className="text-xs font-bold text-forest-ink/60 text-right">Value</TableHead>
+                            <TableHead className="text-xs font-bold text-forest-ink/60 text-right">Blended Margin</TableHead>
+                            <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Risk Score</TableHead>
+                            <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Approval Level</TableHead>
+                            <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Status</TableHead>
                             <TableHead className="w-10" />
                           </TableRow>
                         </TableHeader>
@@ -205,8 +215,8 @@ function ApprovalsComponent() {
                             return (
                               <TableRow
                                 key={quote.id}
-                                className={`cursor-pointer hover:bg-muted/30 ${
-                                  quote.requiredApprovalLevel === "FINANCE" ? "border-l-2 border-l-destructive" : ""
+                                className={`cursor-pointer hover:bg-whisper-gray/50 ${
+                                  quote.requiredApprovalLevel === "FINANCE" ? "border-l-2 border-l-terracotta" : ""
                                 }`}
                                 onClick={() => setSelectedQuote(quote)}
                               >
@@ -218,10 +228,10 @@ function ApprovalsComponent() {
                                   <Badge
                                     className={`text-[10px] px-1.5 py-0 border ${
                                       quote.customerTier === "GOLD"
-                                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                                        ? "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60"
                                         : quote.customerTier === "SILVER"
-                                        ? "bg-slate-400/15 text-slate-500 dark:text-slate-300 border-slate-400/30"
-                                        : "bg-orange-700/15 text-orange-700 dark:text-orange-400 border-orange-700/30"
+                                        ? "bg-whisper-gray text-forest-ink/60 border-pencil-gray/40"
+                                        : "bg-terracotta/10 text-terracotta border-terracotta/30"
                                     }`}
                                   >
                                     {quote.customerTier}
@@ -234,10 +244,10 @@ function ApprovalsComponent() {
                                   <span
                                     className={`text-xs font-mono font-bold ${
                                       quote.totalMarginPercent >= 30
-                                        ? "text-emerald-500"
+                                        ? "text-forest-ink"
                                         : quote.totalMarginPercent >= 15
-                                        ? "text-amber-500"
-                                        : "text-destructive"
+                                        ? "text-forest-ink/60"
+                                        : "text-terracotta"
                                     }`}
                                   >
                                     {quote.totalMarginPercent.toFixed(1)}%
@@ -246,7 +256,7 @@ function ApprovalsComponent() {
                                 <TableCell className="text-center">
                                   <span
                                     className={`text-xs font-mono font-bold ${
-                                      risk > 10 ? "text-destructive" : risk > 0 ? "text-amber-500" : "text-emerald-500"
+                                      risk > 10 ? "text-terracotta" : risk > 0 ? "text-forest-ink/60" : "text-forest-ink"
                                     }`}
                                   >
                                     {risk}

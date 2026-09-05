@@ -10,35 +10,35 @@ interface LiveMarginIndicatorProps {
 function getRiskConfig(riskScore: number, approvalLevel: string) {
   if (approvalLevel === "FINANCE" || riskScore > 10) {
     return {
-      barColor: "bg-destructive",
-      textColor: "text-destructive",
-      badgeBg: "bg-destructive/10 dark:bg-destructive/20 border-destructive/30",
-      badgeText: "text-destructive",
+      barColor: "bg-terracotta",
+      textColor: "text-terracotta",
+      badgeBg: "bg-terracotta/10 border-terracotta/30",
+      badgeText: "text-terracotta",
       label: `Finance Approval Required (Risk: ${riskScore})`,
     };
   }
   if (approvalLevel === "SALES_MANAGER" || riskScore > 0) {
     return {
-      barColor: "bg-amber-500",
-      textColor: "text-amber-500",
-      badgeBg: "bg-amber-500/10 dark:bg-amber-500/20 border-amber-500/30",
-      badgeText: "text-amber-600 dark:text-amber-400",
+      barColor: "bg-highlighter-yellow",
+      textColor: "text-forest-ink",
+      badgeBg: "bg-highlighter-yellow/40 border-highlighter-yellow/60",
+      badgeText: "text-forest-ink",
       label: `Manager Approval Required (Risk: ${riskScore})`,
     };
   }
   return {
-    barColor: "bg-emerald-500",
-    textColor: "text-emerald-500",
-    badgeBg: "bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/30",
-    badgeText: "text-emerald-600 dark:text-emerald-400",
+    barColor: "bg-sticky-note-mint",
+    textColor: "text-forest-ink",
+    badgeBg: "bg-sticky-note-mint border-sticky-note-mint/60",
+    badgeText: "text-forest-ink",
     label: "Auto-Approved (Within Limits)",
   };
 }
 
 function getMarginBarColor(pct: number) {
-  if (pct >= 30) return "bg-emerald-500";
-  if (pct >= 15) return "bg-amber-500";
-  return "bg-destructive";
+  if (pct >= 30) return "bg-sticky-note-mint";
+  if (pct >= 15) return "bg-highlighter-yellow";
+  return "bg-terracotta";
 }
 
 export function LiveMarginIndicator({
@@ -69,8 +69,8 @@ export function LiveMarginIndicator({
         </div>
         <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
           <span>0%</span>
-          <span className="text-amber-500">15%</span>
-          <span className="text-emerald-500">30%</span>
+          <span className="text-forest-ink/50">15%</span>
+          <span className="text-forest-ink/50">30%</span>
           <span>100%</span>
         </div>
       </div>

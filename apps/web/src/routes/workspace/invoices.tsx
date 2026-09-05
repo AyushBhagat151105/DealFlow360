@@ -50,17 +50,17 @@ const currency = new Intl.NumberFormat("en-US", {
 });
 
 const TYPE_BADGES: Record<string, string> = {
-  ONE_TIME: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
-  RECURRING: "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30",
-  PRORATED_SUPPLEMENTAL: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
-  CREDIT_NOTE: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+  ONE_TIME: "bg-whisper-gray text-forest-ink border-pencil-gray/40",
+  RECURRING: "bg-highlighter-yellow/40 text-forest-ink border-highlighter-yellow/60",
+  PRORATED_SUPPLEMENTAL: "bg-sticky-note-teal text-forest-ink border-sticky-note-teal/60",
+  CREDIT_NOTE: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
 };
 
 const STATUS_BADGES: Record<string, string> = {
-  PAID: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-  ISSUED: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
-  DRAFT: "bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/30",
-  CANCELLED: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30",
+  PAID: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
+  ISSUED: "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60",
+  DRAFT: "bg-whisper-gray text-forest-ink border-pencil-gray/40",
+  CANCELLED: "bg-whisper-gray text-forest-ink/50 border-pencil-gray/40",
 };
 
 function InvoicesPage() {
@@ -167,18 +167,28 @@ function InvoicesPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleExportCsv}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-pencil-gray text-forest-ink hover:bg-whisper-gray"
+              onClick={handleExportCsv}
+            >
               <Download className="mr-1.5 h-4 w-4" />
               Export CSV
             </Button>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-pencil-gray text-forest-ink hover:bg-whisper-gray"
+              onClick={() => refetch()}
+            >
               Refresh
             </Button>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="rounded-lg border-border bg-card shadow-none">
+          <Card className="rounded-xl border border-pencil-gray/40 bg-card shadow-none">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">
                 Total Invoiced
@@ -193,45 +203,45 @@ function InvoicesPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-lg border-border bg-card shadow-none">
+          <Card className="rounded-xl border border-pencil-gray/40 bg-card shadow-none">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">
                 Total Collected
               </CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <div className="text-2xl font-bold text-foreground">
                 {currency.format(summary.totalPaid)}
               </div>
-              <p className="text-xs text-muted-foreground">Settled invoices & payments</p>
+              <p className="text-xs text-muted-foreground">Settled invoices &amp; payments</p>
             </CardContent>
           </Card>
 
-          <Card className="rounded-lg border-border bg-card shadow-none">
+          <Card className="rounded-xl border border-pencil-gray/40 bg-card shadow-none">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">
                 Outstanding Balance
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-blue-500" />
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <div className="text-2xl font-bold text-foreground">
                 {currency.format(summary.totalOutstanding)}
               </div>
               <p className="text-xs text-muted-foreground">Pending receivables</p>
             </CardContent>
           </Card>
 
-          <Card className="rounded-lg border-border bg-card shadow-none">
+          <Card className="rounded-xl border border-pencil-gray/40 bg-card shadow-none">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">
                 Overdue Invoices
               </CardTitle>
-              <AlertCircle className="h-4 w-4 text-rose-500" />
+              <AlertCircle className="h-4 w-4 text-terracotta" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">
+              <div className="text-2xl font-bold text-terracotta">
                 {summary.overdueCount}
               </div>
               <p className="text-xs text-muted-foreground">Past due payment term</p>
@@ -260,7 +270,7 @@ function InvoicesPage() {
                 key={status}
                 variant={statusFilter === status ? "default" : "outline"}
                 size="sm"
-                className="h-8 text-xs"
+                className={`h-8 text-xs ${statusFilter === status ? "bg-forest-ink text-cream-paper hover:bg-forest-ink/90" : "border-pencil-gray text-forest-ink hover:bg-whisper-gray"}`}
                 onClick={() => setStatusFilter(status)}
               >
                 {status}
@@ -276,7 +286,7 @@ function InvoicesPage() {
                   key={type}
                   variant={typeFilter === type ? "default" : "outline"}
                   size="sm"
-                  className="h-8 text-xs"
+                  className={`h-8 text-xs ${typeFilter === type ? "bg-forest-ink text-cream-paper hover:bg-forest-ink/90" : "border-pencil-gray text-forest-ink hover:bg-whisper-gray"}`}
                   onClick={() => setTypeFilter(type)}
                 >
                   {type === "PRORATED_SUPPLEMENTAL"
@@ -290,7 +300,7 @@ function InvoicesPage() {
           </div>
         </div>
 
-        <Card className="rounded-lg border-border bg-card shadow-none">
+        <Card className="rounded-xl border border-pencil-gray/40 bg-card shadow-none">
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-12 text-center text-sm text-muted-foreground">
@@ -303,7 +313,7 @@ function InvoicesPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b border-border bg-muted/40 text-xs font-semibold text-muted-foreground">
+                  <thead className="border-b border-pencil-gray/30 bg-whisper-gray text-xs font-semibold text-forest-ink/60">
                     <tr>
                       <th className="px-4 py-3">Invoice #</th>
                       <th className="px-4 py-3">Customer</th>
@@ -315,14 +325,14 @@ function InvoicesPage() {
                       <th className="px-4 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-pencil-gray/20">
                     {invoices.map((inv) => {
                       const isPaid = inv.status === "PAID";
                       const isOverdue =
                         inv.status === "ISSUED" && new Date(inv.dueDate) < new Date();
 
                       return (
-                        <tr key={inv.id} className="hover:bg-muted/20 transition-colors">
+                        <tr key={inv.id} className="hover:bg-whisper-gray/50 transition-colors">
                           <td className="px-4 py-3 font-mono font-medium text-foreground">
                             {inv.invoiceNumber}
                           </td>
@@ -357,11 +367,11 @@ function InvoicesPage() {
                             {currency.format(inv.amount)}
                           </td>
                           <td className="px-4 py-3 text-xs text-muted-foreground">
-                            <span className={isOverdue ? "font-semibold text-rose-500" : ""}>
+                            <span className={isOverdue ? "font-semibold text-terracotta" : ""}>
                               {new Date(inv.dueDate).toLocaleDateString()}
                             </span>
                             {isOverdue && (
-                              <span className="ml-1 text-[10px] text-rose-500 font-bold">
+                              <span className="ml-1 text-[10px] text-terracotta font-bold">
                                 (Overdue)
                               </span>
                             )}
@@ -379,7 +389,7 @@ function InvoicesPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 px-2 text-xs"
+                                className="h-7 px-2 text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray"
                                 onClick={() => handlePrintInvoice(inv)}
                                 title="Print / Save as PDF"
                               >
@@ -391,7 +401,7 @@ function InvoicesPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-7 px-2 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
+                                  className="h-7 px-2 text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray"
                                   onClick={() => handleOpenPayment(inv)}
                                 >
                                   <CreditCard className="mr-1 h-3.5 w-3.5" />
@@ -465,10 +475,15 @@ function InvoicesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPaymentInvoice(null)}>
+            <Button
+              variant="outline"
+              className="border-pencil-gray text-forest-ink hover:bg-whisper-gray"
+              onClick={() => setPaymentInvoice(null)}
+            >
               Cancel
             </Button>
             <Button
+              className="bg-forest-ink text-cream-paper hover:bg-forest-ink/90"
               onClick={handleSubmitPayment}
               disabled={paymentAmount <= 0 || recordPaymentMutation.isPending}
             >

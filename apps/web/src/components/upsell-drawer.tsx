@@ -48,7 +48,7 @@ export function UpsellDrawerContent({
   return (
     <div className="space-y-4 py-2">
       <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 p-2.5 rounded border border-border">
-        <Sparkles className="h-4 w-4 text-amber-500 shrink-0" />
+        <Sparkles className="h-4 w-4 text-forest-ink/60 shrink-0" />
         <span>
           Intelligent AI recommendations powered by historical margin optimization and product affinity rules.
         </span>
