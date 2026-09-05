@@ -2,6 +2,7 @@ import prisma, {
   CustomerTier,
   ProductCategory,
 } from "@DealFlow360/db";
+import { ValidationError } from "../utils/errors";
 
 export async function getCatalogProducts() {
   const products = await prisma.product.findMany({
@@ -72,51 +73,82 @@ export async function getDiscountCeilingsMatrix() {
 export type CreateProductInput = {
   sku: string;
   name: string;
-  description?: string;
-  category: ProductCategory;
+  description?: string | null;
+  category: ProductCategory | "SOFTWARE_SUBSCRIPTION" | "SOFTWARE";
   unit?: string;
-  costPrice: number;
-  basePrice: number;
+  costPrice?: number;
+  standardCost?: number;
+  cost?: number;
+  basePrice?: number;
+  listPrice?: number;
+  price?: number;
   taxRate?: number;
   isPromoted?: boolean;
   minMarginThreshold?: number;
 };
 
 export async function createProduct(input: CreateProductInput) {
+  const basePrice = input.basePrice ?? input.listPrice ?? input.price;
+  const costPrice = input.costPrice ?? input.standardCost ?? input.cost ?? 0;
+
+  if (basePrice === undefined || isNaN(Number(basePrice))) {
+    throw new ValidationError("basePrice (or listPrice) is required and must be a valid number.");
+  }
+
+  let category: ProductCategory = ProductCategory.HARDWARE;
+  const rawCategory = String(input.category || "").toUpperCase();
+  if (rawCategory === "SOFTWARE_SUBSCRIPTION" || rawCategory === "SUBSCRIPTION" || rawCategory === "SOFTWARE") {
+    category = ProductCategory.SUBSCRIPTION;
+  } else if (rawCategory === "SERVICE") {
+    category = ProductCategory.SERVICE;
+  } else {
+    category = ProductCategory.HARDWARE;
+  }
+
   return prisma.product.create({
     data: {
       sku: input.sku,
       name: input.name,
       description: input.description ?? null,
-      category: input.category,
+      category,
       unit: input.unit ?? "unit",
-      costPrice: input.costPrice,
-      basePrice: input.basePrice,
-      taxRate: input.taxRate ?? 10.0,
+      costPrice: Number(costPrice),
+      basePrice: Number(basePrice),
+      taxRate: input.taxRate !== undefined ? Number(input.taxRate) : 10.0,
       isPromoted: input.isPromoted ?? false,
-      minMarginThreshold: input.minMarginThreshold ?? 15.0,
+      minMarginThreshold: input.minMarginThreshold !== undefined ? Number(input.minMarginThreshold) : 15.0,
     },
   });
 }
 
 export type CreateCustomerInput = {
   name: string;
-  contactName: string;
+  contactName?: string;
   email: string;
-  phone?: string;
-  address?: string;
-  tier?: CustomerTier;
+  phone?: string | null;
+  address?: string | null;
+  tier?: CustomerTier | "STANDARD" | string;
 };
 
 export async function createCustomer(input: CreateCustomerInput) {
+  let tier: CustomerTier = CustomerTier.BRONZE;
+  const rawTier = String(input.tier || "").toUpperCase();
+  if (rawTier === "SILVER") {
+    tier = CustomerTier.SILVER;
+  } else if (rawTier === "GOLD") {
+    tier = CustomerTier.GOLD;
+  } else {
+    tier = CustomerTier.BRONZE;
+  }
+
   return prisma.customer.create({
     data: {
       name: input.name,
-      contactName: input.contactName,
+      contactName: input.contactName ?? input.name,
       email: input.email,
       phone: input.phone ?? null,
       address: input.address ?? null,
-      tier: input.tier ?? CustomerTier.BRONZE,
+      tier,
     },
   });
 }
@@ -124,40 +156,58 @@ export async function createCustomer(input: CreateCustomerInput) {
 export type CreateWarehouseInput = {
   code: string;
   name: string;
-  location?: string;
+  location?: string | null;
   shippingCostWeight?: number;
+  preferenceWeight?: number;
   isPrimary?: boolean;
 };
 
 export async function createWarehouse(input: CreateWarehouseInput) {
+  const weight = input.shippingCostWeight ?? input.preferenceWeight ?? 1.0;
   return prisma.warehouse.create({
     data: {
       code: input.code,
       name: input.name,
       location: input.location ?? null,
-      shippingCostWeight: input.shippingCostWeight ?? 1.0,
+      shippingCostWeight: Number(weight),
       isPrimary: input.isPrimary ?? false,
     },
   });
 }
 
-export async function updateCustomerTierCeiling(tier: CustomerTier, ceilingPercent: number) {
+export async function updateCustomerTierCeiling(tier: string, ceilingPercent: number) {
+  let resolvedTier: CustomerTier = CustomerTier.BRONZE;
+  const rawTier = String(tier || "").toUpperCase();
+  if (rawTier === "SILVER") resolvedTier = CustomerTier.SILVER;
+  else if (rawTier === "GOLD") resolvedTier = CustomerTier.GOLD;
+  else resolvedTier = CustomerTier.BRONZE;
+
   return prisma.customerTierConfig.upsert({
-    where: { tier },
+    where: { tier: resolvedTier },
     update: { defaultDiscountCeiling: ceilingPercent },
     create: {
-      tier,
+      tier: resolvedTier,
       defaultDiscountCeiling: ceilingPercent,
     },
   });
 }
 
-export async function updateCategoryCeiling(category: ProductCategory, ceilingPercent: number) {
+export async function updateCategoryCeiling(category: string, ceilingPercent: number) {
+  let resolvedCategory: ProductCategory = ProductCategory.HARDWARE;
+  const rawCategory = String(category || "").toUpperCase();
+  if (rawCategory === "SOFTWARE_SUBSCRIPTION" || rawCategory === "SUBSCRIPTION" || rawCategory === "SOFTWARE") {
+    resolvedCategory = ProductCategory.SUBSCRIPTION;
+  } else if (rawCategory === "SERVICE") {
+    resolvedCategory = ProductCategory.SERVICE;
+  } else {
+    resolvedCategory = ProductCategory.HARDWARE;
+  }
+
   return prisma.categoryDiscountCeiling.upsert({
-    where: { category },
+    where: { category: resolvedCategory },
     update: { maxDiscountCeiling: ceilingPercent },
     create: {
-      category,
+      category: resolvedCategory,
       maxDiscountCeiling: ceilingPercent,
     },
   });

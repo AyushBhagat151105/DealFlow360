@@ -75,11 +75,18 @@ const createProductRoute = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            name: z.string(),
+            sku: z.string().describe("Unique product SKU code"),
+            name: z.string().describe("Product display name"),
+            description: z.string().optional().default(""),
             category: z.enum(["HARDWARE", "SOFTWARE_SUBSCRIPTION", "SERVICE"]),
-            listPrice: z.number(),
-            standardCost: z.number(),
-            sku: z.string(),
+            unit: z.string().optional().default("unit"),
+            basePrice: z.number().optional().describe("Base / list price"),
+            listPrice: z.number().optional().describe("Alternative field for selling price"),
+            costPrice: z.number().optional().describe("Internal standard unit cost"),
+            standardCost: z.number().optional().describe("Alternative field for internal cost"),
+            taxRate: z.number().optional().default(10.0),
+            isPromoted: z.boolean().optional().default(false),
+            minMarginThreshold: z.number().optional().default(15.0),
           }),
         },
       },
@@ -87,6 +94,7 @@ const createProductRoute = createRoute({
   },
   responses: {
     201: { description: "Product created successfully" },
+    400: { description: "Validation error" },
   },
 });
 
@@ -100,10 +108,12 @@ const createCustomerRoute = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            name: z.string(),
-            email: z.string().email(),
-            company: z.string().optional(),
-            tier: z.enum(["STANDARD", "BRONZE", "SILVER", "GOLD"]),
+            name: z.string().describe("Company or organization name"),
+            contactName: z.string().optional().describe("Primary contact person"),
+            email: z.string().email().describe("Primary contact email"),
+            phone: z.string().optional().describe("Phone number"),
+            address: z.string().optional().describe("Physical or billing address"),
+            tier: z.enum(["STANDARD", "BRONZE", "SILVER", "GOLD"]).optional().default("BRONZE"),
           }),
         },
       },
@@ -111,6 +121,7 @@ const createCustomerRoute = createRoute({
   },
   responses: {
     201: { description: "Customer created successfully" },
+    400: { description: "Validation error" },
   },
 });
 
@@ -124,10 +135,12 @@ const createWarehouseRoute = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            name: z.string(),
-            code: z.string(),
-            location: z.string(),
-            preferenceWeight: z.number().optional().default(1.0),
+            code: z.string().describe("Unique warehouse code e.g. CHI-01"),
+            name: z.string().describe("Warehouse facility name"),
+            location: z.string().optional().describe("City or state location"),
+            shippingCostWeight: z.number().optional().default(1.0).describe("Fulfillment preference weight"),
+            preferenceWeight: z.number().optional().default(1.0).describe("Alternative field for preference weight"),
+            isPrimary: z.boolean().optional().default(false),
           }),
         },
       },
@@ -135,6 +148,7 @@ const createWarehouseRoute = createRoute({
   },
   responses: {
     201: { description: "Warehouse created successfully" },
+    400: { description: "Validation error" },
   },
 });
 
