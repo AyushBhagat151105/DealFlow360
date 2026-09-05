@@ -18,15 +18,24 @@ import {
 } from "../controllers/catalog.controller";
 import { requireAuth, requireRole, optionalAuth } from "../middlewares/auth";
 
+import {
+  listProductsQuerySchema,
+  listCustomersQuerySchema,
+  listUsersQuerySchema,
+} from "../validators/catalog.validator";
+
 export const catalogRoutes = new OpenAPIHono();
 
 const getProductsRoute = createRoute({
   method: "get",
   path: "/products",
   tags: ["Catalog"],
-  summary: "List all active catalog products and variants",
+  summary: "List catalog products and variants with optional pagination",
+  request: {
+    query: listProductsQuerySchema,
+  },
   responses: {
-    200: { description: "Active catalog products" },
+    200: { description: "Catalog products list or paginated response" },
   },
 });
 
@@ -34,9 +43,12 @@ const getCustomersRoute = createRoute({
   method: "get",
   path: "/customers",
   tags: ["Catalog"],
-  summary: "List all customers with assigned tiers and ceilings",
+  summary: "List customers with assigned tiers and ceilings with optional pagination",
+  request: {
+    query: listCustomersQuerySchema,
+  },
   responses: {
-    200: { description: "List of customers" },
+    200: { description: "List of customers or paginated response" },
   },
 });
 
@@ -256,9 +268,12 @@ const getUsersRoute = createRoute({
   method: "get",
   path: "/users",
   tags: ["Catalog"],
-  summary: "List all workspace team members and roles",
+  summary: "List all workspace team members and roles with optional pagination",
+  request: {
+    query: listUsersQuerySchema,
+  },
   responses: {
-    200: { description: "List of workspace users" },
+    200: { description: "List of workspace users or paginated response" },
   },
 });
 

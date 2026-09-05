@@ -17,8 +17,9 @@ export const listInvoicesQuerySchema = z.object({
   search: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  limit: z.coerce.number().min(1).max(100).default(50).optional(),
-  offset: z.coerce.number().min(0).default(0).optional(),
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
 });
 
 export const exportInvoicesQuerySchema = z.object({

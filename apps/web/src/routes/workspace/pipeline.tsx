@@ -59,7 +59,7 @@ const COLUMNS: Array<{ status: QuoteStatus; label: string; badgeClass: string }>
 ];
 
 function PipelineComponent() {
-  const quotesQuery = useQuotes();
+  const quotesQuery = useQuotes({ all: true });
   const submitApprovalMutation = useSubmitQuoteForApproval();
   const approveMutation = useApproveQuote();
   const rejectMutation = useRejectQuote();
@@ -328,8 +328,8 @@ function PipelineComponent() {
                   }
                 }}
                 className={`w-80 flex-shrink-0 border bg-card rounded-xl flex flex-col transition-all duration-200 shadow-sm ${isTarget
-                    ? "border-primary ring-2 ring-primary/30 bg-primary/5 shadow-md"
-                    : "border-pencil-gray/40"
+                  ? "border-primary ring-2 ring-primary/30 bg-primary/5 shadow-md"
+                  : "border-pencil-gray/40"
                   }`}
               >
                 <div className="flex items-center justify-between border-b border-pencil-gray/40 p-3.5 bg-whisper-gray rounded-t-xl">
@@ -348,8 +348,8 @@ function PipelineComponent() {
                   {columnQuotes.length === 0 ? (
                     <div
                       className={`h-32 flex items-center justify-center text-center p-3 text-xs rounded-lg border border-dashed transition-colors ${isTarget
-                          ? "border-primary text-primary font-medium bg-primary/10"
-                          : "border-pencil-gray/40 text-muted-foreground/60"
+                        ? "border-primary text-primary font-medium bg-primary/10"
+                        : "border-pencil-gray/40 text-muted-foreground/60"
                         }`}
                     >
                       {isTarget ? "Drop Quote Here" : "No quotes in stage"}
@@ -446,10 +446,10 @@ function DealCard({
           <Badge
             variant="outline"
             className={`text-[10px] px-1.5 py-0.5 flex-shrink-0 ${quote.requiredApprovalLevel === "NONE"
-                ? "border-sticky-note-mint/60 text-forest-ink bg-sticky-note-mint/40"
-                : quote.requiredApprovalLevel === "SALES_MANAGER"
-                  ? "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/40"
-                  : "border-terracotta/30 text-terracotta bg-terracotta/10"
+              ? "border-sticky-note-mint/60 text-forest-ink bg-sticky-note-mint/40"
+              : quote.requiredApprovalLevel === "SALES_MANAGER"
+                ? "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/40"
+                : "border-terracotta/30 text-terracotta bg-terracotta/10"
               }`}
           >
             {quote.requiredApprovalLevel === "NONE" ? "Auto-Approved" : quote.requiredApprovalLevel}

@@ -83,6 +83,7 @@ export type InvoicesFilterParams = {
   search?: string;
   startDate?: string;
   endDate?: string;
+  page?: number;
   limit?: number;
   offset?: number;
 };
@@ -98,8 +99,9 @@ export function useInvoices(filters: InvoicesFilterParams = {}) {
       if (filters.search) params.append("search", filters.search);
       if (filters.startDate) params.append("startDate", filters.startDate);
       if (filters.endDate) params.append("endDate", filters.endDate);
+      if (filters.page) params.append("page", String(filters.page));
       if (filters.limit) params.append("limit", String(filters.limit));
-      if (filters.offset) params.append("offset", String(filters.offset));
+      if (filters.offset !== undefined) params.append("offset", String(filters.offset));
 
       const queryString = params.toString() ? `?${params.toString()}` : "";
       const response = await httpClient.get<{ data: InvoicesListResponse }>(

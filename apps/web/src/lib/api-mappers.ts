@@ -1,4 +1,4 @@
-import type { CustomerTier, ProductCategory, Quote, QuoteLine } from "@/lib/api-types";
+import type { CustomerTier, ProductCategory, Quote, QuoteLine, PaginatedQuotesResponse } from "@/lib/api-types";
 
 type ApiRecord = Record<string, unknown>;
 
@@ -73,20 +73,49 @@ export function normalizeQuote(value: unknown): Quote {
     lines,
     auditLogs: Array.isArray(raw.auditLogs)
       ? raw.auditLogs.map((value) => {
-          const audit = asRecord(value);
-          return {
-            id: asString(audit.id),
-            action: asString(audit.action),
-            actorName: asString(audit.actorName),
-            actorRole: asString(audit.actorRole),
-            reason: typeof audit.reason === "string" ? audit.reason : null,
-            createdAt: asString(audit.createdAt),
-          };
-        })
+        const audit = asRecord(value);
+        return {
+          id: asString(audit.id),
+          action: asString(audit.action),
+          actorName: asString(audit.actorName),
+          actorRole: asString(audit.actorRole),
+          reason: typeof audit.reason === "string" ? audit.reason : null,
+          createdAt: asString(audit.createdAt),
+        };
+      })
       : [],
   };
 }
 
 export function normalizeQuotes(value: unknown): Quote[] {
-  return Array.isArray(value) ? value.map(normalizeQuote) : [];
+  if (Array.isArray(value)) {
+    return value.map(normalizeQuote);
+  }
+  const raw = asRecord(value);
+  if (Array.isArray(raw.quotes)) {
+    return raw.quotes.map(normalizeQuote);
+  }
+  if (Array.isArray(raw.items)) {
+    return raw.items.map(normalizeQuote);
+  }
+  return [];
+}
+
+export function normalizePaginatedQuotes(value: unknown): PaginatedQuotesResponse {
+  const raw = asRecord(value);
+  const quotes = normalizeQuotes(value);
+  const total = asNumber(raw.total, quotes.length);
+  const page = asNumber(raw.page, 1);
+  const limit = asNumber(raw.limit, quotes.length || 20);
+  const totalPages = asNumber(raw.totalPages, Math.max(1, Math.ceil(total / (limit || 1))));
+  const hasMore = Boolean(raw.hasMore ?? page < totalPages);
+
+  return {
+    quotes,
+    total,
+    page,
+    limit,
+    totalPages,
+    hasMore,
+  };
 }

@@ -1,11 +1,78 @@
 import prisma, {
   CustomerTier,
   ProductCategory,
+  type Prisma,
 } from "@DealFlow360/db";
 import { NotFoundError, ValidationError } from "../utils/errors";
+import { getPaginationParams, buildPaginationMeta } from "../utils/pagination";
 
-export async function getCatalogProducts() {
+export type CatalogProductsQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: ProductCategory;
+  all?: boolean;
+};
+
+export async function getCatalogProducts(query?: CatalogProductsQuery) {
+  const where: Prisma.ProductWhereInput = {};
+
+  if (query?.category) {
+    where.category = query.category;
+  }
+  if (query?.search) {
+    const term = query.search.trim();
+    where.OR = [
+      { name: { contains: term, mode: "insensitive" } },
+      { sku: { contains: term, mode: "insensitive" } },
+      { description: { contains: term, mode: "insensitive" } },
+    ];
+  }
+
+  const isPaginated = !query?.all && (query?.page !== undefined || query?.limit !== undefined);
+
+  if (isPaginated) {
+    const { page, limit, skip } = getPaginationParams(query ?? {}, 20);
+
+    const [rawProducts, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: {
+          variants: true,
+          stocks: true,
+        },
+        orderBy: { name: "asc" },
+        skip,
+        take: limit,
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    const products = rawProducts.map((p) => {
+      const totalStock = p.stocks.reduce(
+        (acc, s) => acc + Math.max(0, s.quantityOnHand - s.reservedQuantity),
+        0,
+      );
+      return {
+        ...p,
+        totalStock,
+      };
+    });
+
+    const meta = buildPaginationMeta(total, page, limit);
+
+    return {
+      products,
+      total,
+      page: meta.page,
+      limit: meta.limit,
+      totalPages: meta.totalPages,
+      hasMore: meta.hasMore,
+    };
+  }
+
   const products = await prisma.product.findMany({
+    where,
     include: {
       variants: true,
       stocks: true,
@@ -25,9 +92,68 @@ export async function getCatalogProducts() {
   });
 }
 
-export async function getCatalogCustomers() {
+export type CatalogCustomersQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  tier?: CustomerTier;
+  all?: boolean;
+};
+
+export async function getCatalogCustomers(query?: CatalogCustomersQuery) {
+  const where: Prisma.CustomerWhereInput = {};
+
+  if (query?.tier) {
+    where.tier = query.tier;
+  }
+  if (query?.search) {
+    const term = query.search.trim();
+    where.OR = [
+      { name: { contains: term, mode: "insensitive" } },
+      { email: { contains: term, mode: "insensitive" } },
+      { contactName: { contains: term, mode: "insensitive" } },
+    ];
+  }
+
+  const isPaginated = !query?.all && (query?.page !== undefined || query?.limit !== undefined);
+
+  if (isPaginated) {
+    const { page, limit, skip } = getPaginationParams(query ?? {}, 20);
+
+    const [customers, total, tierConfigs] = await Promise.all([
+      prisma.customer.findMany({
+        where,
+        orderBy: { name: "asc" },
+        skip,
+        take: limit,
+      }),
+      prisma.customer.count({ where }),
+      prisma.customerTierConfig.findMany(),
+    ]);
+
+    const ceilingMap = new Map(
+      tierConfigs.map((tc) => [tc.tier, tc.defaultDiscountCeiling]),
+    );
+
+    const items = customers.map((c) => ({
+      ...c,
+      allowedDiscountCeiling: ceilingMap.get(c.tier) ?? 5.0,
+    }));
+
+    const meta = buildPaginationMeta(total, page, limit);
+
+    return {
+      customers: items,
+      total,
+      page: meta.page,
+      limit: meta.limit,
+      totalPages: meta.totalPages,
+      hasMore: meta.hasMore,
+    };
+  }
+
   const [customers, tierConfigs] = await Promise.all([
-    prisma.customer.findMany({ orderBy: { name: "asc" } }),
+    prisma.customer.findMany({ where, orderBy: { name: "asc" } }),
     prisma.customerTierConfig.findMany(),
   ]);
 
@@ -204,8 +330,76 @@ export type UserResponse = {
   createdAt: Date;
 };
 
-export async function listUsers(): Promise<UserResponse[]> {
+export type ListUsersQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  all?: boolean;
+};
+
+export async function listUsers(query?: ListUsersQuery) {
+  const where: Prisma.UserWhereInput = {};
+
+  if (query?.search) {
+    const term = query.search.trim();
+    where.OR = [
+      { name: { contains: term, mode: "insensitive" } },
+      { email: { contains: term, mode: "insensitive" } },
+    ];
+  }
+
+  if (query?.role) {
+    where.members = {
+      some: {
+        role: query.role,
+      },
+    };
+  }
+
+  const isPaginated = !query?.all && (query?.page !== undefined || query?.limit !== undefined);
+
+  if (isPaginated) {
+    const { page, limit, skip } = getPaginationParams(query ?? {}, 20);
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        include: {
+          members: true,
+        },
+        orderBy: { createdAt: "asc" },
+        skip,
+        take: limit,
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    const items = users.map((u) => {
+      const memberRole = u.members[0]?.role || "rep";
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: memberRole,
+        createdAt: u.createdAt,
+      };
+    });
+
+    const meta = buildPaginationMeta(total, page, limit);
+
+    return {
+      users: items,
+      total,
+      page: meta.page,
+      limit: meta.limit,
+      totalPages: meta.totalPages,
+      hasMore: meta.hasMore,
+    };
+  }
+
   const users = await prisma.user.findMany({
+    where,
     include: {
       members: true,
     },

@@ -6,6 +6,7 @@ import prisma, {
   BillingInterval,
 } from "@DealFlow360/db";
 import { NotFoundError, ValidationError } from "../utils/errors";
+import { getPaginationParams, buildPaginationMeta } from "../utils/pagination";
 
 export async function generateOrderInvoicesAndSubscriptions(quoteId: string) {
   const quote = await prisma.quotation.findUnique({
@@ -378,6 +379,7 @@ export type ListInvoicesFilter = {
   search?: string;
   startDate?: string;
   endDate?: string;
+  page?: number;
   limit?: number;
   offset?: number;
 };
@@ -405,8 +407,7 @@ export async function listInvoices(filters: ListInvoicesFilter = {}) {
     ];
   }
 
-  const limit = filters.limit ?? 50;
-  const offset = filters.offset ?? 0;
+  const { page, limit, skip } = getPaginationParams(filters, 20);
 
   const [invoices, total, allSummaryInvoices] = await Promise.all([
     prisma.invoice.findMany({
@@ -433,7 +434,7 @@ export async function listInvoices(filters: ListInvoicesFilter = {}) {
       },
       orderBy: { createdAt: "desc" },
       take: limit,
-      skip: offset,
+      skip,
     }),
     prisma.invoice.count({ where }),
     prisma.invoice.findMany({
@@ -465,9 +466,15 @@ export async function listInvoices(filters: ListInvoicesFilter = {}) {
     }
   }
 
+  const meta = buildPaginationMeta(total, page, limit);
+
   return {
     invoices,
     total,
+    page: meta.page,
+    limit: meta.limit,
+    totalPages: meta.totalPages,
+    hasMore: meta.hasMore,
     summary: {
       totalInvoiced: Math.round(totalInvoiced * 100) / 100,
       totalPaid: Math.round(totalPaid * 100) / 100,

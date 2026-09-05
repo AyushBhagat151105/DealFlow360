@@ -18,14 +18,23 @@ import {
   updateUserRole,
   deleteUser,
 } from "../services/catalog.service";
+import {
+  listProductsQuerySchema,
+  listCustomersQuerySchema,
+  listUsersQuerySchema,
+} from "../validators/catalog.validator";
 
 export async function getProductsController(c: Context) {
-  const products = await getCatalogProducts();
+  const query = c.req.query();
+  const validated = listProductsQuerySchema.parse(query);
+  const products = await getCatalogProducts(validated);
   return sendSuccess(c, products);
 }
 
 export async function getCustomersController(c: Context) {
-  const customers = await getCatalogCustomers();
+  const query = c.req.query();
+  const validated = listCustomersQuerySchema.parse(query);
+  const customers = await getCatalogCustomers(validated);
   return sendSuccess(c, customers);
 }
 
@@ -110,7 +119,9 @@ export async function deleteCustomerController(c: Context) {
 }
 
 export async function getUsersController(c: Context) {
-  const users = await listUsers();
+  const query = c.req.query();
+  const validated = listUsersQuerySchema.parse(query);
+  const users = await listUsers(validated);
   return sendSuccess(c, users);
 }
 

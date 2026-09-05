@@ -23,12 +23,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useProducts, useSubscriptionPlans, useCreateProduct } from "@/hooks/use-catalog";
+import { TablePagination } from "@/components/ui/pagination";
+import {
+  useProducts,
+  usePaginatedProducts,
+  useSubscriptionPlans,
+  useCreateProduct,
+} from "@/hooks/use-catalog";
 import type { ProductCategory } from "@/lib/api-types";
 import { currencyFormatter, CATEGORY_STYLES } from "./admin-utils";
 
 export function ProductsTab() {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+
   const productsQuery = useProducts();
+  const paginatedProductsQuery = usePaginatedProducts({
+    page,
+    limit: pageSize,
+    search: search || undefined,
+    category: categoryFilter === "ALL" ? undefined : categoryFilter,
+  });
   const plansQuery = useSubscriptionPlans();
   const createProductMutation = useCreateProduct();
 
@@ -42,22 +59,10 @@ export function ProductsTab() {
   const [productTaxRate, setProductTaxRate] = useState("10");
   const [productDescription, setProductDescription] = useState("");
 
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("ALL");
-
-  const products = productsQuery.data ?? [];
+  const allProducts = productsQuery.data ?? [];
+  const paginatedData = paginatedProductsQuery.data;
+  const products = paginatedData?.products ?? [];
   const plans = plansQuery.data ?? [];
-
-  const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const matchesSearch =
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.sku.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory =
-        categoryFilter === "ALL" || p.category === categoryFilter;
-      return matchesSearch && matchesCategory;
-    });
-  }, [products, search, categoryFilter]);
 
   const calcPreviewMargin = () => {
     const lp = parseFloat(productListPrice);
@@ -108,7 +113,7 @@ export function ProductsTab() {
               <span className="text-xs">Total Products</span>
               <Package className="h-4 w-4 text-primary" />
             </div>
-            <p className="text-2xl font-semibold">{products.length}</p>
+            <p className="text-2xl font-semibold">{allProducts.length}</p>
             <p className="text-[11px] text-muted-foreground">Hardware, Services & Plans</p>
           </CardContent>
         </Card>
@@ -120,7 +125,7 @@ export function ProductsTab() {
               <Boxes className="h-4 w-4 text-indigo-500" />
             </div>
             <p className="text-2xl font-semibold">
-              {products.filter((p) => p.category === "HARDWARE").length}
+              {allProducts.filter((p) => p.category === "HARDWARE").length}
             </p>
             <p className="text-[11px] text-muted-foreground">Physical items requiring fulfillment</p>
           </CardContent>
@@ -133,7 +138,7 @@ export function ProductsTab() {
               <TrendingUp className="h-4 w-4 text-emerald-500" />
             </div>
             <p className="text-2xl font-semibold">
-              {products.filter((p) => p.category !== "HARDWARE").length + plans.length}
+              {allProducts.filter((p) => p.category !== "HARDWARE").length + plans.length}
             </p>
             <p className="text-[11px] text-muted-foreground">Recurring & Onboarding offerings</p>
           </CardContent>
@@ -146,16 +151,16 @@ export function ProductsTab() {
               <Percent className="h-4 w-4 text-amber-500" />
             </div>
             <p className="text-2xl font-semibold">
-              {products.length > 0
+              {allProducts.length > 0
                 ? (
-                  products.reduce(
+                  allProducts.reduce(
                     (acc, p) =>
                       acc +
                       (p.basePrice > 0
                         ? ((p.basePrice - p.costPrice) / p.basePrice) * 100
                         : 0),
                     0
-                  ) / products.length
+                  ) / allProducts.length
                 ).toFixed(1)
                 : 0}
               %
@@ -172,13 +177,19 @@ export function ProductsTab() {
             <Input
               placeholder="Search by SKU or Product Name..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="pl-8 h-9 text-xs"
             />
           </div>
           <select
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setPage(1);
+            }}
             className="h-9 px-3 text-xs bg-card border border-border text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="ALL">All Categories</option>
@@ -208,14 +219,20 @@ export function ProductsTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.length === 0 ? (
+            {paginatedProductsQuery.isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8 text-sm text-muted-foreground">
+                  Loading catalog products...
+                </TableCell>
+              </TableRow>
+            ) : products.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-sm text-muted-foreground">
                   No products found matching criteria.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredProducts.map((p) => {
+              products.map((p) => {
                 const marginPct =
                   p.basePrice > 0 ? ((p.basePrice - p.costPrice) / p.basePrice) * 100 : 0;
                 return (
@@ -270,6 +287,14 @@ export function ProductsTab() {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          total={paginatedData?.total ?? 0}
+          totalPages={paginatedData?.totalPages ?? 1}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -355,10 +380,10 @@ export function ProductsTab() {
                 <span className="text-[11px] text-muted-foreground">Expected List Margin:</span>
                 <span
                   className={`font-mono font-bold text-xs ${calcPreviewMargin() >= 30
-                      ? "text-emerald-500"
-                      : calcPreviewMargin() >= 15
-                        ? "text-amber-500"
-                        : "text-red-500"
+                    ? "text-emerald-500"
+                    : calcPreviewMargin() >= 15
+                      ? "text-amber-500"
+                      : "text-red-500"
                     }`}
                 >
                   {calcPreviewMargin().toFixed(1)}%
