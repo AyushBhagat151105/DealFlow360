@@ -13,7 +13,7 @@ import { authorizeRoute } from "@/lib/auth-middleware";
 
 import "../index.css";
 
-export interface RouterAppContext {}
+export interface RouterAppContext { }
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
@@ -46,6 +46,7 @@ function RootComponent() {
   const isPublicPage =
     pathname === "/" ||
     pathname === "/login" ||
+    pathname === "/success" ||
     pathname.startsWith("/portal/");
   const showHeader = !isPublicPage;
 
