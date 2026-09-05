@@ -15,7 +15,6 @@ import {
   TrendingUp,
   Percent,
   ChevronRight,
-  DollarSign,
   Activity,
   History,
 } from "lucide-react";
@@ -357,7 +356,7 @@ function BuilderComponent() {
 
             <Button
               onClick={() => setViewMode("CREATE")}
-              className="gap-2 bg-sky-500 hover:bg-sky-400 text-cream-paper font-bold px-4 py-2 text-xs shadow-md cursor-pointer"
+              className="gap-2 border border-sticky-note-mint bg-sticky-note-mint px-4 py-2 text-xs font-bold text-forest-ink hover:bg-sticky-note-mint/80 cursor-pointer"
             >
               <Plus className="h-4 w-4 stroke-[2.5]" />
               Create New Quotation
@@ -394,7 +393,7 @@ function BuilderComponent() {
               <CardContent className="p-4 space-y-1">
                 <div className="flex items-center justify-between text-muted-foreground">
                   <span className="text-xs">Active Pipeline Value</span>
-                  <DollarSign className="h-4 w-4 text-emerald-400" />
+                  <TrendingUp className="h-4 w-4 text-emerald-400" />
                 </div>
                 <p className="text-2xl font-bold text-foreground">
                   {currencyFormatter.format(

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { exportToCsv } from "@/lib/export-utils";
+import { currencyFormatterNoDecimals as currency } from "@/lib/currency";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -241,12 +242,6 @@ function PipelineComponent() {
                 <RefreshCw className={`h-3.5 w-3.5 ${quotesQuery.isFetching ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
               </Button>
-              <Link to="/workspace/builder">
-                <Button size="sm" className="h-9 text-xs font-semibold gap-1.5 bg-forest-ink text-cream-paper">
-                  <FileText className="h-3.5 w-3.5" />
-                  <span>Create Quotation</span>
-                </Button>
-              </Link>
             </div>
           </div>
 
@@ -255,7 +250,7 @@ function PipelineComponent() {
             <Card className="bg-card border-border p-4">
               <span className="text-xs text-muted-foreground block font-medium">Total Pipeline Value</span>
               <span className="text-2xl font-black font-mono text-foreground">
-                ${totalPipelineValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                {currency.format(totalPipelineValue)}
               </span>
               <p className="text-[10px] text-muted-foreground pt-1">Across all active stages</p>
             </Card>
@@ -271,7 +266,7 @@ function PipelineComponent() {
             <Card className="bg-card border-border p-4">
               <span className="text-xs text-muted-foreground block font-medium">In Negotiation Value</span>
               <span className="text-2xl font-black font-mono text-foreground">
-                ${inNegotiationValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                {currency.format(inNegotiationValue)}
               </span>
               <p className="text-[10px] text-muted-foreground pt-1">Customer counter proposals</p>
             </Card>
@@ -348,7 +343,7 @@ function PipelineComponent() {
                     </Badge>
                   </div>
                   <span className="text-xs font-mono font-semibold text-muted-foreground">
-                    ${columnTotal.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                    {currency.format(columnTotal)}
                   </span>
                 </div>
 
@@ -444,7 +439,7 @@ function DealCard({
         <div className="flex items-center justify-between gap-2 pt-1 border-t border-pencil-gray/30">
           <div>
             <span className="font-mono text-sm font-extrabold text-foreground block">
-              ${quote.totalSubtotal.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              {currency.format(quote.totalSubtotal)}
             </span>
             <span className="text-[10px] text-muted-foreground font-mono">
               Margin: <span className="font-semibold text-foreground">{quote.totalMarginPercent.toFixed(1)}%</span>
@@ -577,7 +572,7 @@ function QuoteDetailModal({
             <div className="text-right">
               <span className="text-xs text-muted-foreground block font-medium">Total Quotation Subtotal</span>
               <span className="text-2xl font-black font-mono text-foreground">
-                ${quote.totalSubtotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {currency.format(quote.totalSubtotal)}
               </span>
             </div>
           </div>

@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useConfirmFulfillment, useFulfillmentPlan } from "@/hooks/use-fulfillment";
 import { useAuthStore } from "@/stores/auth-store";
+import { currencyFormatter } from "@/lib/currency";
 
 export const Route = createFileRoute("/workspace/fulfillment/$id")({
   component: FulfillmentComponent,
@@ -179,7 +180,7 @@ function FulfillmentComponent() {
           <Metric
             icon={<Package className="h-4 w-4 text-primary" />}
             label="Est. Freight Cost"
-            value={`$${plan.totalEstimatedShippingCost.toFixed(2)}`}
+            value={currencyFormatter.format(plan.totalEstimatedShippingCost)}
           />
           <Metric
             icon={<CheckCircle2 className="h-4 w-4 text-forest-ink" />}

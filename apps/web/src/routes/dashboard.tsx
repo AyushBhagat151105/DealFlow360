@@ -62,10 +62,10 @@ function DealHealthPage() {
         />
 
         <Tabs defaultValue="attention" className="space-y-6">
-          <TabsList className="bg-whisper-gray border border-pencil-gray/40 rounded-lg">
+          <TabsList className="inline-flex h-auto rounded-lg border border-pencil-gray/40 bg-transparent p-1">
             <TabsTrigger
               value="attention"
-              className="gap-2 text-xs data-[state=active]:bg-forest-ink data-[state=active]:text-cream-paper text-forest-ink/60"
+              className="gap-2 rounded-md border border-transparent bg-transparent px-3 py-2 text-xs text-forest-ink/70 hover:bg-sticky-note-mint/40 aria-selected:border-sticky-note-mint aria-selected:bg-sticky-note-mint aria-selected:text-forest-ink aria-selected:ring-1 aria-selected:ring-sticky-note-mint/70"
             >
               <Activity className="h-3.5 w-3.5" />
               Attention Needed
@@ -77,7 +77,7 @@ function DealHealthPage() {
             </TabsTrigger>
             <TabsTrigger
               value="reports"
-              className="gap-2 text-xs data-[state=active]:bg-forest-ink data-[state=active]:text-cream-paper text-forest-ink/60"
+              className="gap-2 rounded-md border border-transparent bg-transparent px-3 py-2 text-xs text-forest-ink/70 hover:bg-sticky-note-mint/40 aria-selected:border-sticky-note-mint aria-selected:bg-sticky-note-mint aria-selected:text-forest-ink aria-selected:ring-1 aria-selected:ring-sticky-note-mint/70"
             >
               <BarChart3 className="h-3.5 w-3.5" />
               Sales & Financial Reports

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Download,
   Filter,
@@ -40,6 +40,10 @@ const STAGES: QuoteStatus[] = [
 export function SalesReportsView() {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | "ALL">("ALL");
   const [selectedStatus, setSelectedStatus] = useState<QuoteStatus | "ALL">("ALL");
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [tierPage, setTierPage] = useState(1);
+  const [repPage, setRepPage] = useState(1);
+  const pageSize = 5;
 
   const filters: SalesReportFilters = {
     category: selectedCategory === "ALL" ? undefined : selectedCategory,
@@ -47,6 +51,24 @@ export function SalesReportsView() {
   };
 
   const { data, isLoading, isError, refetch, isFetching } = useSalesAnalyticsReport(filters);
+  const categoryBreakdown = data?.categoryBreakdown ?? [];
+  const tierGovernance = data?.tierGovernance ?? [];
+  const repPerformance = data?.repPerformance ?? [];
+  const categoryPageCount = Math.max(1, Math.ceil(categoryBreakdown.length / pageSize));
+  const tierPageCount = Math.max(1, Math.ceil(tierGovernance.length / pageSize));
+  const repPageCount = Math.max(1, Math.ceil(repPerformance.length / pageSize));
+  const visibleCategories = useMemo(
+    () => categoryBreakdown.slice((categoryPage - 1) * pageSize, categoryPage * pageSize),
+    [categoryBreakdown, categoryPage],
+  );
+  const visibleTiers = useMemo(
+    () => tierGovernance.slice((tierPage - 1) * pageSize, tierPage * pageSize),
+    [tierGovernance, tierPage],
+  );
+  const visibleReps = useMemo(
+    () => repPerformance.slice((repPage - 1) * pageSize, repPage * pageSize),
+    [repPerformance, repPage],
+  );
 
   const handleExportCategoryCsv = () => {
     if (!data?.categoryBreakdown || data.categoryBreakdown.length === 0) {
@@ -59,9 +81,9 @@ export function SalesReportsView() {
       data.categoryBreakdown,
       [
         { header: "Category", accessor: (item) => item.category },
-        { header: "Revenue ($)", accessor: (item) => item.revenue.toFixed(2) },
-        { header: "Direct Cost ($)", accessor: (item) => item.cost.toFixed(2) },
-        { header: "Gross Profit ($)", accessor: (item) => (item.revenue - item.cost).toFixed(2) },
+        { header: "Revenue (INR)", accessor: (item) => item.revenue.toFixed(2) },
+        { header: "Direct Cost (INR)", accessor: (item) => item.cost.toFixed(2) },
+        { header: "Gross Profit (INR)", accessor: (item) => (item.revenue - item.cost).toFixed(2) },
         { header: "Margin %", accessor: (item) => item.marginPercent.toFixed(1) },
         { header: "Line Items Count", accessor: (item) => item.lineCount },
       ],
@@ -102,8 +124,8 @@ export function SalesReportsView() {
       [
         { header: "Rep Name", accessor: (item) => item.repName },
         { header: "Quotes Handled", accessor: (item) => item.quoteCount },
-        { header: "Quoted Pipeline ($)", accessor: (item) => item.totalPipeline.toFixed(2) },
-        { header: "Won Revenue ($)", accessor: (item) => item.wonRevenue.toFixed(2) },
+        { header: "Quoted Pipeline (INR)", accessor: (item) => item.totalPipeline.toFixed(2) },
+        { header: "Won Revenue (INR)", accessor: (item) => item.wonRevenue.toFixed(2) },
         { header: "Avg Blended Margin %", accessor: (item) => item.avgMarginPercent.toFixed(1) },
       ],
     );
@@ -138,7 +160,7 @@ export function SalesReportsView() {
     );
   }
 
-  const { summary, categoryBreakdown, tierGovernance, repPerformance } = data;
+  const { summary } = data;
 
   return (
     <div className="space-y-6">
@@ -220,24 +242,24 @@ export function SalesReportsView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
-        <Card className="border-border bg-card p-4">
-          <span className="text-xs text-muted-foreground block font-medium">Total Quoted Revenue</span>
-          <span className="text-2xl font-black font-mono text-foreground">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+        <Card className="min-w-0 border-primary/40 bg-primary/5 p-4">
+          <span className="text-xs font-medium text-primary">Total Quoted Revenue</span>
+          <span className="block whitespace-nowrap text-lg font-black font-mono text-primary sm:text-xl" title={currency.format(summary.totalRevenue)}>
             {currency.format(summary.totalRevenue)}
           </span>
           <p className="text-[10px] text-muted-foreground pt-1">Across {summary.totalQuotes} analyzed deals</p>
         </Card>
 
-        <Card className="border-border bg-card p-4">
+        <Card className="min-w-0 border-border bg-card p-4">
           <span className="text-xs text-muted-foreground block font-medium">Direct Cost Basis</span>
-          <span className="text-2xl font-black font-mono text-muted-foreground">
+          <span className="block whitespace-nowrap text-lg font-black font-mono text-muted-foreground sm:text-xl" title={currency.format(summary.totalCost)}>
             {currency.format(summary.totalCost)}
           </span>
           <p className="text-[10px] text-muted-foreground pt-1">Product & fulfillment costs</p>
         </Card>
 
-        <Card className="border-border bg-card p-4">
+        <Card className="min-w-0 border-border bg-card p-4">
           <span className="text-xs text-muted-foreground block font-medium">Net Gross Margin</span>
           <span className={`text-2xl font-black font-mono ${summary.avgMarginPercent >= 35 ? "text-emerald-500" : "text-amber-500"}`}>
             {summary.avgMarginPercent.toFixed(1)}%
@@ -247,7 +269,7 @@ export function SalesReportsView() {
           </p>
         </Card>
 
-        <Card className="border-border bg-card p-4">
+        <Card className="min-w-0 border-border bg-card p-4">
           <span className="text-xs text-muted-foreground block font-medium">Average Risk Score</span>
           <span className={`text-2xl font-black font-mono ${summary.avgRiskScore > 10 ? "text-red-500" : summary.avgRiskScore > 0 ? "text-amber-500" : "text-emerald-500"}`}>
             {summary.avgRiskScore.toFixed(1)}
@@ -255,7 +277,7 @@ export function SalesReportsView() {
           <p className="text-[10px] text-muted-foreground pt-1">Blended discount exposure</p>
         </Card>
 
-        <Card className="border-border bg-card p-4 col-span-2 sm:col-span-1">
+        <Card className="min-w-0 border-border bg-card p-4 col-span-2 sm:col-span-1">
           <span className="text-xs text-muted-foreground block font-medium">Policy Compliance</span>
           <span className="text-2xl font-black font-mono text-emerald-500">
             {tierGovernance.reduce((acc, t) => acc + t.breachCount, 0) === 0 ? "100%" : `${Math.max(0, 100 - tierGovernance.reduce((acc, t) => acc + t.breachCount, 0) * 10)}%`}
@@ -302,7 +324,7 @@ export function SalesReportsView() {
                   </TableCell>
                 </TableRow>
               ) : (
-                categoryBreakdown.map((cat) => {
+                visibleCategories.map((cat) => {
                   const profit = cat.revenue - cat.cost;
                   return (
                     <TableRow key={cat.category} className="border-border">
@@ -342,6 +364,7 @@ export function SalesReportsView() {
               )}
             </TableBody>
           </Table>
+          {categoryBreakdown.length > pageSize && <ReportPagination page={categoryPage} pageCount={categoryPageCount} total={categoryBreakdown.length} onPageChange={setCategoryPage} />}
         </CardContent>
       </Card>
 
@@ -381,7 +404,7 @@ export function SalesReportsView() {
                   </TableCell>
                 </TableRow>
               ) : (
-                tierGovernance.map((tier) => {
+                visibleTiers.map((tier) => {
                   return (
                     <TableRow key={tier.tier} className="border-border">
                       <TableCell className="font-semibold text-sm">
@@ -421,6 +444,7 @@ export function SalesReportsView() {
               )}
             </TableBody>
           </Table>
+          {tierGovernance.length > pageSize && <ReportPagination page={tierPage} pageCount={tierPageCount} total={tierGovernance.length} onPageChange={setTierPage} />}
         </CardContent>
       </Card>
 
@@ -459,7 +483,7 @@ export function SalesReportsView() {
                   </TableCell>
                 </TableRow>
               ) : (
-                repPerformance.map((rep) => (
+                visibleReps.map((rep) => (
                   <TableRow key={rep.repId} className="border-border">
                     <TableCell className="font-medium text-sm text-foreground">
                       <div className="flex items-center gap-2">
@@ -492,8 +516,31 @@ export function SalesReportsView() {
               )}
             </TableBody>
           </Table>
+          {repPerformance.length > pageSize && <ReportPagination page={repPage} pageCount={repPageCount} total={repPerformance.length} onPageChange={setRepPage} />}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function ReportPagination({
+  page,
+  pageCount,
+  total,
+  onPageChange,
+}: {
+  page: number;
+  pageCount: number;
+  total: number;
+  onPageChange: (page: number) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between border-t border-border px-4 py-3">
+      <span className="text-xs text-muted-foreground">Page {page} of {pageCount} · {total} records</span>
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" disabled={page === 1} onClick={() => onPageChange(page - 1)}>Previous</Button>
+        <Button variant="outline" size="sm" disabled={page === pageCount} onClick={() => onPageChange(page + 1)}>Next</Button>
+      </div>
     </div>
   );
 }
