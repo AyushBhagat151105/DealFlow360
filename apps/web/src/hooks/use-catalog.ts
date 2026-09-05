@@ -11,24 +11,111 @@ import type {
   Warehouse,
   UpdateCustomerInput,
   UserItem,
+  PaginatedProductsResponse,
+  PaginatedCustomersResponse,
+  PaginatedUsersResponse,
 } from "@/lib/api-types";
 
 export function useProducts() {
   return useQuery<Product[]>({
-    queryKey: ["catalog", "products"],
+    queryKey: ["catalog", "products", "all"],
     queryFn: async () => {
-      const response = await httpClient.get<{ data: Product[] }>("/api/catalog/products");
-      return response.data.data;
+      const response = await httpClient.get<{ data: Product[] | PaginatedProductsResponse }>(
+        "/api/catalog/products?all=true",
+      );
+      const data = response.data.data;
+      return Array.isArray(data) ? data : data.products;
+    },
+  });
+}
+
+export type ProductFilters = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  all?: boolean;
+};
+
+export function usePaginatedProducts(filters: ProductFilters = {}) {
+  return useQuery<PaginatedProductsResponse>({
+    queryKey: ["catalog", "products", "paginated", filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.page) params.append("page", String(filters.page));
+      if (filters.limit) params.append("limit", String(filters.limit));
+      if (filters.search) params.append("search", filters.search);
+      if (filters.category && filters.category !== "ALL") params.append("category", filters.category);
+      if (filters.all) params.append("all", "true");
+
+      const queryStr = params.toString() ? `?${params.toString()}` : "";
+      const response = await httpClient.get<{ data: Product[] | PaginatedProductsResponse }>(
+        `/api/catalog/products${queryStr}`,
+      );
+      const data = response.data.data;
+      if (Array.isArray(data)) {
+        return {
+          products: data,
+          total: data.length,
+          page: 1,
+          limit: data.length,
+          totalPages: 1,
+          hasMore: false,
+        };
+      }
+      return data;
     },
   });
 }
 
 export function useCustomers() {
   return useQuery<Customer[]>({
-    queryKey: ["catalog", "customers"],
+    queryKey: ["catalog", "customers", "all"],
     queryFn: async () => {
-      const response = await httpClient.get<{ data: Customer[] }>("/api/catalog/customers");
-      return response.data.data;
+      const response = await httpClient.get<{ data: Customer[] | PaginatedCustomersResponse }>(
+        "/api/catalog/customers?all=true",
+      );
+      const data = response.data.data;
+      return Array.isArray(data) ? data : data.customers;
+    },
+  });
+}
+
+export type CustomerFilters = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  tier?: string;
+  all?: boolean;
+};
+
+export function usePaginatedCustomers(filters: CustomerFilters = {}) {
+  return useQuery<PaginatedCustomersResponse>({
+    queryKey: ["catalog", "customers", "paginated", filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.page) params.append("page", String(filters.page));
+      if (filters.limit) params.append("limit", String(filters.limit));
+      if (filters.search) params.append("search", filters.search);
+      if (filters.tier && filters.tier !== "ALL") params.append("tier", filters.tier);
+      if (filters.all) params.append("all", "true");
+
+      const queryStr = params.toString() ? `?${params.toString()}` : "";
+      const response = await httpClient.get<{ data: Customer[] | PaginatedCustomersResponse }>(
+        `/api/catalog/customers${queryStr}`,
+      );
+      const data = response.data.data;
+      if (Array.isArray(data)) {
+        return {
+          customers: data,
+          total: data.length,
+          page: 1,
+          limit: data.length,
+          totalPages: 1,
+          hasMore: false,
+        };
+      }
+      return data;
     },
   });
 }
@@ -134,10 +221,52 @@ export function useDeleteCustomer() {
 
 export function useUsers() {
   return useQuery<UserItem[]>({
-    queryKey: ["catalog", "users"],
+    queryKey: ["catalog", "users", "all"],
     queryFn: async () => {
-      const response = await httpClient.get<{ data: UserItem[] }>("/api/catalog/users");
-      return response.data.data;
+      const response = await httpClient.get<{ data: UserItem[] | PaginatedUsersResponse }>(
+        "/api/catalog/users?all=true",
+      );
+      const data = response.data.data;
+      return Array.isArray(data) ? data : data.users;
+    },
+  });
+}
+
+export type UserFilters = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  all?: boolean;
+};
+
+export function usePaginatedUsers(filters: UserFilters = {}) {
+  return useQuery<PaginatedUsersResponse>({
+    queryKey: ["catalog", "users", "paginated", filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.page) params.append("page", String(filters.page));
+      if (filters.limit) params.append("limit", String(filters.limit));
+      if (filters.search) params.append("search", filters.search);
+      if (filters.role && filters.role !== "ALL") params.append("role", filters.role);
+      if (filters.all) params.append("all", "true");
+
+      const queryStr = params.toString() ? `?${params.toString()}` : "";
+      const response = await httpClient.get<{ data: UserItem[] | PaginatedUsersResponse }>(
+        `/api/catalog/users${queryStr}`,
+      );
+      const data = response.data.data;
+      if (Array.isArray(data)) {
+        return {
+          users: data,
+          total: data.length,
+          page: 1,
+          limit: data.length,
+          totalPages: 1,
+          hasMore: false,
+        };
+      }
+      return data;
     },
   });
 }

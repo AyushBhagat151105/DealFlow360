@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TablePagination } from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -68,6 +69,8 @@ function InvoicesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [paymentInvoice, setPaymentInvoice] = useState<InvoiceListItem | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
@@ -80,6 +83,8 @@ function InvoicesPage() {
     search: searchTerm || undefined,
     status: statusFilter,
     type: typeFilter,
+    page,
+    limit: pageSize,
   });
 
   const recordPaymentMutation = useRecordPayment("");
@@ -256,7 +261,10 @@ function InvoicesPage() {
               type="text"
               placeholder="Search invoice, customer, or quote..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
               className="pl-9 text-sm"
             />
           </div>
@@ -271,7 +279,10 @@ function InvoicesPage() {
                 variant={statusFilter === status ? "default" : "outline"}
                 size="sm"
                 className={`h-8 text-xs ${statusFilter === status ? "bg-forest-ink text-cream-paper hover:bg-forest-ink/90" : "border-pencil-gray text-forest-ink hover:bg-whisper-gray"}`}
-                onClick={() => setStatusFilter(status)}
+                onClick={() => {
+                  setStatusFilter(status);
+                  setPage(1);
+                }}
               >
                 {status}
               </Button>
@@ -287,7 +298,10 @@ function InvoicesPage() {
                   variant={typeFilter === type ? "default" : "outline"}
                   size="sm"
                   className={`h-8 text-xs ${typeFilter === type ? "bg-forest-ink text-cream-paper hover:bg-forest-ink/90" : "border-pencil-gray text-forest-ink hover:bg-whisper-gray"}`}
-                  onClick={() => setTypeFilter(type)}
+                  onClick={() => {
+                    setTypeFilter(type);
+                    setPage(1);
+                  }}
                 >
                   {type === "PRORATED_SUPPLEMENTAL"
                     ? "PRORATED"
@@ -311,111 +325,121 @@ function InvoicesPage() {
                 No invoices found matching the current filters.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b border-pencil-gray/30 bg-whisper-gray text-xs font-semibold text-forest-ink/60">
-                    <tr>
-                      <th className="px-4 py-3">Invoice #</th>
-                      <th className="px-4 py-3">Customer</th>
-                      <th className="px-4 py-3">Quotation</th>
-                      <th className="px-4 py-3">Type</th>
-                      <th className="px-4 py-3 text-right">Amount</th>
-                      <th className="px-4 py-3">Due Date</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-pencil-gray/20">
-                    {invoices.map((inv) => {
-                      const isPaid = inv.status === "PAID";
-                      const isOverdue =
-                        inv.status === "ISSUED" && new Date(inv.dueDate) < new Date();
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-pencil-gray/30 bg-whisper-gray text-xs font-semibold text-forest-ink/60">
+                      <tr>
+                        <th className="px-4 py-3">Invoice #</th>
+                        <th className="px-4 py-3">Customer</th>
+                        <th className="px-4 py-3">Quotation</th>
+                        <th className="px-4 py-3">Type</th>
+                        <th className="px-4 py-3 text-right">Amount</th>
+                        <th className="px-4 py-3">Due Date</th>
+                        <th className="px-4 py-3">Status</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-pencil-gray/20">
+                      {invoices.map((inv) => {
+                        const isPaid = inv.status === "PAID";
+                        const isOverdue =
+                          inv.status === "ISSUED" && new Date(inv.dueDate) < new Date();
 
-                      return (
-                        <tr key={inv.id} className="hover:bg-whisper-gray/50 transition-colors">
-                          <td className="px-4 py-3 font-mono font-medium text-foreground">
-                            {inv.invoiceNumber}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="font-medium text-foreground">{inv.customer.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {inv.customer.email}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                            {inv.quotation ? (
-                              <Link
-                                to="/workspace/billing/$id"
-                                params={{ id: inv.quotation.id }}
-                                className="text-primary hover:underline"
-                              >
-                                {inv.quotation.quoteNumber}
-                              </Link>
-                            ) : (
-                              "Manual Contract"
-                            )}
-                          </td>
-                          <td className="px-4 py-3">
-                            <Badge
-                              variant="outline"
-                              className={`text-[11px] font-semibold ${TYPE_BADGES[inv.type] || ""}`}
-                            >
-                              {inv.type}
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-3 text-right font-mono font-bold text-foreground">
-                            {currency.format(inv.amount)}
-                          </td>
-                          <td className="px-4 py-3 text-xs text-muted-foreground">
-                            <span className={isOverdue ? "font-semibold text-terracotta" : ""}>
-                              {new Date(inv.dueDate).toLocaleDateString()}
-                            </span>
-                            {isOverdue && (
-                              <span className="ml-1 text-[10px] text-terracotta font-bold">
-                                (Overdue)
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3">
-                            <Badge
-                              variant="outline"
-                              className={`text-[11px] font-semibold ${STATUS_BADGES[inv.status] || ""}`}
-                            >
-                              {inv.status}
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <Button
+                        return (
+                          <tr key={inv.id} className="hover:bg-whisper-gray/50 transition-colors">
+                            <td className="px-4 py-3 font-mono font-medium text-foreground">
+                              {inv.invoiceNumber}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="font-medium text-foreground">{inv.customer.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {inv.customer.email}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                              {inv.quotation ? (
+                                <Link
+                                  to="/workspace/billing/$id"
+                                  params={{ id: inv.quotation.id }}
+                                  className="text-primary hover:underline"
+                                >
+                                  {inv.quotation.quoteNumber}
+                                </Link>
+                              ) : (
+                                "Manual Contract"
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge
                                 variant="outline"
-                                size="sm"
-                                className="h-7 px-2 text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray"
-                                onClick={() => handlePrintInvoice(inv)}
-                                title="Print / Save as PDF"
+                                className={`text-[11px] font-semibold ${TYPE_BADGES[inv.type] || ""}`}
                               >
-                                <Printer className="mr-1 h-3.5 w-3.5" />
-                                Print
-                              </Button>
-
-                              {!isPaid && inv.status !== "CANCELLED" && (
+                                {inv.type}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                              {currency.format(inv.amount)}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-muted-foreground">
+                              <span className={isOverdue ? "font-semibold text-terracotta" : ""}>
+                                {new Date(inv.dueDate).toLocaleDateString()}
+                              </span>
+                              {isOverdue && (
+                                <span className="ml-1 text-[10px] text-terracotta font-bold">
+                                  (Overdue)
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge
+                                variant="outline"
+                                className={`text-[11px] font-semibold ${STATUS_BADGES[inv.status] || ""}`}
+                              >
+                                {inv.status}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   className="h-7 px-2 text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray"
-                                  onClick={() => handleOpenPayment(inv)}
+                                  onClick={() => handlePrintInvoice(inv)}
+                                  title="Print / Save as PDF"
                                 >
-                                  <CreditCard className="mr-1 h-3.5 w-3.5" />
-                                  Pay
+                                  <Printer className="mr-1 h-3.5 w-3.5" />
+                                  Print
                                 </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+
+                                {!isPaid && inv.status !== "CANCELLED" && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 px-2 text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray"
+                                    onClick={() => handleOpenPayment(inv)}
+                                  >
+                                    <CreditCard className="mr-1 h-3.5 w-3.5" />
+                                    Pay
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <TablePagination
+                  page={page}
+                  pageSize={pageSize}
+                  total={data?.total ?? invoices.length}
+                  totalPages={data?.totalPages ?? 1}
+                  onPageChange={setPage}
+                  onPageSizeChange={setPageSize}
+                />
+              </>
             )}
           </CardContent>
         </Card>

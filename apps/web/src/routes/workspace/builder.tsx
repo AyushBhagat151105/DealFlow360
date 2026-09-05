@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useProducts, useCustomers } from "@/hooks/use-catalog";
 import {
   useQuotes,
+  usePaginatedQuotes,
   useQuote,
   useCreateQuote,
   useQuotePreview,
@@ -61,6 +62,7 @@ import { useAuthStore } from "@/stores/auth-store";
 
 import { CartTable, type CartLine, calcLineSubtotal, calcLineMarginPercent } from "@/components/cart-table";
 import { CustomerSelector, TIER_BADGE_STYLES } from "@/components/customer-selector";
+import { TablePagination } from "@/components/ui/pagination";
 
 export const Route = createFileRoute("/workspace/builder")({
   component: BuilderComponent,
@@ -116,8 +118,21 @@ function BuilderComponent() {
   const [viewMode, setViewMode] = useState<"LIST" | "CREATE" | "DETAILS">("LIST");
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
+  // Pagination and filtering for Quotations List View
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [listSearch, setListSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+
   // Queries
-  const { data: quotes = [], isLoading: isQuotesLoading } = useQuotes();
+  const { data: allQuotes = [] } = useQuotes({ all: true });
+  const { data: paginatedData, isLoading: isQuotesLoading } = usePaginatedQuotes({
+    page,
+    limit: pageSize,
+    search: listSearch || undefined,
+    status: statusFilter === "ALL" ? undefined : statusFilter,
+  });
+  const quotes = paginatedData?.quotes ?? [];
   const { data: quoteDetail, isLoading: isDetailLoading } = useQuote(selectedQuoteId ?? undefined);
   const { data: products = [] } = useProducts();
   const { data: customers = [] } = useCustomers();
@@ -139,20 +154,6 @@ function BuilderComponent() {
   const [notes, setNotes] = useState("");
   const [productSearch, setProductSearch] = useState("");
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
-
-  // Filtering State for Quotations List View
-  const [listSearch, setListSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-
-  const filteredQuotes = useMemo(() => {
-    return quotes.filter((q) => {
-      const matchesSearch =
-        q.quoteNumber.toLowerCase().includes(listSearch.toLowerCase()) ||
-        q.customerName.toLowerCase().includes(listSearch.toLowerCase());
-      const matchesStatus = statusFilter === "ALL" || q.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [quotes, listSearch, statusFilter]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(
@@ -375,7 +376,7 @@ function BuilderComponent() {
                   <span className="text-xs">Total Quotations</span>
                   <FileText className="h-4 w-4 text-forest-ink/70" />
                 </div>
-                <p className="text-2xl font-bold text-foreground">{quotes.length}</p>
+                <p className="text-2xl font-bold text-foreground">{allQuotes.length}</p>
                 <p className="text-[11px] text-muted-foreground">Active deal quotes in workspace</p>
               </CardContent>
             </Card>
@@ -387,7 +388,7 @@ function BuilderComponent() {
                   <Clock className="h-4 w-4 text-amber-400" />
                 </div>
                 <p className="text-2xl font-bold text-foreground">
-                  {quotes.filter((q) => q.status === "PENDING_APPROVAL").length}
+                  {allQuotes.filter((q) => q.status === "PENDING_APPROVAL").length}
                 </p>
                 <p className="text-[11px] text-muted-foreground">Requires Manager/Finance review</p>
               </CardContent>
@@ -401,7 +402,7 @@ function BuilderComponent() {
                 </div>
                 <p className="text-2xl font-bold text-foreground">
                   {currencyFormatter.format(
-                    quotes.reduce((acc, q) => acc + (q.totalSubtotal || 0), 0)
+                    allQuotes.reduce((acc, q) => acc + (q.totalSubtotal || 0), 0)
                   )}
                 </p>
                 <p className="text-[11px] text-muted-foreground">Total net quotation value</p>
@@ -415,11 +416,11 @@ function BuilderComponent() {
                   <Percent className="h-4 w-4 text-purple-400" />
                 </div>
                 <p className="text-2xl font-bold text-foreground">
-                  {quotes.length > 0
+                  {allQuotes.length > 0
                     ? (
-                        quotes.reduce((acc, q) => acc + (q.totalMarginPercent || 0), 0) /
-                        quotes.length
-                      ).toFixed(1)
+                      allQuotes.reduce((acc, q) => acc + (q.totalMarginPercent || 0), 0) /
+                      allQuotes.length
+                    ).toFixed(1)
                     : 0}
                   %
                 </p>
@@ -436,13 +437,19 @@ function BuilderComponent() {
                 <Input
                   placeholder="Search by quote # or customer name..."
                   value={listSearch}
-                  onChange={(e) => setListSearch(e.target.value)}
+                  onChange={(e) => {
+                    setListSearch(e.target.value);
+                    setPage(1);
+                  }}
                   className="pl-8 h-9 text-xs bg-whisper-gray border-pencil-gray/40 text-foreground"
                 />
               </div>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
                 className="h-9 px-3 text-xs bg-whisper-gray border border-pencil-gray/40 text-foreground focus:outline-none focus:ring-1 focus:ring-forest-ink/40 rounded-md"
               >
                 <option value="ALL">All Statuses</option>
@@ -478,14 +485,14 @@ function BuilderComponent() {
                       Loading quotations list...
                     </TableCell>
                   </TableRow>
-                ) : filteredQuotes.length === 0 ? (
+                ) : quotes.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-12 text-xs text-muted-foreground">
                       No quotations found. Click "+ Create New Quotation" to build one.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredQuotes.map((quote) => (
+                  quotes.map((quote) => (
                     <TableRow
                       key={quote.id}
                       onClick={() => {
@@ -517,8 +524,8 @@ function BuilderComponent() {
                             quote.totalMarginPercent >= 30
                               ? "text-emerald-400"
                               : quote.totalMarginPercent >= 15
-                              ? "text-amber-400"
-                              : "text-red-400"
+                                ? "text-amber-400"
+                                : "text-red-400"
                           }
                         >
                           {quote.totalMarginPercent.toFixed(1)}%
@@ -527,13 +534,12 @@ function BuilderComponent() {
                       <TableCell className="text-center">
                         <Badge
                           variant="outline"
-                          className={`font-mono text-[10px] border ${
-                            quote.blendedRiskScore === 0
+                          className={`font-mono text-[10px] border ${quote.blendedRiskScore === 0
                               ? "border-sticky-note-mint/60 text-forest-ink bg-sticky-note-mint"
                               : quote.blendedRiskScore <= 10
-                              ? "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/40"
-                              : "border-terracotta/30 text-terracotta bg-terracotta/10"
-                          }`}
+                                ? "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/40"
+                                : "border-terracotta/30 text-terracotta bg-terracotta/10"
+                            }`}
                         >
                           Risk: {quote.blendedRiskScore}
                         </Badge>
@@ -558,6 +564,14 @@ function BuilderComponent() {
                 )}
               </TableBody>
             </Table>
+            <TablePagination
+              page={page}
+              pageSize={pageSize}
+              total={paginatedData?.total ?? 0}
+              totalPages={paginatedData?.totalPages ?? 1}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
           </Card>
         </div>
       </div>
@@ -865,9 +879,8 @@ function BuilderComponent() {
                           return (
                             <div
                               key={product.id}
-                              className={`flex items-center justify-between gap-3 p-3 border rounded-none transition-colors ${
-                                isInCart ? "border-primary/30 bg-primary/5" : "border-border bg-card hover:bg-muted/30"
-                              }`}
+                              className={`flex items-center justify-between gap-3 p-3 border rounded-none transition-colors ${isInCart ? "border-primary/30 bg-primary/5" : "border-border bg-card hover:bg-muted/30"
+                                }`}
                             >
                               <div className="min-w-0 space-y-0.5">
                                 <div className="flex items-center gap-2">

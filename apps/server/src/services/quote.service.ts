@@ -2,8 +2,10 @@ import prisma, {
   QuotationStatus,
   ApprovalLevel,
   ApprovalAction,
+  type Prisma,
 } from "@DealFlow360/db";
 import { NotFoundError, ValidationError } from "../utils/errors";
+import { getPaginationParams, buildPaginationMeta } from "../utils/pagination";
 import {
   calculateQuotePricing,
   type LineCalculationInput,
@@ -21,6 +23,10 @@ export type ListQuotesFilter = {
   customerId?: string;
   repUserId?: string;
   search?: string;
+  page?: number;
+  limit?: number;
+  offset?: number;
+  all?: boolean;
 };
 
 export async function createQuote(
@@ -94,7 +100,7 @@ export async function createQuote(
 }
 
 export async function listQuotes(filters: ListQuotesFilter = {}) {
-  const where: Record<string, unknown> = {};
+  const where: Prisma.QuotationWhereInput = {};
 
   if (filters.status) {
     where.status = filters.status;
@@ -112,23 +118,60 @@ export async function listQuotes(filters: ListQuotesFilter = {}) {
     ];
   }
 
-  return prisma.quotation.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      customer: true,
-      lines: {
-        include: {
-          product: true,
-          variant: true,
-          subscriptionPlan: true,
-        },
-      },
-      dealAlerts: {
-        where: { isDismissed: false },
+  const includeConfig = {
+    customer: true,
+    lines: {
+      include: {
+        product: true,
+        variant: true,
+        subscriptionPlan: true,
       },
     },
-  });
+    dealAlerts: {
+      where: { isDismissed: false },
+    },
+  };
+
+  if (filters.all) {
+    const quotes = await prisma.quotation.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: includeConfig,
+    });
+
+    return {
+      quotes,
+      total: quotes.length,
+      page: 1,
+      limit: quotes.length,
+      totalPages: 1,
+      hasMore: false,
+    };
+  }
+
+  const { page, limit, skip } = getPaginationParams(filters, 20);
+
+  const [quotes, total] = await Promise.all([
+    prisma.quotation.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      include: includeConfig,
+    }),
+    prisma.quotation.count({ where }),
+  ]);
+
+  const meta = buildPaginationMeta(total, page, limit);
+
+  return {
+    quotes,
+    total,
+    page: meta.page,
+    limit: meta.limit,
+    totalPages: meta.totalPages,
+    hasMore: meta.hasMore,
+  };
 }
 
 export async function getQuoteById(id: string) {

@@ -27,6 +27,7 @@ import type { Quote } from "@/lib/api-types";
 import { useAuthStore } from "@/stores/auth-store";
 import { ApprovalModal } from "@/components/approval-modal";
 import { DealHealthPanel } from "@/components/deal-health-panel";
+import { TablePagination } from "@/components/ui/pagination";
 
 export const Route = createFileRoute("/workspace/approvals")({
   component: ApprovalsComponent,
@@ -54,13 +55,18 @@ function getRiskScore(quote: Quote): number {
 
 function ApprovalsComponent() {
   const { user } = useAuthStore();
-  const quotesQuery = useQuotes();
+  const quotesQuery = useQuotes({ all: true });
   const quotes = quotesQuery.data ?? [];
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("PENDING_APPROVAL");
   const [mainTab, setMainTab] = useState<"queue" | "health">("queue");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const displayQuotes = filterStatus === "ALL" ? quotes : quotes.filter((q) => q.status === filterStatus);
+  const totalItems = displayQuotes.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const paginatedQuotes = displayQuotes.slice((page - 1) * pageSize, page * pageSize);
 
   const pendingCount = quotes.filter((q) => q.status === "PENDING_APPROVAL").length;
 
@@ -171,7 +177,7 @@ function ApprovalsComponent() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                <Tabs value={filterStatus} onValueChange={setFilterStatus}>
+                <Tabs value={filterStatus} onValueChange={(val) => { setFilterStatus(val); setPage(1); }}>
                   <TabsList className="bg-muted p-1 mb-4">
                     {[
                       { value: "PENDING_APPROVAL", label: "Pending" },
@@ -195,95 +201,101 @@ function ApprovalsComponent() {
                         No quotations in this category.
                       </div>
                     ) : (
-                      <Table>
-                        <TableHeader className="bg-whisper-gray">
-                          <TableRow>
-                            <TableHead className="text-xs font-bold text-forest-ink/60">Quote #</TableHead>
-                            <TableHead className="text-xs font-bold text-forest-ink/60">Customer</TableHead>
-                            <TableHead className="text-xs font-bold text-forest-ink/60">Tier</TableHead>
-                            <TableHead className="text-xs font-bold text-forest-ink/60 text-right">Value</TableHead>
-                            <TableHead className="text-xs font-bold text-forest-ink/60 text-right">Blended Margin</TableHead>
-                            <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Risk Score</TableHead>
-                            <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Approval Level</TableHead>
-                            <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Status</TableHead>
-                            <TableHead className="w-10" />
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {displayQuotes.map((quote) => {
-                            const risk = getRiskScore(quote);
-                            return (
-                              <TableRow
-                                key={quote.id}
-                                className={`cursor-pointer hover:bg-whisper-gray/50 ${
-                                  quote.requiredApprovalLevel === "FINANCE" ? "border-l-2 border-l-terracotta" : ""
-                                }`}
-                                onClick={() => setSelectedQuote(quote)}
-                              >
-                                <TableCell className="font-mono text-xs font-bold text-foreground">
-                                  {quote.quoteNumber}
-                                </TableCell>
-                                <TableCell className="text-xs font-medium">{quote.customerName}</TableCell>
-                                <TableCell>
-                                  <Badge
-                                    className={`text-[10px] px-1.5 py-0 border ${
-                                      quote.customerTier === "GOLD"
-                                        ? "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60"
-                                        : quote.customerTier === "SILVER"
-                                        ? "bg-whisper-gray text-forest-ink/60 border-pencil-gray/40"
-                                        : "bg-terracotta/10 text-terracotta border-terracotta/30"
+                      <>
+                        <Table>
+                          <TableHeader className="bg-whisper-gray">
+                            <TableRow>
+                              <TableHead className="text-xs font-bold text-forest-ink/60">Quote #</TableHead>
+                              <TableHead className="text-xs font-bold text-forest-ink/60">Customer</TableHead>
+                              <TableHead className="text-xs font-bold text-forest-ink/60">Tier</TableHead>
+                              <TableHead className="text-xs font-bold text-forest-ink/60 text-right">Value</TableHead>
+                              <TableHead className="text-xs font-bold text-forest-ink/60 text-right">Blended Margin</TableHead>
+                              <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Risk Score</TableHead>
+                              <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Approval Level</TableHead>
+                              <TableHead className="text-xs font-bold text-forest-ink/60 text-center">Status</TableHead>
+                              <TableHead className="w-10" />
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {paginatedQuotes.map((quote) => {
+                              const risk = getRiskScore(quote);
+                              return (
+                                <TableRow
+                                  key={quote.id}
+                                  className={`cursor-pointer hover:bg-whisper-gray/50 ${quote.requiredApprovalLevel === "FINANCE" ? "border-l-2 border-l-terracotta" : ""
                                     }`}
-                                  >
-                                    {quote.customerTier}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-right font-mono font-bold text-xs">
-                                  ${quote.totalSubtotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <span
-                                    className={`text-xs font-mono font-bold ${
-                                      quote.totalMarginPercent >= 30
-                                        ? "text-forest-ink"
-                                        : quote.totalMarginPercent >= 15
-                                        ? "text-forest-ink/60"
-                                        : "text-terracotta"
-                                    }`}
-                                  >
-                                    {quote.totalMarginPercent.toFixed(1)}%
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <span
-                                    className={`text-xs font-mono font-bold ${
-                                      risk > 10 ? "text-terracotta" : risk > 0 ? "text-forest-ink/60" : "text-forest-ink"
-                                    }`}
-                                  >
-                                    {risk}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <Badge className={`text-[10px] border ${RISK_BADGE[quote.requiredApprovalLevel]}`}>
-                                    {quote.requiredApprovalLevel === "NONE"
-                                      ? "Auto"
-                                      : quote.requiredApprovalLevel === "SALES_MANAGER"
-                                      ? "Manager"
-                                      : "Finance"}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <Badge className={`text-[10px] border ${STATUS_BADGE[quote.status] || ""}`}>
-                                    {quote.status.replace(/_/g, " ")}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
+                                  onClick={() => setSelectedQuote(quote)}
+                                >
+                                  <TableCell className="font-mono text-xs font-bold text-foreground">
+                                    {quote.quoteNumber}
+                                  </TableCell>
+                                  <TableCell className="text-xs font-medium">{quote.customerName}</TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      className={`text-[10px] px-1.5 py-0 border ${quote.customerTier === "GOLD"
+                                          ? "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60"
+                                          : quote.customerTier === "SILVER"
+                                            ? "bg-whisper-gray text-forest-ink/60 border-pencil-gray/40"
+                                            : "bg-terracotta/10 text-terracotta border-terracotta/30"
+                                        }`}
+                                    >
+                                      {quote.customerTier}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-right font-mono font-bold text-xs">
+                                    ${quote.totalSubtotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <span
+                                      className={`text-xs font-mono font-bold ${quote.totalMarginPercent >= 30
+                                          ? "text-forest-ink"
+                                          : quote.totalMarginPercent >= 15
+                                            ? "text-forest-ink/60"
+                                            : "text-terracotta"
+                                        }`}
+                                    >
+                                      {quote.totalMarginPercent.toFixed(1)}%
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <span
+                                      className={`text-xs font-mono font-bold ${risk > 10 ? "text-terracotta" : risk > 0 ? "text-forest-ink/60" : "text-forest-ink"
+                                        }`}
+                                    >
+                                      {risk}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <Badge className={`text-[10px] border ${RISK_BADGE[quote.requiredApprovalLevel]}`}>
+                                      {quote.requiredApprovalLevel === "NONE"
+                                        ? "Auto"
+                                        : quote.requiredApprovalLevel === "SALES_MANAGER"
+                                          ? "Manager"
+                                          : "Finance"}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <Badge className={`text-[10px] border ${STATUS_BADGE[quote.status] || ""}`}>
+                                      {quote.status.replace(/_/g, " ")}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                        <TablePagination
+                          page={page}
+                          pageSize={pageSize}
+                          total={totalItems}
+                          totalPages={totalPages}
+                          onPageChange={setPage}
+                          onPageSizeChange={setPageSize}
+                        />
+                      </>
                     )}
                   </TabsContent>
                 </Tabs>

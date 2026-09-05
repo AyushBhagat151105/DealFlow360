@@ -22,7 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useUsers, useUpdateUserRole, useDeleteUser } from "@/hooks/use-catalog";
+import { TablePagination } from "@/components/ui/pagination";
+import { usePaginatedUsers, useUpdateUserRole, useDeleteUser } from "@/hooks/use-catalog";
 import type { UserItem } from "@/lib/api-types";
 
 const ROLE_BADGE_STYLES: Record<string, string> = {
@@ -33,24 +34,22 @@ const ROLE_BADGE_STYLES: Record<string, string> = {
 };
 
 export function UsersTab() {
-  const usersQuery = useUsers();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState("");
+
+  const usersQuery = usePaginatedUsers({
+    page,
+    limit: pageSize,
+    search: search || undefined,
+  });
   const updateRoleMutation = useUpdateUserRole();
   const deleteUserMutation = useDeleteUser();
 
-  const [search, setSearch] = useState("");
   const [deletingUser, setDeletingUser] = useState<UserItem | null>(null);
 
-  const users = usersQuery.data ?? [];
-
-  const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
-      return (
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        u.role.toLowerCase().includes(search.toLowerCase())
-      );
-    });
-  }, [users, search]);
+  const paginatedData = usersQuery.data;
+  const users = paginatedData?.users ?? [];
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
@@ -79,14 +78,17 @@ export function UsersTab() {
           <Input
             placeholder="Search team member by name, email, or role..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="pl-8 h-9 text-xs"
           />
         </div>
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <UserCheck className="h-4 w-4 text-emerald-600" />
-          <span>{users.length} active team members</span>
+          <span>{paginatedData?.total ?? users.length} active team members</span>
         </div>
       </div>
 
@@ -103,14 +105,20 @@ export function UsersTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? (
+            {usersQuery.isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-sm text-muted-foreground">
-                  {usersQuery.isLoading ? "Loading team members..." : "No team members found."}
+                  Loading team members...
+                </TableCell>
+              </TableRow>
+            ) : users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8 text-sm text-muted-foreground">
+                  No team members found.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredUsers.map((u) => (
+              users.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium text-xs">
                     <p className="font-semibold">{u.name}</p>
@@ -154,6 +162,14 @@ export function UsersTab() {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          total={paginatedData?.total ?? 0}
+          totalPages={paginatedData?.totalPages ?? 1}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       </Card>
 
       <Dialog open={Boolean(deletingUser)} onOpenChange={(open) => !open && setDeletingUser(null)}>

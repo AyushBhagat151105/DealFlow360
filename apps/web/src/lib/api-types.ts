@@ -343,10 +343,58 @@ export type InvoicesSummary = {
   overdueCount: number;
 };
 
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+};
+
 export type InvoicesListResponse = {
   invoices: InvoiceListItem[];
   total: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+  hasMore?: boolean;
   summary: InvoicesSummary;
+};
+
+export type PaginatedQuotesResponse = {
+  quotes: Quote[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasMore: boolean;
+};
+
+export type PaginatedProductsResponse = {
+  products: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasMore: boolean;
+};
+
+export type PaginatedCustomersResponse = {
+  customers: Customer[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasMore: boolean;
+};
+
+export type PaginatedUsersResponse = {
+  users: UserItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasMore: boolean;
 };
 
 export type CategoryRevenueStat = {

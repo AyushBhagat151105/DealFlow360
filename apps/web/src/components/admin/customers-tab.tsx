@@ -23,12 +23,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer } from "@/hooks/use-catalog";
+import { TablePagination } from "@/components/ui/pagination";
+import {
+  usePaginatedCustomers,
+  useCreateCustomer,
+  useUpdateCustomer,
+  useDeleteCustomer,
+} from "@/hooks/use-catalog";
 import type { Customer, CustomerTier } from "@/lib/api-types";
 import { TIER_STYLES } from "./admin-utils";
 
 export function CustomersTab() {
-  const customersQuery = useCustomers();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState("");
+
+  const customersQuery = usePaginatedCustomers({
+    page,
+    limit: pageSize,
+    search: search || undefined,
+  });
   const createCustomerMutation = useCreateCustomer();
   const updateCustomerMutation = useUpdateCustomer();
   const deleteCustomerMutation = useDeleteCustomer();
@@ -39,7 +53,6 @@ export function CustomersTab() {
   const [customerContact, setCustomerContact] = useState("");
   const [customerCompany, setCustomerCompany] = useState("");
   const [customerTier, setCustomerTier] = useState<CustomerTier>("BRONZE");
-  const [search, setSearch] = useState("");
 
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [editName, setEditName] = useState("");
@@ -49,17 +62,8 @@ export function CustomersTab() {
 
   const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(null);
 
-  const customers = customersQuery.data ?? [];
-
-  const filteredCustomers = useMemo(() => {
-    return customers.filter((c) => {
-      return (
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.email.toLowerCase().includes(search.toLowerCase()) ||
-        (c.company && c.company.toLowerCase().includes(search.toLowerCase()))
-      );
-    });
-  }, [customers, search]);
+  const paginatedData = customersQuery.data;
+  const customers = paginatedData?.customers ?? [];
 
   const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +138,10 @@ export function CustomersTab() {
           <Input
             placeholder="Search customer account or email..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="pl-8 h-9 text-xs"
           />
         </div>
@@ -159,14 +166,20 @@ export function CustomersTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredCustomers.length === 0 ? (
+            {customersQuery.isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8 text-sm text-muted-foreground">
+                  Loading customer accounts...
+                </TableCell>
+              </TableRow>
+            ) : customers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-sm text-muted-foreground">
                   No customers found.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredCustomers.map((c) => (
+              customers.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="font-medium text-xs">
                     <div>
@@ -216,6 +229,14 @@ export function CustomersTab() {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          page={page}
+          pageSize={pageSize}
+          total={paginatedData?.total ?? 0}
+          totalPages={paginatedData?.totalPages ?? 1}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
