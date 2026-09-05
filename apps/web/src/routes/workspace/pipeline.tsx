@@ -10,8 +10,10 @@ import {
   FileText,
   Eye,
   GripVertical,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
+import { exportToCsv } from "@/lib/export-utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -171,6 +173,33 @@ function PipelineComponent() {
     handleMoveQuoteStatus(quoteId, targetStatus);
   };
 
+  const handleExportPipelineCsv = () => {
+    if (filteredQuotes.length === 0) {
+      toast.error("No quotes available to export");
+      return;
+    }
+
+    exportToCsv(
+      `commercial-pipeline-${new Date().toISOString().slice(0, 10)}.csv`,
+      filteredQuotes,
+      [
+        { header: "Quote Number", accessor: (q) => q.quoteNumber },
+        { header: "Customer Name", accessor: (q) => q.customerName },
+        { header: "Customer Tier", accessor: (q) => q.customerTier },
+        { header: "Status", accessor: (q) => q.status },
+        { header: "Subtotal ($)", accessor: (q) => q.totalSubtotal.toFixed(2) },
+        { header: "Total Margin ($)", accessor: (q) => q.totalMarginAmount.toFixed(2) },
+        { header: "Total Cost ($)", accessor: (q) => q.totalCost.toFixed(2) },
+        { header: "Margin %", accessor: (q) => q.totalMarginPercent.toFixed(1) },
+        { header: "Risk Score", accessor: (q) => q.blendedRiskScore.toFixed(1) },
+        { header: "Required Approval Level", accessor: (q) => q.requiredApprovalLevel },
+        { header: "Line Items Count", accessor: (q) => q.lines?.length ?? 0 },
+        { header: "Created Date", accessor: (q) => new Date(q.createdAt).toLocaleDateString() },
+      ],
+    );
+    toast.success(`Exported ${filteredQuotes.length} quotes to CSV`);
+  };
+
   if (quotesQuery.isLoading) return <PageState label="Loading commercial pipeline..." />;
   if (quotesQuery.isError)
     return (
@@ -194,6 +223,15 @@ function PipelineComponent() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportPipelineCsv}
+                className="h-9 text-xs gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5 text-primary" />
+                <span>Export Pipeline (.csv)</span>
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -289,11 +327,10 @@ function PipelineComponent() {
                     handleDropOnColumn(column.status, quoteId);
                   }
                 }}
-                className={`w-80 flex-shrink-0 border bg-card/70 rounded-xl flex flex-col transition-all duration-200 shadow-sm ${
-                  isTarget
+                className={`w-80 flex-shrink-0 border bg-card/70 rounded-xl flex flex-col transition-all duration-200 shadow-sm ${isTarget
                     ? "border-primary ring-2 ring-primary/30 bg-primary/5 shadow-md"
                     : "border-border"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between border-b border-border p-3.5 bg-muted/40 rounded-t-xl">
                   <div className="flex items-center gap-2">
@@ -310,11 +347,10 @@ function PipelineComponent() {
                 <div className="p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-300px)] min-h-[180px]">
                   {columnQuotes.length === 0 ? (
                     <div
-                      className={`h-32 flex items-center justify-center text-center p-3 text-xs rounded-lg border border-dashed transition-colors ${
-                        isTarget
+                      className={`h-32 flex items-center justify-center text-center p-3 text-xs rounded-lg border border-dashed transition-colors ${isTarget
                           ? "border-primary text-primary font-medium bg-primary/10"
                           : "border-border/60 text-muted-foreground/60"
-                      }`}
+                        }`}
                     >
                       {isTarget ? "Drop Quote Here" : "No quotes in stage"}
                     </div>
@@ -376,9 +412,8 @@ function DealCard({
       onDragStart={(e) => onDragStart(e, quote.id)}
       onDragEnd={onDragEnd}
       onClick={() => onSelectQuote(quote.id)}
-      className={`w-full rounded-lg border-border bg-card shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-grab active:cursor-grabbing group select-none relative ${
-        isDragging ? "opacity-30 scale-95 border-dashed border-primary bg-primary/5" : ""
-      }`}
+      className={`w-full rounded-lg border-border bg-card shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-grab active:cursor-grabbing group select-none relative ${isDragging ? "opacity-30 scale-95 border-dashed border-primary bg-primary/5" : ""
+        }`}
     >
       <CardContent className="space-y-3 p-3.5">
         <div className="flex items-start justify-between gap-2">
@@ -410,13 +445,12 @@ function DealCard({
 
           <Badge
             variant="outline"
-            className={`text-[10px] px-1.5 py-0.5 flex-shrink-0 ${
-              quote.requiredApprovalLevel === "NONE"
+            className={`text-[10px] px-1.5 py-0.5 flex-shrink-0 ${quote.requiredApprovalLevel === "NONE"
                 ? "border-emerald-500/30 text-emerald-500"
                 : quote.requiredApprovalLevel === "SALES_MANAGER"
-                ? "border-amber-500/30 text-amber-500"
-                : "border-red-500/30 text-red-500"
-            }`}
+                  ? "border-amber-500/30 text-amber-500"
+                  : "border-red-500/30 text-red-500"
+              }`}
           >
             {quote.requiredApprovalLevel === "NONE" ? "Auto-Approved" : quote.requiredApprovalLevel}
           </Badge>

@@ -5,11 +5,17 @@ import {
   recordPaymentController,
   modifySubscriptionSeatsController,
   cancelSubscriptionController,
+  listInvoicesController,
+  getInvoiceByIdController,
+  getInvoicePrintHtmlController,
+  exportInvoicesCsvController,
 } from "../controllers/billing.controller";
 import { requireAuth, requireRole } from "../middlewares/auth";
 import {
   recordPaymentSchema,
   modifySeatsSchema,
+  listInvoicesQuerySchema,
+  exportInvoicesQuerySchema,
 } from "../validators/billing.validator";
 
 export const billingRoutes = new OpenAPIHono();
@@ -103,6 +109,64 @@ const cancelSubscriptionRoute = createRoute({
   },
 });
 
+const listInvoicesRoute = createRoute({
+  method: "get",
+  path: "/invoices",
+  tags: ["Billing"],
+  summary: "List all invoices across accounts with financial receivables summary and filters",
+  request: {
+    query: listInvoicesQuerySchema,
+  },
+  responses: {
+    200: { description: "List of invoices and receivables KPIs" },
+  },
+});
+
+const exportInvoicesRoute = createRoute({
+  method: "get",
+  path: "/invoices/export",
+  tags: ["Billing"],
+  summary: "Export invoices data in CSV format for accounting and auditing",
+  request: {
+    query: exportInvoicesQuerySchema,
+  },
+  responses: {
+    200: { description: "Downloadable CSV file of invoices" },
+  },
+});
+
+const getInvoiceByIdRoute = createRoute({
+  method: "get",
+  path: "/invoices/{id}",
+  tags: ["Billing"],
+  summary: "Get single invoice details with line items and payment ledger",
+  request: {
+    params: z.object({
+      id: z.string().openapi({ param: { name: "id", in: "path" } }),
+    }),
+  },
+  responses: {
+    200: { description: "Invoice details" },
+    404: { description: "Invoice not found" },
+  },
+});
+
+const getInvoicePrintHtmlRoute = createRoute({
+  method: "get",
+  path: "/invoices/{id}/html",
+  tags: ["Billing"],
+  summary: "Get branded, printable HTML invoice template",
+  request: {
+    params: z.object({
+      id: z.string().openapi({ param: { name: "id", in: "path" } }),
+    }),
+  },
+  responses: {
+    200: { description: "Printable HTML invoice page" },
+    404: { description: "Invoice not found" },
+  },
+});
+
 billingRoutes.openapi(getQuoteBillingRoute, async (c) => {
   await requireAuth(c, async () => { });
   return getQuoteBillingController(c);
@@ -127,4 +191,24 @@ billingRoutes.openapi(cancelSubscriptionRoute, async (c) => {
   await requireAuth(c, async () => { });
   await requireRole(["manager", "finance", "admin"])(c, async () => { });
   return cancelSubscriptionController(c);
+});
+
+billingRoutes.openapi(listInvoicesRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return listInvoicesController(c);
+});
+
+billingRoutes.openapi(exportInvoicesRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return exportInvoicesCsvController(c);
+});
+
+billingRoutes.openapi(getInvoiceByIdRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return getInvoiceByIdController(c);
+});
+
+billingRoutes.openapi(getInvoicePrintHtmlRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return getInvoicePrintHtmlController(c);
 });

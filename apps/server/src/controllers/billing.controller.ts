@@ -7,10 +7,16 @@ import {
   recordInvoicePayment,
   modifySubscriptionSeats,
   cancelSubscription,
+  listInvoices,
+  getInvoiceById,
+  generateInvoicePrintHtml,
+  exportInvoicesCsv,
 } from "../services/billing.service";
 import {
   recordPaymentSchema,
   modifySeatsSchema,
+  listInvoicesQuerySchema,
+  exportInvoicesQuerySchema,
 } from "../validators/billing.validator";
 
 export async function getQuoteBillingController(c: Context) {
@@ -65,4 +71,46 @@ export async function cancelSubscriptionController(c: Context) {
   }
   const result = await cancelSubscription(contractId);
   return sendSuccess(c, result, 200, "Subscription cancelled.");
+}
+
+export async function listInvoicesController(c: Context) {
+  const query = c.req.query();
+  const validated = listInvoicesQuerySchema.parse(query);
+  const result = await listInvoices(validated);
+  return sendSuccess(c, result);
+}
+
+export async function getInvoiceByIdController(c: Context) {
+  const id = c.req.param("id");
+  if (!id) {
+    throw new ValidationError("Invoice ID is required.");
+  }
+  const invoice = await getInvoiceById(id);
+  return sendSuccess(c, invoice);
+}
+
+export async function getInvoicePrintHtmlController(c: Context) {
+  const id = c.req.param("id");
+  if (!id) {
+    throw new ValidationError("Invoice ID is required.");
+  }
+  const html = await generateInvoicePrintHtml(id);
+  return c.html(html);
+}
+
+export async function exportInvoicesCsvController(c: Context) {
+  const query = c.req.query();
+  const validated = exportInvoicesQuerySchema.parse(query);
+  const csv = await exportInvoicesCsv({
+    status: validated.status,
+    type: validated.type,
+    customerId: validated.customerId,
+    startDate: validated.startDate,
+    endDate: validated.endDate,
+  });
+
+  return c.text(csv, 200, {
+    "Content-Type": "text/csv; charset=utf-8",
+    "Content-Disposition": 'attachment; filename="dealflow360-invoices.csv"',
+  });
 }

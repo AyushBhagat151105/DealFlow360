@@ -4,6 +4,8 @@ import {
   nudgeDealRepController,
   escalateDealAlertController,
   getSalesReportController,
+  getSalesAnalyticsReportController,
+  exportSalesReportController,
 } from "../controllers/deal-health.controller";
 import { requireAuth, requireRole } from "../middlewares/auth";
 
@@ -59,6 +61,26 @@ const escalateAlertRoute = createRoute({
   },
 });
 
+const getSalesAnalyticsReportRoute = createRoute({
+  method: "get",
+  path: "/reports/analytics",
+  tags: ["Deal Health"],
+  summary: "Get aggregated sales analytics: category revenue share, tier discount ceilings vs actuals, and rep performance",
+  responses: {
+    200: { description: "Aggregated sales analytics report" },
+  },
+});
+
+const exportSalesReportRoute = createRoute({
+  method: "get",
+  path: "/reports/export",
+  tags: ["Deal Health"],
+  summary: "Export quotation performance and deal metrics in CSV or JSON format",
+  responses: {
+    200: { description: "Downloadable CSV or JSON export" },
+  },
+});
+
 dealHealthRoutes.openapi(getOverviewRoute, async (c) => {
   await requireAuth(c, async () => { });
   return getDealHealthOverviewController(c);
@@ -67,6 +89,16 @@ dealHealthRoutes.openapi(getOverviewRoute, async (c) => {
 dealHealthRoutes.openapi(getSalesReportRoute, async (c) => {
   await requireAuth(c, async () => { });
   return getSalesReportController(c);
+});
+
+dealHealthRoutes.openapi(getSalesAnalyticsReportRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return getSalesAnalyticsReportController(c);
+});
+
+dealHealthRoutes.openapi(exportSalesReportRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return exportSalesReportController(c);
 });
 
 dealHealthRoutes.openapi(nudgeRepRoute, async (c) => {

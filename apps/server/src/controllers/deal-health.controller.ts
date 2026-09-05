@@ -6,6 +6,8 @@ import {
   nudgeDealRep,
   escalateDealAlert,
   getSalesReportData,
+  getSalesAnalyticsReport,
+  exportSalesReportCsv,
 } from "../services/deal-health.service";
 
 export async function getDealHealthOverviewController(c: Context) {
@@ -40,6 +42,60 @@ export async function getSalesReportController(c: Context) {
   const repUserId = query.repUserId;
   const status = query.status as never;
   const category = query.category as never;
+
+  const data = await getSalesReportData({
+    startDate,
+    endDate,
+    repUserId,
+    status,
+    category,
+  });
+
+  return sendSuccess(c, data);
+}
+
+export async function getSalesAnalyticsReportController(c: Context) {
+  const query = c.req.query();
+  const startDate = query.startDate ? new Date(query.startDate) : undefined;
+  const endDate = query.endDate ? new Date(query.endDate) : undefined;
+  const repUserId = query.repUserId;
+  const status = query.status as never;
+  const category = query.category as never;
+
+  const report = await getSalesAnalyticsReport({
+    startDate,
+    endDate,
+    repUserId,
+    status,
+    category,
+  });
+
+  return sendSuccess(c, report);
+}
+
+export async function exportSalesReportController(c: Context) {
+  const query = c.req.query();
+  const format = query.format ?? "csv";
+  const startDate = query.startDate ? new Date(query.startDate) : undefined;
+  const endDate = query.endDate ? new Date(query.endDate) : undefined;
+  const repUserId = query.repUserId;
+  const status = query.status as never;
+  const category = query.category as never;
+
+  if (format === "csv") {
+    const csv = await exportSalesReportCsv({
+      startDate,
+      endDate,
+      repUserId,
+      status,
+      category,
+    });
+
+    return c.text(csv, 200, {
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": 'attachment; filename="sales-performance-report.csv"',
+    });
+  }
 
   const data = await getSalesReportData({
     startDate,

@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { httpClient } from "@/lib/http-client";
-import type { DealHealthOverview, SalesReportItem, QuoteStatus, ProductCategory } from "@/lib/api-types";
+import type {
+  DealHealthOverview,
+  SalesReportItem,
+  QuoteStatus,
+  ProductCategory,
+  SalesAnalyticsReport,
+} from "@/lib/api-types";
 
 export function useDealHealthOverview() {
   return useQuery<DealHealthOverview>({
@@ -72,6 +78,26 @@ export function useSalesReport(filters: SalesReportFilters = {}) {
       const queryString = params.toString() ? `?${params.toString()}` : "";
       const response = await httpClient.get<{ data: SalesReportItem[] }>(
         `/api/deal-health/reports/sales${queryString}`
+      );
+      return response.data.data;
+    },
+  });
+}
+
+export function useSalesAnalyticsReport(filters: SalesReportFilters = {}) {
+  return useQuery<SalesAnalyticsReport>({
+    queryKey: ["deal-health", "reports", "analytics", filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.startDate) params.append("startDate", filters.startDate);
+      if (filters.endDate) params.append("endDate", filters.endDate);
+      if (filters.repUserId) params.append("repUserId", filters.repUserId);
+      if (filters.status) params.append("status", filters.status);
+      if (filters.category) params.append("category", filters.category);
+
+      const queryString = params.toString() ? `?${params.toString()}` : "";
+      const response = await httpClient.get<{ data: SalesAnalyticsReport }>(
+        `/api/deal-health/reports/analytics${queryString}`,
       );
       return response.data.data;
     },

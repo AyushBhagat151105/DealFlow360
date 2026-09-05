@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as WorkspaceApprovalsRouteImport } from './routes/workspace/approvals'
 import { Route as WorkspaceBuilderRouteImport } from './routes/workspace/builder'
+import { Route as WorkspaceInvoicesRouteImport } from './routes/workspace/invoices'
 import { Route as WorkspacePipelineRouteImport } from './routes/workspace/pipeline'
 import { Route as PortalQuoteTokenRouteImport } from './routes/portal/quote.$token'
 import { Route as WorkspaceBillingIdRouteImport } from './routes/workspace/billing.$id'
@@ -56,6 +57,11 @@ const WorkspaceBuilderRoute = WorkspaceBuilderRouteImport.update({
   path: '/workspace/builder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkspaceInvoicesRoute = WorkspaceInvoicesRouteImport.update({
+  id: '/workspace/invoices',
+  path: '/workspace/invoices',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkspacePipelineRoute = WorkspacePipelineRouteImport.update({
   id: '/workspace/pipeline',
   path: '/workspace/pipeline',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/success': typeof SuccessRoute
   '/workspace/approvals': typeof WorkspaceApprovalsRoute
   '/workspace/builder': typeof WorkspaceBuilderRoute
+  '/workspace/invoices': typeof WorkspaceInvoicesRoute
   '/workspace/pipeline': typeof WorkspacePipelineRoute
   '/portal/quote/$token': typeof PortalQuoteTokenRoute
   '/workspace/billing/$id': typeof WorkspaceBillingIdRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/success': typeof SuccessRoute
   '/workspace/approvals': typeof WorkspaceApprovalsRoute
   '/workspace/builder': typeof WorkspaceBuilderRoute
+  '/workspace/invoices': typeof WorkspaceInvoicesRoute
   '/workspace/pipeline': typeof WorkspacePipelineRoute
   '/portal/quote/$token': typeof PortalQuoteTokenRoute
   '/workspace/billing/$id': typeof WorkspaceBillingIdRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/success': typeof SuccessRoute
   '/workspace/approvals': typeof WorkspaceApprovalsRoute
   '/workspace/builder': typeof WorkspaceBuilderRoute
+  '/workspace/invoices': typeof WorkspaceInvoicesRoute
   '/workspace/pipeline': typeof WorkspacePipelineRoute
   '/portal/quote/$token': typeof PortalQuoteTokenRoute
   '/workspace/billing/$id': typeof WorkspaceBillingIdRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/workspace/approvals'
     | '/workspace/builder'
+    | '/workspace/invoices'
     | '/workspace/pipeline'
     | '/portal/quote/$token'
     | '/workspace/billing/$id'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/workspace/approvals'
     | '/workspace/builder'
+    | '/workspace/invoices'
     | '/workspace/pipeline'
     | '/portal/quote/$token'
     | '/workspace/billing/$id'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/workspace/approvals'
     | '/workspace/builder'
+    | '/workspace/invoices'
     | '/workspace/pipeline'
     | '/portal/quote/$token'
     | '/workspace/billing/$id'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   SuccessRoute: typeof SuccessRoute
   WorkspaceApprovalsRoute: typeof WorkspaceApprovalsRoute
   WorkspaceBuilderRoute: typeof WorkspaceBuilderRoute
+  WorkspaceInvoicesRoute: typeof WorkspaceInvoicesRoute
   WorkspacePipelineRoute: typeof WorkspacePipelineRoute
   PortalQuoteTokenRoute: typeof PortalQuoteTokenRoute
   WorkspaceBillingIdRoute: typeof WorkspaceBillingIdRoute
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workspace/invoices': {
+      id: '/workspace/invoices'
+      path: '/workspace/invoices'
+      fullPath: '/workspace/invoices'
+      preLoaderRoute: typeof WorkspaceInvoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/workspace/pipeline': {
       id: '/workspace/pipeline'
       path: '/workspace/pipeline'
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuccessRoute: SuccessRoute,
   WorkspaceApprovalsRoute: WorkspaceApprovalsRoute,
   WorkspaceBuilderRoute: WorkspaceBuilderRoute,
+  WorkspaceInvoicesRoute: WorkspaceInvoicesRoute,
   WorkspacePipelineRoute: WorkspacePipelineRoute,
   PortalQuoteTokenRoute: PortalQuoteTokenRoute,
   WorkspaceBillingIdRoute: WorkspaceBillingIdRoute,
