@@ -53,10 +53,10 @@ temp
 
 
 # START Ruler Generated Files
-/.agent/rules/ruler.md
-/.agent/rules/ruler.md.bak
-/.mcp.json
-/.mcp.json.bak
-/AGENTS.md
-/AGENTS.md.bak
+# /.agent/rules/ruler.md
+# /.agent/rules/ruler.md.bak
+# /.mcp.json
+# /.mcp.json.bak
+# /AGENTS.md
+# /AGENTS.md.bak
 # END Ruler Generated Files
