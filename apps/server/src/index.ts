@@ -5,6 +5,13 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { createMarkdownFromOpenApi } from "@scalar/openapi-to-markdown";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { errorHandler } from "./middlewares/error-handler";
+import { catalogRoutes } from "./routes/catalog.routes";
+import { quoteRoutes } from "./routes/quote.routes";
+import { fulfillmentRoutes } from "./routes/fulfillment.routes";
+import { billingRoutes } from "./routes/billing.routes";
+import { portalRoutes } from "./routes/portal.routes";
+import { dealHealthRoutes } from "./routes/deal-health.routes";
 
 const app = new OpenAPIHono();
 
@@ -19,7 +26,16 @@ app.use(
   }),
 );
 
+app.onError(errorHandler);
+
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+app.route("/api/catalog", catalogRoutes);
+app.route("/api/quotes", quoteRoutes);
+app.route("/api/fulfillment", fulfillmentRoutes);
+app.route("/api/billing", billingRoutes);
+app.route("/api/portal", portalRoutes);
+app.route("/api/deal-health", dealHealthRoutes);
 
 app.doc("/doc", {
   openapi: "3.1.0",
@@ -30,7 +46,7 @@ app.doc("/doc", {
   },
   servers: [
     {
-      url: "http://localhost:3001",
+      url: "http://localhost:3000",
       description: "Development Server",
     },
   ],
@@ -68,4 +84,7 @@ app.get("/", (c) => {
   });
 });
 
-export default app;
+export default {
+  port: process.env.PORT ? Number(process.env.PORT) : 3000,
+  fetch: app.fetch,
+};
