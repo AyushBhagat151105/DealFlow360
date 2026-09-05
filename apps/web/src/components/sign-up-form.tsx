@@ -30,13 +30,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             const session = await authClient.getSession();
             const currentUser = ctx?.data?.user ?? session.data?.user;
 
-            let activeRole: UserRole = "rep";
-            for (const roleKey of Object.keys(USER_ROLES) as UserRole[]) {
-              if (value.email.toLowerCase().includes(roleKey)) {
-                activeRole = roleKey;
-                break;
-              }
-            }
+            let activeRole: UserRole | undefined;
 
             try {
               const orgList = await authClient.organization.list();
@@ -52,19 +46,21 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                 }
               }
             } catch {
-              // Ignore organization fetch error
+              activeRole = undefined;
             }
 
-            if (currentUser) {
-              useAuthStore.getState().login(activeRole, {
-                id: currentUser.id,
-                name: currentUser.name,
-                email: currentUser.email,
-                role: activeRole,
-              });
-            } else {
-              useAuthStore.getState().login(activeRole);
+            if (!currentUser || !activeRole) {
+              await authClient.signOut();
+              toast.error("Your account was created but has no organization role yet.");
+              return;
             }
+
+            useAuthStore.getState().login(activeRole, {
+              id: currentUser.id,
+              name: currentUser.name,
+              email: currentUser.email,
+              role: activeRole,
+            });
 
             toast.success("Enterprise account created successfully!");
             navigate({ to: "/workspace/builder" });

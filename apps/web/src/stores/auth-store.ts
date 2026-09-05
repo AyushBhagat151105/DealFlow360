@@ -56,13 +56,8 @@ export interface AuthUser {
 interface AuthState {
   isAuthenticated: boolean;
   user: AuthUser;
-  activeQuoteId: string;
-  activeQuoteToken: string;
   login: (role?: UserRole, customUser?: Partial<AuthUser>) => void;
   logout: () => void;
-  setRole: (role: UserRole) => void;
-  setActiveQuoteId: (id: string) => void;
-  setActiveQuoteToken: (token: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -73,8 +68,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     email: USER_ROLES.rep.email,
     role: "rep",
   },
-  activeQuoteId: "quote_42",
-  activeQuoteToken: "demo-token-acme",
   login: (role = "rep", customUser) => {
     const roleDetails = USER_ROLES[role];
     set({
@@ -90,17 +83,4 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     set({ isAuthenticated: false });
   },
-  setRole: (role) => {
-    const roleDetails = USER_ROLES[role];
-    set((state) => ({
-      user: {
-        ...state.user,
-        role,
-        email: roleDetails.email,
-        name: roleDetails.name,
-      },
-    }));
-  },
-  setActiveQuoteId: (activeQuoteId) => set({ activeQuoteId }),
-  setActiveQuoteToken: (activeQuoteToken) => set({ activeQuoteToken }),
 }));

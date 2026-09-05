@@ -38,7 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Quote } from "@/lib/mock-data";
+import type { Quote } from "@/lib/api-types";
 import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/workspace/approvals")({
@@ -79,13 +79,14 @@ function ApprovalDetailDrawer({
   onReturn: (id: string, reason: string) => void;
 }) {
   const [actionNotes, setActionNotes] = useState("");
+  const { user } = useAuthStore();
   const approveMutation = useApproveQuote();
   const rejectMutation = useRejectQuote();
   const returnMutation = useReturnQuoteForRevision();
 
   const handleApprove = () => {
     approveMutation.mutate(
-      { quoteId: quote.id, notes: actionNotes },
+      { quoteId: quote.id, notes: actionNotes, actorName: user.name, actorRole: user.role === "finance" || user.role === "admin" ? user.role : "manager" },
       {
         onSuccess: () => {
           toast.success(`Quotation ${quote.quoteNumber} approved!`);
@@ -139,32 +140,6 @@ function ApprovalDetailDrawer({
     const margin = lineSubtotal > 0 ? ((lineSubtotal - lineCost) / lineSubtotal) * 100 : 0;
     return margin < l.minMarginThreshold;
   });
-
-  // Mock audit trail
-  const auditTrail = [
-    {
-      id: "evt_1",
-      event: "Quote Created",
-      actor: "Sales Rep",
-      timestamp: quote.createdAt,
-    },
-    {
-      id: "evt_2",
-      event: "Submitted for Approval",
-      actor: "Sales Rep",
-      timestamp: quote.updatedAt,
-    },
-    ...(quote.status === "PENDING_APPROVAL"
-      ? []
-      : [
-          {
-            id: "evt_3",
-            event: `Status: ${quote.status}`,
-            actor: "Manager",
-            timestamp: new Date().toISOString(),
-          },
-        ]),
-  ];
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -298,20 +273,20 @@ function ApprovalDetailDrawer({
 
           <TabsContent value="audit" className="pt-3 space-y-2">
             <div className="space-y-2">
-              {auditTrail.map((event, idx) => (
+              {quote.auditLogs.map((event, idx) => (
                 <div key={event.id} className="flex items-start gap-3">
                   <div className="flex flex-col items-center">
                     <div className="h-6 w-6 rounded-full bg-muted border border-border flex items-center justify-center">
                       <History className="h-3 w-3 text-muted-foreground" />
                     </div>
-                    {idx < auditTrail.length - 1 && (
+                    {idx < quote.auditLogs.length - 1 && (
                       <div className="flex-1 w-px bg-border mt-1 h-6" />
                     )}
                   </div>
                   <div className="pb-4 text-xs">
-                    <p className="font-semibold text-foreground">{event.event}</p>
+                    <p className="font-semibold text-foreground">{event.action.replaceAll("_", " ")}</p>
                     <p className="text-muted-foreground">
-                      {event.actor} • {new Date(event.timestamp).toLocaleString()}
+                      {event.actorName} • {new Date(event.createdAt).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -387,7 +362,8 @@ function ApprovalDetailDrawer({
 
 function ApprovalsComponent() {
   const { user } = useAuthStore();
-  const { data: quotes = [] } = useQuotes();
+  const quotesQuery = useQuotes();
+  const quotes = quotesQuery.data ?? [];
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("PENDING_APPROVAL");
 
@@ -397,6 +373,14 @@ function ApprovalsComponent() {
 
   const canApprove =
     user.role === "manager" || user.role === "finance" || user.role === "admin";
+
+  if (quotesQuery.isLoading) {
+    return <div className="flex min-h-full items-center justify-center bg-background p-6 text-sm text-muted-foreground">Loading approvals...</div>;
+  }
+
+  if (quotesQuery.isError) {
+    return <div className="flex min-h-full flex-col items-center justify-center gap-3 bg-background p-6 text-sm text-muted-foreground"><span>Approvals could not be loaded.</span><Button variant="outline" onClick={() => quotesQuery.refetch()}>Try again</Button></div>;
+  }
 
   return (
     <div className="h-full overflow-y-auto">

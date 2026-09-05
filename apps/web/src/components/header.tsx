@@ -5,16 +5,14 @@ import {
   CheckCircle2,
   Activity,
   ShieldCheck,
-  ExternalLink,
   Zap,
-  UserCheck,
   ChevronDown,
   LogOut,
   User,
 } from "lucide-react";
 import { ModeToggle } from "./mode-toggle";
 import { authClient } from "@/lib/auth-client";
-import { useAuthStore, USER_ROLES, type UserRole } from "@/stores/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,8 +29,7 @@ export default function Header() {
   const navigate = useNavigate();
   const currentPath = routerState.location.pathname;
   const { data: session } = authClient.useSession();
-  const { user, setRole, activeQuoteToken, logout } = useAuthStore();
-  const activeRoleInfo = USER_ROLES[user.role];
+  const { user, logout } = useAuthStore();
 
   const displayUserEmail = session?.user?.email || user.email;
   const displayUserName = session?.user?.name || user.name;
@@ -41,14 +38,11 @@ export default function Header() {
     { to: "/workspace/builder", label: "Quotations", icon: FileText },
     { to: "/workspace/pipeline", label: "Pipeline", icon: Kanban },
     { to: "/workspace/approvals", label: "Approvals", icon: CheckCircle2 },
+    { to: "/workspace/fulfillment", label: "Fulfillment", icon: Activity },
+    { to: "/workspace/billing", label: "Billing", icon: Activity },
     { to: "/dashboard", label: "Deal Health", icon: Activity },
     { to: "/admin", label: "Admin Config", icon: ShieldCheck },
   ];
-
-  const handleOpenCustomerPortal = () => {
-    const portalUrl = `/portal/quote/${activeQuoteToken}`;
-    window.open(portalUrl, "_blank");
-  };
 
   const handleSignOut = () => {
     authClient.signOut({
@@ -104,52 +98,6 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Button
-            variant="outline"
-            size="xs"
-            onClick={handleOpenCustomerPortal}
-            className="h-8 gap-1.5 text-xs font-medium border-sky-500/40 text-sky-300 bg-sky-500/5 hover:bg-sky-500/10"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Customer Portal</span>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="h-8 gap-1.5 px-2.5 bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 inline-flex items-center justify-center rounded-md text-xs font-medium cursor-pointer">
-              <span className={`h-2 w-2 rounded-full ${activeRoleInfo.avatarColor}`} />
-              <span className="font-semibold hidden sm:inline">{activeRoleInfo.name}</span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 bg-[#101923] text-foreground border border-slate-700">
-              <DropdownMenuLabel className="text-slate-300 text-[10px] uppercase tracking-wider">
-                Role & Permission View
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-slate-700" />
-              {(Object.keys(USER_ROLES) as UserRole[]).map((roleKey) => {
-                const item = USER_ROLES[roleKey];
-                const isSelected = user.role === roleKey;
-                return (
-                  <DropdownMenuItem
-                    key={roleKey}
-                    onClick={() => setRole(roleKey)}
-                    className="flex flex-col items-start gap-0.5 py-2 cursor-pointer text-white hover:bg-slate-800"
-                  >
-                    <div className="flex w-full items-center justify-between font-medium text-xs">
-                      <span className="flex items-center gap-2">
-                        <span className={`h-2 w-2 rounded-full ${item.avatarColor}`} />
-                        {item.name}
-                      </span>
-                      {isSelected && <UserCheck className="h-3.5 w-3.5 text-emerald-400" />}
-                    </div>
-                    <span className="text-[10px] text-slate-400 pl-4">
-                      {item.description}
-                    </span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           <ModeToggle />
 
           <DropdownMenu>

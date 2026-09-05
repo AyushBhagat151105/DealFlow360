@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { httpClient } from "@/lib/http-client";
-import { MOCK_QUOTES, type Quote, type QuoteLine } from "@/lib/mock-data";
+import type { CustomerTier, ProductCategory } from "@/lib/api-types";
 
 export interface SanitizedQuoteLine {
   id: string;
   productId: string;
   productName: string;
-  category: "HARDWARE" | "SERVICE" | "SUBSCRIPTION";
+  category: ProductCategory;
   quantity: number;
   unitPrice: number;
   discountPercent: number;
@@ -17,16 +17,9 @@ export interface SanitizedQuote {
   id: string;
   quoteNumber: string;
   customerName: string;
-  customerTier: "BRONZE" | "SILVER" | "GOLD";
+  customerTier: CustomerTier;
   notes: string;
-  status:
-    | "DRAFT"
-    | "PENDING_APPROVAL"
-    | "APPROVED"
-    | "UNDER_NEGOTIATION"
-    | "CONFIRMED"
-    | "REJECTED"
-    | "FULFILLED";
+  status: string;
   totalSubtotal: number;
   createdAt: string;
   updatedAt: string;
@@ -41,35 +34,46 @@ export interface SanitizedQuote {
   }>;
 }
 
-export function sanitizeQuoteForPortal(quote: Quote): SanitizedQuote {
+function normalizePortalQuote(value: unknown): SanitizedQuote {
+  const raw = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const rawLines = Array.isArray(raw.lines) ? raw.lines : [];
+  const rawComments = Array.isArray(raw.negotiationComments) ? raw.negotiationComments : [];
+
   return {
-    id: quote.id,
-    quoteNumber: quote.quoteNumber,
-    customerName: quote.customerName,
-    customerTier: quote.customerTier,
-    notes: quote.notes,
-    status: quote.status,
-    totalSubtotal: quote.totalSubtotal,
-    createdAt: quote.createdAt,
-    updatedAt: quote.updatedAt,
-    lines: quote.lines.map((line: QuoteLine) => ({
-      id: line.id,
-      productId: line.productId,
-      productName: line.productName,
-      category: line.category,
-      quantity: line.quantity,
-      unitPrice: line.unitPrice,
-      discountPercent: line.discountPercent,
-      lineSubtotal: line.lineSubtotal,
-    })),
-    comments: [
-      {
-        id: "cmt_01",
-        authorName: "DealFlow Sales Rep",
-        comment: "Please review the proposed volume discount structure for Q1 deployment.",
-        createdAt: quote.createdAt,
-      },
-    ],
+    id: typeof raw.id === "string" ? raw.id : "",
+    quoteNumber: typeof raw.quoteNumber === "string" ? raw.quoteNumber : "",
+    customerName: typeof raw.customerName === "string" ? raw.customerName : "",
+    customerTier: raw.customerTier === "GOLD" || raw.customerTier === "SILVER" ? raw.customerTier : "BRONZE",
+    notes: typeof raw.notes === "string" ? raw.notes : "",
+    status: typeof raw.status === "string" ? raw.status : "",
+    totalSubtotal: typeof raw.totalSubtotal === "number" ? raw.totalSubtotal : typeof raw.totalAmount === "number" ? raw.totalAmount : 0,
+    createdAt: typeof raw.createdAt === "string" ? raw.createdAt : "",
+    updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : "",
+    lines: rawLines.map((line) => {
+      const item = line && typeof line === "object" ? (line as Record<string, unknown>) : {};
+      const category = item.category === "SERVICE" || item.category === "SUBSCRIPTION" ? item.category : "HARDWARE";
+      return {
+        id: typeof item.id === "string" ? item.id : "",
+        productId: typeof item.productId === "string" ? item.productId : "",
+        productName: typeof item.productName === "string" ? item.productName : "",
+        category,
+        quantity: typeof item.quantity === "number" ? item.quantity : 0,
+        unitPrice: typeof item.unitPrice === "number" ? item.unitPrice : 0,
+        discountPercent: typeof item.discountPercent === "number" ? item.discountPercent : 0,
+        lineSubtotal: typeof item.lineSubtotal === "number" ? item.lineSubtotal : typeof item.lineTotal === "number" ? item.lineTotal : 0,
+      };
+    }),
+    comments: rawComments.map((comment) => {
+      const item = comment && typeof comment === "object" ? (comment as Record<string, unknown>) : {};
+      return {
+        id: typeof item.id === "string" ? item.id : "",
+        quotationLineId: typeof item.quotationLineId === "string" ? item.quotationLineId : typeof item.lineId === "string" ? item.lineId : null,
+        authorName: typeof item.authorName === "string" ? item.authorName : typeof item.author === "string" ? item.author : "",
+        comment: typeof item.comment === "string" ? item.comment : "",
+        createdAt: typeof item.createdAt === "string" ? item.createdAt : "",
+        proposedDiscountPercent: typeof item.proposedDiscountPercent === "number" ? item.proposedDiscountPercent : undefined,
+      };
+    }),
   };
 }
 
@@ -77,19 +81,10 @@ export function usePortalQuote(token: string) {
   return useQuery<SanitizedQuote>({
     queryKey: ["portal", "quote", token],
     queryFn: async () => {
-      try {
-        const response = await httpClient.get(`/api/portal/quote/${token}`);
-        if (response.data?.success && response.data.data) {
-          return response.data.data;
-        }
-      } catch {
-        // Fallback to mock data matching token or first mock quote
-      }
-
-      const match = MOCK_QUOTES.find(
-        (q) => q.portalAccessToken === token || q.id === token || q.quoteNumber === token
+      const response = await httpClient.get<{ data: unknown }>(
+        `/api/portal/quote/${token}`,
       );
-      return sanitizeQuoteForPortal(match || MOCK_QUOTES[0]);
+      return normalizePortalQuote(response.data.data);
     },
     enabled: Boolean(token),
   });
@@ -105,12 +100,8 @@ export function useSubmitPortalComment(token: string) {
       comment: string;
       proposedDiscountPercent?: number;
     }) => {
-      try {
-        const response = await httpClient.post(`/api/portal/quote/${token}/comment`, data);
-        return response.data;
-      } catch {
-        return { success: true, message: "Comment recorded successfully" };
-      }
+      const response = await httpClient.post(`/api/portal/quote/${token}/comment`, data);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["portal", "quote", token] });
@@ -130,12 +121,8 @@ export function useSubmitPortalCounter(token: string) {
       }>;
       comment?: string;
     }) => {
-      try {
-        const response = await httpClient.post(`/api/portal/quote/${token}/counter`, data);
-        return response.data;
-      } catch {
-        return { success: true, message: "Counter-offer recorded successfully" };
-      }
+      const response = await httpClient.post(`/api/portal/quote/${token}/counter`, data);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["portal", "quote", token] });
@@ -148,12 +135,8 @@ export function useConfirmPortalQuote(token: string) {
 
   return useMutation({
     mutationFn: async (data: { customerSignature?: string }) => {
-      try {
-        const response = await httpClient.post(`/api/portal/quote/${token}/confirm`, data);
-        return response.data;
-      } catch {
-        return { success: true, message: "Quotation confirmed successfully" };
-      }
+      const response = await httpClient.post(`/api/portal/quote/${token}/confirm`, data);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["portal", "quote", token] });

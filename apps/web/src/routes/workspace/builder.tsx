@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Plus,
@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProducts, useCustomers } from "@/hooks/use-catalog";
-import { useSubmitQuoteForApproval } from "@/hooks/use-quotes";
+import { useCreateQuote, useQuotePreview, useSubmitQuoteForApproval } from "@/hooks/use-quotes";
 import { UpsellDrawer, UpsellDrawerContent } from "@/components/upsell-drawer";
 import { LiveMarginIndicator } from "@/components/live-margin-indicator";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import type { Customer, Product, UpsellSuggestion } from "@/lib/mock-data";
+import type { Customer, Product, UpsellSuggestion } from "@/lib/api-types";
 import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/workspace/builder")({
@@ -163,6 +163,12 @@ function BuilderComponent() {
   const navigate = useNavigate();
   const { data: products = [] } = useProducts();
   const { data: customers = [] } = useCustomers();
+  const createQuoteMutation = useCreateQuote();
+  const {
+    data: preview,
+    mutate: previewQuote,
+    reset: resetPreview,
+  } = useQuotePreview();
   const submitMutation = useSubmitQuoteForApproval();
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -179,15 +185,35 @@ function BuilderComponent() {
     );
   }, [products, productSearch]);
 
-  const blendedMargin = useMemo(() => calcBlendedMargin(cart), [cart]);
-  const { score: riskScore, level: approvalLevel } = useMemo(
+  const localBlendedMargin = useMemo(() => calcBlendedMargin(cart), [cart]);
+  const localRisk = useMemo(
     () => calcBlendedRiskScore(cart, selectedCustomer),
     [cart, selectedCustomer]
   );
+  const blendedMargin = preview?.totalMarginPercent ?? localBlendedMargin;
+  const riskScore = preview?.blendedRiskScore ?? localRisk.score;
+  const approvalLevel = preview?.requiredApprovalLevel ?? localRisk.level;
   const totalSubtotal = useMemo(
     () => cart.reduce((s, l) => s + calcLineSubtotal(l), 0),
     [cart]
   );
+
+  useEffect(() => {
+    if (!selectedCustomer || cart.length === 0) {
+      resetPreview();
+      return;
+    }
+
+    previewQuote({
+      customerId: selectedCustomer.id,
+      lines: cart.map((line) => ({
+        productId: line.productId,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        discountPercent: line.discountPercent,
+      })),
+    });
+  }, [cart, previewQuote, resetPreview, selectedCustomer]);
 
   const addProductToCart = (product: Product) => {
     setCart((prev) => {
@@ -272,18 +298,40 @@ function BuilderComponent() {
     setSubmitDialogOpen(true);
   };
 
-  const handleConfirmSubmit = () => {
-    submitMutation.mutate("new-quote", {
-      onSuccess: () => {
-        toast.success("Quotation submitted for approval!", {
-          description: approvalLevel === "NONE"
-            ? "Auto-approved — no manual review needed."
-            : `Routed to ${approvalLevel === "FINANCE" ? "Finance" : "Sales Manager"} for review.`,
-        });
-        setSubmitDialogOpen(false);
-        navigate({ to: "/workspace/approvals" });
-      },
-    });
+  const handleConfirmSubmit = async () => {
+    if (!selectedCustomer || cart.length === 0) return;
+
+    try {
+      const quote = await createQuoteMutation.mutateAsync({
+        customerId: selectedCustomer.id,
+        notes: notes || undefined,
+        lines: cart.map((line) => ({
+          productId: line.productId,
+          quantity: line.quantity,
+          unitPrice: line.unitPrice,
+          discountPercent: line.discountPercent,
+        })),
+      });
+
+      await submitMutation.mutateAsync({
+        quoteId: quote.id,
+        actorName: user.name,
+        actorRole: user.role,
+      });
+
+      toast.success("Quote sent for review", {
+        description:
+          approvalLevel === "NONE"
+            ? "Approved automatically because it is within the allowed limits."
+            : `Sent to ${approvalLevel === "FINANCE" ? "Finance" : "a sales manager"} for review.`,
+      });
+      setSubmitDialogOpen(false);
+      navigate({ to: "/workspace/approvals" });
+    } catch {
+      toast.error("We could not submit the quote", {
+        description: "Check the quote details and try again.",
+      });
+    }
   };
 
   const cartProductIds = cart.map((l) => l.productId);

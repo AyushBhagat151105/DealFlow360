@@ -1,7 +1,7 @@
 import { Sparkles, Plus, TrendingUp, Tag, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUpsellSuggestions } from "@/hooks/use-upsell-suggestions";
-import { type UpsellSuggestion } from "@/lib/mock-data";
+import type { UpsellSuggestion } from "@/lib/api-types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

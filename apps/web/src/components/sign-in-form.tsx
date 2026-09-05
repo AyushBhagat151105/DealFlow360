@@ -28,13 +28,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
             const session = await authClient.getSession();
             const currentUser = ctx?.data?.user ?? session.data?.user;
 
-            let activeRole: UserRole = "rep";
-            for (const roleKey of Object.keys(USER_ROLES) as UserRole[]) {
-              if (value.email.toLowerCase().includes(roleKey)) {
-                activeRole = roleKey;
-                break;
-              }
-            }
+            let activeRole: UserRole | undefined;
 
             try {
               const orgList = await authClient.organization.list();
@@ -50,19 +44,21 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
                 }
               }
             } catch {
-              // Ignore organization fetch error
+              activeRole = undefined;
             }
 
-            if (currentUser) {
-              useAuthStore.getState().login(activeRole, {
-                id: currentUser.id,
-                name: currentUser.name,
-                email: currentUser.email,
-                role: activeRole,
-              });
-            } else {
-              useAuthStore.getState().login(activeRole);
+            if (!currentUser || !activeRole) {
+              await authClient.signOut();
+              toast.error("Your account is not assigned to an organization role yet.");
+              return;
             }
+
+            useAuthStore.getState().login(activeRole, {
+              id: currentUser.id,
+              name: currentUser.name,
+              email: currentUser.email,
+              role: activeRole,
+            });
 
             toast.success("Signed in successfully");
             navigate({ to: "/workspace/builder" });

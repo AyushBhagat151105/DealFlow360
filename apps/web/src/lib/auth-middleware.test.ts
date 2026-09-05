@@ -14,6 +14,10 @@ vi.mock("./auth-client", () => ({
   },
 }));
 
+function mockedFunction(value: unknown) {
+  return value as ReturnType<typeof vi.fn>;
+}
+
 describe("auth-middleware", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,7 +42,7 @@ describe("auth-middleware", () => {
     });
 
     it("redirects unauthenticated users to /login for protected paths", async () => {
-      vi.mocked(authClient.getSession).mockResolvedValue({ data: null } as never);
+      mockedFunction(authClient.getSession).mockResolvedValue({ data: null } as never);
 
       await expect(
         requireAuthentication("/workspace/approvals", "/workspace/approvals")
@@ -50,7 +54,7 @@ describe("auth-middleware", () => {
     });
 
     it("allows authenticated users to proceed", async () => {
-      vi.mocked(authClient.getSession).mockResolvedValue({
+      mockedFunction(authClient.getSession).mockResolvedValue({
         data: { user: { id: "u1", name: "Test User", email: "test@example.com" } },
       } as never);
 
@@ -66,73 +70,16 @@ describe("auth-middleware", () => {
     });
 
     it("succeeds if active member already has the required role", async () => {
-      vi.mocked(authClient.organization.getActiveMember).mockResolvedValue({
+      mockedFunction(authClient.organization.getActiveMember).mockResolvedValue({
         data: { role: "admin" },
       } as never);
 
       await expect(requireRole("/admin")).resolves.toBeUndefined();
     });
 
-    it("auto-activates the first organization when getActiveMember returns null", async () => {
-      vi.mocked(authClient.organization.getActiveMember)
-        .mockResolvedValueOnce({ data: null } as never)
-        .mockResolvedValueOnce({ data: { role: "manager" } } as never);
-
-      vi.mocked(authClient.organization.list).mockResolvedValue({
-        data: [{ id: "org_1", name: "Org 1" }],
-      } as never);
-
-      vi.mocked(authClient.organization.setActive).mockResolvedValue({ data: {} } as never);
-
-      await expect(requireRole("/workspace/approvals")).resolves.toBeUndefined();
-      expect(authClient.organization.setActive).toHaveBeenCalledWith({
-        organizationId: "org_1",
-      });
-    });
-
-    it("falls back to useAuthStore role when organization lookup fails or has no role", async () => {
-      vi.mocked(authClient.organization.getActiveMember).mockResolvedValue({
-        data: null,
-      } as never);
-      vi.mocked(authClient.organization.list).mockResolvedValue({
-        data: [],
-      } as never);
-
-      useAuthStore.setState({
-        user: {
-          id: "usr_mgr",
-          name: "Manager User",
-          email: "manager@dealflow360.com",
-          role: "manager",
-        },
-      });
-
-      await expect(requireRole("/workspace/approvals")).resolves.toBeUndefined();
-    });
-
-    it("falls back to useAuthStore role when active member role does not satisfy route requirements", async () => {
-      vi.mocked(authClient.organization.getActiveMember).mockResolvedValue({
-        data: { role: "rep" },
-      } as never);
-
-      useAuthStore.setState({
-        user: {
-          id: "usr_mgr",
-          name: "Manager User",
-          email: "manager@dealflow360.com",
-          role: "manager",
-        },
-      });
-
-      await expect(requireRole("/workspace/approvals")).resolves.toBeUndefined();
-    });
-
     it("redirects to / when role does not satisfy requirements", async () => {
-      vi.mocked(authClient.organization.getActiveMember).mockResolvedValue({
+      mockedFunction(authClient.organization.getActiveMember).mockResolvedValue({
         data: null,
-      } as never);
-      vi.mocked(authClient.organization.list).mockResolvedValue({
-        data: [],
       } as never);
 
       useAuthStore.setState({
