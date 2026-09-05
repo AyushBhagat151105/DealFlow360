@@ -161,7 +161,6 @@ export async function submitPortalCounterOffer(
     updatedCalculationInputs,
   );
 
-  return prisma.$transaction(async (tx) => {
   const updatedQuote = await prisma.$transaction(async (tx) => {
     for (const line of quote.lines) {
       const proposed = discountMap.get(line.id);
@@ -189,7 +188,6 @@ export async function submitPortalCounterOffer(
       : QuotationStatus.UNDER_NEGOTIATION;
     const nextStep = requiresApproval ? "SALES_MANAGER" : null;
 
-    const updatedQuote = await tx.quotation.update({
     const result = await tx.quotation.update({
       where: { id: quote.id },
       data: {
@@ -227,7 +225,6 @@ export async function submitPortalCounterOffer(
       },
     });
 
-    return updatedQuote;
     return result;
   });
 
@@ -280,7 +277,6 @@ export async function confirmPortalQuote(token: string) {
     data: { status: QuotationStatus.CONFIRMED },
   });
 
-  await generateOrderInvoicesAndSubscriptions(quote.id);
   const billingResult = await generateOrderInvoicesAndSubscriptions(quote.id);
 
   await sendOrderConfirmationReceipt({
