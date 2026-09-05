@@ -30,6 +30,12 @@ async function main() {
   await prisma.categoryDiscountCeiling.deleteMany();
   await prisma.customerTierConfig.deleteMany();
   await prisma.customer.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.member.deleteMany();
+  await prisma.invitation.deleteMany();
+  await prisma.organization.deleteMany();
+  await prisma.user.deleteMany();
 
   await prisma.customerTierConfig.createMany({
     data: [
@@ -118,6 +124,12 @@ async function main() {
 
     if (existingUser) {
       seededUserMap[u.role] = existingUser.id;
+
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: { emailVerified: true },
+      });
+
       const member = await prisma.member.findFirst({
         where: { organizationId: org.id, userId: existingUser.id },
       });
@@ -131,6 +143,16 @@ async function main() {
           },
         });
       }
+
+      await prisma.session.create({
+        data: {
+          id: `sess_${existingUser.id}`,
+          userId: existingUser.id,
+          token: `dev_${u.role}_token`,
+          activeOrganizationId: org.id,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+      });
     }
   }
 
