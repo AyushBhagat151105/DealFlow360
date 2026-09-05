@@ -20,6 +20,7 @@ import {
   useEscalateDealAlert,
   useSalesReport,
 } from "@/hooks/use-deal-health";
+import { formatCurrency } from "@/lib/currency";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -140,7 +141,7 @@ export function DealHealthPanel() {
           <CardContent className="p-4">
             <span className="text-xs text-muted-foreground block font-medium">Active Pipeline Value</span>
             <span className="text-2xl font-black font-mono text-foreground">
-              ${kpis.activePipelineValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              {formatCurrency(kpis.activePipelineValue, { maximumFractionDigits: 0 })}
             </span>
             <p className="text-[10px] text-muted-foreground pt-1">Total value across non-closed deals</p>
           </CardContent>
@@ -170,7 +171,7 @@ export function DealHealthPanel() {
           <CardContent className="p-4">
             <span className="text-xs text-muted-foreground block font-medium">Margin Value at Risk</span>
             <span className="text-2xl font-black font-mono text-destructive">
-              ${kpis.marginAtRisk.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              {formatCurrency(kpis.marginAtRisk, { maximumFractionDigits: 0 })}
             </span>
             <p className="text-[10px] text-muted-foreground pt-1">Quotes with positive risk score</p>
           </CardContent>
@@ -330,8 +331,8 @@ export function DealHealthPanel() {
                     <TableHead className="text-xs font-bold">Customer</TableHead>
                     <TableHead className="text-xs font-bold">Tier</TableHead>
                     <TableHead className="text-xs font-bold text-center">Status</TableHead>
-                    <TableHead className="text-xs font-bold text-right">Value ($)</TableHead>
-                    <TableHead className="text-xs font-bold text-right">Cost ($)</TableHead>
+                    <TableHead className="text-xs font-bold text-right">Value (₹)</TableHead>
+                    <TableHead className="text-xs font-bold text-right">Cost (₹)</TableHead>
                     <TableHead className="text-xs font-bold text-right">Margin (%)</TableHead>
                     <TableHead className="text-xs font-bold text-center">Risk Score</TableHead>
                   </TableRow>
@@ -352,10 +353,10 @@ export function DealHealthPanel() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs">
-                        ${rpt.totalAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        {formatCurrency(rpt.totalAmount)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                        ${rpt.totalCost.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        {formatCurrency(rpt.totalCost)}
                       </TableCell>
                       <TableCell className="text-right font-mono font-bold text-xs text-emerald-500">
                         {rpt.totalMarginPercent.toFixed(1)}%

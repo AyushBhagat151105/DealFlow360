@@ -13,11 +13,7 @@ export const Route = createFileRoute("/dashboard")({
   component: DealHealthPage,
 });
 
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+import { currencyFormatterNoDecimals as currency } from "@/lib/currency";
 
 function DealHealthPage() {
   const overviewQuery = useDealHealthOverview();

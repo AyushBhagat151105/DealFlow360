@@ -68,11 +68,7 @@ export const Route = createFileRoute("/workspace/builder")({
   component: BuilderComponent,
 });
 
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 2,
-});
+import { currencyFormatter } from "@/lib/currency";
 
 const STATUS_BADGE_STYLES: Record<string, string> = {
   DRAFT: "bg-whisper-gray text-forest-ink border-pencil-gray/40",
@@ -535,10 +531,10 @@ function BuilderComponent() {
                         <Badge
                           variant="outline"
                           className={`font-mono text-[10px] border ${quote.blendedRiskScore === 0
-                              ? "border-sticky-note-mint/60 text-forest-ink bg-sticky-note-mint"
-                              : quote.blendedRiskScore <= 10
-                                ? "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/40"
-                                : "border-terracotta/30 text-terracotta bg-terracotta/10"
+                            ? "border-sticky-note-mint/60 text-forest-ink bg-sticky-note-mint"
+                            : quote.blendedRiskScore <= 10
+                              ? "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/40"
+                              : "border-terracotta/30 text-terracotta bg-terracotta/10"
                             }`}
                         >
                           Risk: {quote.blendedRiskScore}

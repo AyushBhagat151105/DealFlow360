@@ -45,10 +45,7 @@ export const Route = createFileRoute("/workspace/invoices")({
   component: InvoicesPage,
 });
 
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
+import { currencyFormatter as currency } from "@/lib/currency";
 
 const TYPE_BADGES: Record<string, string> = {
   ONE_TIME: "bg-whisper-gray text-forest-ink border-pencil-gray/40",
@@ -460,7 +457,7 @@ function InvoicesPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Payment Amount ($)</Label>
+              <Label className="text-xs font-medium">Payment Amount (₹)</Label>
               <Input
                 type="number"
                 step="0.01"

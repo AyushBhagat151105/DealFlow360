@@ -39,7 +39,7 @@ export const Route = createFileRoute("/workspace/billing/$id")({
   component: BillingComponent,
 });
 
-const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+import { currencyFormatter as currency } from "@/lib/currency";
 
 const INVOICE_TYPE_BADGES: Record<string, string> = {
   ONE_TIME: "bg-whisper-gray text-forest-ink border-pencil-gray/40",
