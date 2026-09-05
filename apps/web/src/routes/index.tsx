@@ -14,15 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useDemoStore } from "@/stores/demo-store";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
 });
 
 function HomeComponent() {
-  const { activeQuoteToken } = useDemoStore();
-
   const features = [
     {
       to: "/workspace/builder",
@@ -85,15 +82,16 @@ function HomeComponent() {
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => window.open(`/portal/quote/${activeQuoteToken}`, "_blank")}
-              className="gap-2 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
-            >
-              <Layers className="h-4 w-4" />
-              Live Customer Portal View
-            </Button>
+            <Link to="/login">
+              <Button
+                variant="outline"
+                size="lg"
+                className="gap-2 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
+              >
+                <Layers className="h-4 w-4" />
+                Open Workspace
+              </Button>
+            </Link>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import { useAuthStore, USER_ROLES } from "./auth-store";
 describe("useAuthStore", () => {
   beforeEach(() => {
     useAuthStore.setState({
-      isAuthenticated: true,
+      isAuthenticated: false,
       user: {
         id: "usr_rep_01",
         name: "Sales Representative",
@@ -16,9 +16,9 @@ describe("useAuthStore", () => {
     });
   });
 
-  it("should initialize with default rep role and authenticated state", () => {
+  it("should initialize logged out until the user signs in", () => {
     const state = useAuthStore.getState();
-    expect(state.isAuthenticated).toBe(true);
+    expect(state.isAuthenticated).toBe(false);
     expect(state.user.role).toBe("rep");
     expect(state.activeQuoteId).toBe("quote_42");
     expect(state.activeQuoteToken).toBe("demo-token-acme");

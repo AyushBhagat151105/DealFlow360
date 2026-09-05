@@ -8,7 +8,9 @@ export function createHttpClient(baseURL = serverBaseURL) {
     baseURL,
     headers: { "Content-Type": "application/json" },
     timeout: 10_000,
+    // withCredentials: true,
   });
 }
 
 export const httpClient = createHttpClient();
+  

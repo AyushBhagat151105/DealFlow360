@@ -4,14 +4,12 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
-import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
 
   const form = useForm({
     defaultValues: {
@@ -27,16 +25,13 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
           name: value.name,
         },
         {
-          onSuccess: () => {
-            login("rep", { email: value.email, name: value.name });
+          onSuccess: async () => {
+            await authClient.getSession();
             toast.success("Enterprise account created successfully!");
             navigate({ to: "/workspace/builder" });
           },
-          onError: (ctx) => {
-            // Fallback for development if backend server is offline
-            login("rep", { email: value.email, name: value.name });
-            toast.info("Development Mode: Account created successfully");
-            navigate({ to: "/workspace/builder" });
+          onError: (error) => {
+            toast.error(error?.error?.message || "Account creation failed. Please try again.");
           },
         }
       );
@@ -53,9 +48,9 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
   return (
     <div className="w-full space-y-4">
       <div className="space-y-1 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-foreground">Create Account</h2>
+        <h2 className="text-xl font-bold tracking-tight text-foreground">Create your workspace</h2>
         <p className="text-xs text-muted-foreground">
-          Register a new organization workspace profile
+          Set up your organization account in minutes
         </p>
       </div>
 

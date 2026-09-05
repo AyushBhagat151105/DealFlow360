@@ -4,14 +4,12 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
-import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
 
   const form = useForm({
     defaultValues: {
@@ -25,16 +23,13 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           password: value.password,
         },
         {
-          onSuccess: () => {
-            login("rep", { email: value.email, name: value.email.split("@")[0] });
+          onSuccess: async () => {
+            await authClient.getSession();
             toast.success("Signed in successfully");
             navigate({ to: "/workspace/builder" });
           },
-          onError: (ctx) => {
-            // Fallback for development if backend server is offline
-            login("rep", { email: value.email, name: value.email.split("@")[0] });
-            toast.info("Development Mode: Signed in successfully");
-            navigate({ to: "/workspace/builder" });
+          onError: (error) => {
+            toast.error(error?.error?.message || "Sign in failed. Please check your credentials.");
           },
         }
       );
@@ -50,9 +45,9 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
   return (
     <div className="w-full space-y-4">
       <div className="space-y-1 text-center">
-        <h2 className="text-xl font-bold tracking-tight text-foreground">Sign In to Account</h2>
+        <h2 className="text-xl font-bold tracking-tight text-foreground">Welcome back</h2>
         <p className="text-xs text-muted-foreground">
-          Enter your organization credentials below
+          Sign in to your enterprise workspace
         </p>
       </div>
 

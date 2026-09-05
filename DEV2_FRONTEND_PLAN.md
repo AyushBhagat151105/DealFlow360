@@ -63,18 +63,18 @@
 ---
 
 ### Block 2: Hours 3 – 7 (Quotation Builder, Live Margin & Approval Screen)
-- [ ] Create route `apps/web/src/routes/workspace/builder.tsx`:
+- [x] Create route `apps/web/src/routes/workspace/builder.tsx`:
   - Customer selector (shows customer tier badge: Gold / Silver / Bronze with discount ceilings).
   - Product Catalog tab picker (Hardware, Services, Subscriptions).
   - Cart Table: SKU, Name, Quantity (+/- buttons), Unit Price, Discount % input, Net Total, Line Margin %.
-- [ ] Build **Live Margin Indicator Component**:
+- [x] Build **Live Margin Indicator Component**:
   - Prominent horizontal progress bar with percentage readout and color shift (Green, Amber, Red).
   - Display Blended Risk Score pill:
     - If score = 0: "Auto-Approved (Within Limits)" (Green).
     - If 1-10: "Manager Approval Required (Risk: X)" (Amber).
     - If >10: "Finance Approval Required (Risk: X)" (Red).
-- [ ] Add "Submit for Approval" button with modal showing the breakdown of line ceiling violations.
-- [ ] Build **Discount Approval Queue Screen** (`apps/web/src/routes/workspace/approvals.tsx`):
+- [x] Add "Submit for Approval" button with modal showing the breakdown of line ceiling violations.
+- [x] Build **Discount Approval Queue Screen** (`apps/web/src/routes/workspace/approvals.tsx`):
   - Table of pending quotes with risk scores.
   - Detail drawer with line item violation highlights, customer tier, and approval action buttons (Approve, Reject, Return).
   - Audit trail event timeline showing past approvals and customer comments.
@@ -82,12 +82,12 @@
 ---
 
 ### Block 3: Hours 7 – 10 (Live Upsell Drawer & Customer Portal View)
-- [ ] Build **Live Upsell / Cross-Sell Panel**:
+- [x] Build **Live Upsell / Cross-Sell Panel**:
   - Slide-out drawer or right-hand column in Quotation Builder.
   - Lists recommendations returned by `use-upsell-suggestions.ts`.
   - Shows Promoted badge, Margin Delta pill (e.g. `+3.4% Margin`), and "Add to Quote" button.
   - Adding an upsell instantly updates the Cart, Live Margin Bar, and Blended Risk Score!
-- [ ] Build **Customer Portal Negotiation View** (`apps/web/src/routes/portal/quote.$token.tsx`):
+- [x] Build **Customer Portal Negotiation View** (`apps/web/src/routes/portal/quote.$token.tsx`):
   - Dedicated layout: clean customer-facing design with company logo.
   - Quote summary: items, quantities, discounted prices, total.
   - **Zero leakage**: strictly ensure no cost prices, margin %, or risk scores are rendered.
@@ -95,7 +95,7 @@
   - Counter Discount input: customer can propose a counter discount %.
   - "Submit Negotiation Request" button $\rightarrow$ calls `/api/portal/quote/:token/counter`.
   - "Confirm Quotation" button $\rightarrow$ 1-click formal customer sign-off.
-- [ ] Connect Demo Toolbar "Open Customer Portal View" button to open this page in a new tab with the active quote token.
+- [x] Connect Demo Toolbar "Open Customer Portal View" button to open this page in a new tab with the active quote token.
 
 ---
 
