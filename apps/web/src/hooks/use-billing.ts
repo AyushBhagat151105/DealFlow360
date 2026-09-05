@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { BillingSummary } from "@/lib/api-types";
+import type { BillingSummary, InvoicesListResponse, InvoiceListItem } from "@/lib/api-types";
 import { httpClient } from "@/lib/http-client";
 
 export function useQuoteBilling(quoteId: string) {
@@ -54,6 +54,7 @@ export function useRecordPayment(quoteId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing", "quote", quoteId] });
+      queryClient.invalidateQueries({ queryKey: ["billing", "invoices"] });
     },
   });
 }
@@ -72,5 +73,52 @@ export function useModifySubscriptionSeats(quoteId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing", "quote", quoteId] });
     },
+  });
+}
+
+export type InvoicesFilterParams = {
+  status?: string;
+  type?: string;
+  customerId?: string;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export function useInvoices(filters: InvoicesFilterParams = {}) {
+  return useQuery<InvoicesListResponse>({
+    queryKey: ["billing", "invoices", filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.status && filters.status !== "ALL") params.append("status", filters.status);
+      if (filters.type && filters.type !== "ALL") params.append("type", filters.type);
+      if (filters.customerId) params.append("customerId", filters.customerId);
+      if (filters.search) params.append("search", filters.search);
+      if (filters.startDate) params.append("startDate", filters.startDate);
+      if (filters.endDate) params.append("endDate", filters.endDate);
+      if (filters.limit) params.append("limit", String(filters.limit));
+      if (filters.offset) params.append("offset", String(filters.offset));
+
+      const queryString = params.toString() ? `?${params.toString()}` : "";
+      const response = await httpClient.get<{ data: InvoicesListResponse }>(
+        `/api/billing/invoices${queryString}`,
+      );
+      return response.data.data;
+    },
+  });
+}
+
+export function useInvoiceDetails(id: string) {
+  return useQuery<InvoiceListItem>({
+    queryKey: ["billing", "invoice", id],
+    queryFn: async () => {
+      const response = await httpClient.get<{ data: InvoiceListItem }>(
+        `/api/billing/invoices/${id}`,
+      );
+      return response.data.data;
+    },
+    enabled: Boolean(id),
   });
 }

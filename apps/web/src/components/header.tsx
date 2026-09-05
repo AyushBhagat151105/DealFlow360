@@ -10,6 +10,7 @@ import {
   LogOut,
   User,
   ExternalLink,
+  ReceiptText,
 } from "lucide-react";
 import { ModeToggle } from "./mode-toggle";
 import { authClient } from "@/lib/auth-client";
@@ -36,6 +37,7 @@ const NAV_ITEMS: readonly NavItem[] = [
   { to: "/workspace/builder", label: "Quotations", icon: FileText, roles: ["rep", "manager", "finance", "admin"] },
   { to: "/workspace/pipeline", label: "Pipeline", icon: Kanban, roles: ["rep", "manager", "finance", "admin"] },
   { to: "/workspace/approvals", label: "Approvals", icon: CheckCircle2, roles: ["manager", "finance", "admin"] },
+  { to: "/workspace/invoices", label: "Invoices", icon: ReceiptText, roles: ["rep", "manager", "finance", "admin"] },
   { to: "/dashboard", label: "Deal Health", icon: Activity, roles: ["manager", "finance", "admin"] },
   { to: "/admin", label: "Admin Config", icon: ShieldCheck, roles: ["admin"] },
 ];
@@ -99,8 +101,8 @@ export function Header() {
                   key={to}
                   to={to}
                   className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium transition-colors rounded-md ${isActive
-                      ? "bg-slate-800 text-white border border-sky-500/30 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.15)]"
-                      : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                    ? "bg-slate-800 text-white border border-sky-500/30 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.15)]"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800/70"
                     }`}
                 >
                   <Icon className={`h-3.5 w-3.5 ${isActive ? "text-sky-400" : "text-slate-400"}`} />

@@ -297,5 +297,93 @@ export type SalesReportItem = {
   createdAt: string;
 };
 
+export type InvoiceListItem = {
+  id: string;
+  invoiceNumber: string;
+  customerId: string;
+  customer: {
+    id: string;
+    name: string;
+    contactName?: string | null;
+    email: string;
+    tier: CustomerTier;
+  };
+  quotationId?: string | null;
+  quotation?: {
+    id: string;
+    quoteNumber: string;
+    status: QuoteStatus;
+  } | null;
+  type: "ONE_TIME" | "RECURRING" | "PRORATED_SUPPLEMENTAL" | "CREDIT_NOTE";
+  status: "DRAFT" | "ISSUED" | "PAID" | "CANCELLED";
+  amount: number;
+  dueDate: string;
+  paidAt?: string | null;
+  createdAt: string;
+  lines: Array<{
+    id: string;
+    description: string;
+    quantity: number;
+    unitPrice: number;
+    amount: number;
+  }>;
+  payments: Array<{
+    id: string;
+    amount: number;
+    paymentMethod: string;
+    reference?: string | null;
+    paidAt: string;
+  }>;
+};
 
+export type InvoicesSummary = {
+  totalInvoiced: number;
+  totalPaid: number;
+  totalOutstanding: number;
+  overdueCount: number;
+};
 
+export type InvoicesListResponse = {
+  invoices: InvoiceListItem[];
+  total: number;
+  summary: InvoicesSummary;
+};
+
+export type CategoryRevenueStat = {
+  category: ProductCategory;
+  revenue: number;
+  cost: number;
+  marginPercent: number;
+  lineCount: number;
+};
+
+export type TierGovernanceStat = {
+  tier: string;
+  quoteCount: number;
+  actualAvgDiscount: number;
+  ceilingPercent: number;
+  breachCount: number;
+  variance: number;
+};
+
+export type RepPerformanceStat = {
+  repId: string;
+  repName: string;
+  quoteCount: number;
+  totalPipeline: number;
+  wonRevenue: number;
+  avgMarginPercent: number;
+};
+
+export type SalesAnalyticsReport = {
+  summary: {
+    totalQuotes: number;
+    totalRevenue: number;
+    totalCost: number;
+    avgMarginPercent: number;
+    avgRiskScore: number;
+  };
+  categoryBreakdown: CategoryRevenueStat[];
+  tierGovernance: TierGovernanceStat[];
+  repPerformance: RepPerformanceStat[];
+};

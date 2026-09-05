@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Activity, AlertTriangle, ArrowUpRight, Bell, RefreshCw } from "lucide-react";
+import { Activity, AlertTriangle, ArrowUpRight, BarChart3, Bell, RefreshCw } from "lucide-react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SalesReportsView } from "@/components/sales-reports-view";
 import { useDealHealthOverview, useEscalateDealAlert, useNudgeDealRep } from "@/hooks/use-deal-health";
 
 export const Route = createFileRoute("/dashboard")({
@@ -56,63 +58,87 @@ function DealHealthPage() {
   };
 
   return (
-    <main className="min-h-full overflow-y-auto bg-background">
+    <main className="min-h-full overflow-y-auto bg-background pb-12">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
         <PageHeading
-          eyebrow="DEAL HEALTH"
-          title="Attention needed"
-          description="A live view of delayed deals, unusual discounts, and delivery risks."
+          eyebrow="COMMERCIAL INTELLIGENCE"
+          title="Deal Health & Executive Reports"
+          description="Real-time deal health alerts, discount governance, category revenue, and sales representative velocity."
         />
 
-        <section className="grid gap-px border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
-          <Metric title="Active pipeline" value={currency.format(kpis.activePipelineValue)} />
-          <Metric title="Waiting for review" value={String(kpis.pendingApprovalCount)} />
-          <Metric title="Delayed deals" value={String(kpis.stalledDealsCount)} />
-          <Metric title="Revenue at risk" value={currency.format(kpis.marginAtRisk)} />
-        </section>
+        <Tabs defaultValue="attention" className="space-y-6">
+          <TabsList className="bg-card border border-border">
+            <TabsTrigger value="attention" className="gap-2 text-xs">
+              <Activity className="h-3.5 w-3.5 text-primary" />
+              <span>Attention Needed</span>
+              {alerts.length > 0 && (
+                <span className="ml-1 rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                  {alerts.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="gap-2 text-xs">
+              <BarChart3 className="h-3.5 w-3.5 text-primary" />
+              <span>Sales & Financial Reports</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <Card className="rounded-lg border-border bg-card shadow-none">
-          <CardHeader className="border-b border-border">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Activity className="h-4 w-4 text-primary" />
-              Attention needed
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {alerts.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <div className="divide-y divide-border">
-                {alerts.map((alert) => (
-                  <div key={alert.id} className="grid gap-4 p-5 lg:grid-cols-[1fr_auto] lg:items-center">
-                    <div className="flex gap-3">
-                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                          <span>{alert.customerName}</span>
-                          <span className="font-mono text-xs text-muted-foreground">{alert.quoteNumber}</span>
-                          <span className="text-xs text-muted-foreground">{formatAlertType(alert.type)}</span>
+          <TabsContent value="attention" className="space-y-6 m-0">
+            <section className="grid gap-px border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
+              <Metric title="Active pipeline" value={currency.format(kpis.activePipelineValue)} />
+              <Metric title="Waiting for review" value={String(kpis.pendingApprovalCount)} />
+              <Metric title="Delayed deals" value={String(kpis.stalledDealsCount)} />
+              <Metric title="Revenue at risk" value={currency.format(kpis.marginAtRisk)} />
+            </section>
+
+            <Card className="rounded-lg border-border bg-card shadow-none">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Activity className="h-4 w-4 text-primary" />
+                  Attention needed
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {alerts.length === 0 ? (
+                  <EmptyState />
+                ) : (
+                  <div className="divide-y divide-border">
+                    {alerts.map((alert) => (
+                      <div key={alert.id} className="grid gap-4 p-5 lg:grid-cols-[1fr_auto] lg:items-center">
+                        <div className="flex gap-3">
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                              <span>{alert.customerName}</span>
+                              <span className="font-mono text-xs text-muted-foreground">{alert.quoteNumber}</span>
+                              <span className="text-xs text-muted-foreground">{formatAlertType(alert.type)}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{alert.message}</p>
+                            <p className="text-xs text-muted-foreground">Owner: {alert.repName}</p>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">{alert.message}</p>
-                        <p className="text-xs text-muted-foreground">Owner: {alert.repName}</p>
+                        <div className="flex gap-2 lg:justify-end">
+                          <Button variant="outline" size="sm" onClick={() => handleNudge(alert.id)} disabled={nudgeMutation.isPending}>
+                            <Bell className="h-3.5 w-3.5" />
+                            Contact owner
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleEscalate(alert.id)} disabled={escalateMutation.isPending}>
+                            <ArrowUpRight className="h-3.5 w-3.5" />
+                            Escalate
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2 lg:justify-end">
-                      <Button variant="outline" size="sm" onClick={() => handleNudge(alert.id)} disabled={nudgeMutation.isPending}>
-                        <Bell className="h-3.5 w-3.5" />
-                        Contact owner
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleEscalate(alert.id)} disabled={escalateMutation.isPending}>
-                        <ArrowUpRight className="h-3.5 w-3.5" />
-                        Escalate
-                      </Button>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-6 m-0">
+            <SalesReportsView />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );
