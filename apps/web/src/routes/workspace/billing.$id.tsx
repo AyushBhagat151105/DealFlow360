@@ -42,10 +42,10 @@ export const Route = createFileRoute("/workspace/billing/$id")({
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 const INVOICE_TYPE_BADGES: Record<string, string> = {
-  ONE_TIME: "bg-blue-500/15 text-blue-500 border-blue-500/30",
-  RECURRING: "bg-purple-500/15 text-purple-500 border-purple-500/30",
-  PRORATED_SUPPLEMENTAL: "bg-amber-500/15 text-amber-500 border-amber-500/30",
-  CREDIT_NOTE: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
+  ONE_TIME: "bg-whisper-gray text-forest-ink border-pencil-gray/40",
+  RECURRING: "bg-highlighter-yellow/40 text-forest-ink border-highlighter-yellow/60",
+  PRORATED_SUPPLEMENTAL: "bg-sticky-note-teal text-forest-ink border-sticky-note-teal/60",
+  CREDIT_NOTE: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
 };
 
 function BillingComponent() {
@@ -154,13 +154,13 @@ function BillingComponent() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs tracking-[0.08em] text-muted-foreground uppercase">
-                BILLING & REVENUE ENGINE
+                BILLING &amp; REVENUE ENGINE
               </span>
-              <Badge variant="outline" className="text-[10px] font-mono border-primary/40 text-primary">
+              <Badge variant="outline" className="text-[10px] font-mono border-pencil-gray/40 text-forest-ink/60">
                 HYBRID SPLIT (ONE-TIME + RECURRING)
               </Badge>
             </div>
-            <h1 className="text-2xl font-semibold tracking-[-0.02em]">Invoicing & Subscription Schedules</h1>
+            <h1 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">Invoicing &amp; Subscription Schedules</h1>
             <p className="text-sm text-muted-foreground">
               Quote <span className="font-mono font-medium text-foreground">{id}</span> · Automated one-time hardware lines and recurring SaaS subscription schedules.
             </p>
@@ -172,7 +172,7 @@ function BillingComponent() {
               size="sm"
               onClick={generateBilling}
               disabled={generateMutation.isPending || !canAct}
-              className="gap-2 text-xs"
+              className="gap-2 text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray"
             >
               <Receipt className="h-3.5 w-3.5" />
               {generateMutation.isPending ? "Generating..." : "Generate Billing Schedule"}
@@ -304,7 +304,7 @@ function BillingComponent() {
                         size="sm"
                         variant="outline"
                         onClick={() => openProrationSimulator(subscription)}
-                        className="gap-2 text-xs border-sky-500/30 text-sky-400 hover:bg-sky-950/40"
+                        className="gap-2 text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray"
                       >
                         <Sliders className="h-3.5 w-3.5" />
                         Simulate Proration / Adjust Seats
@@ -319,7 +319,7 @@ function BillingComponent() {
                         {subscription.schedules.map((schedule, idx) => (
                           <div
                             key={`${schedule.billingDate}-${idx}`}
-                            className="border border-border bg-muted/40 p-3 rounded"
+                            className="border border-pencil-gray/40 bg-card p-3 rounded-lg"
                           >
                             <div className="flex items-center justify-between text-xs text-muted-foreground">
                               <span>Period Cycle #{idx + 1}</span>
@@ -328,7 +328,7 @@ function BillingComponent() {
                             <p className="mt-1 font-mono text-sm font-semibold">
                               {new Date(schedule.billingDate).toLocaleDateString()}
                             </p>
-                            <p className="mt-0.5 text-xs font-mono text-sky-400 font-bold">
+                            <p className="mt-0.5 text-xs font-mono text-forest-ink font-bold">
                               {currency.format(schedule.amount)}
                             </p>
                           </div>
@@ -346,8 +346,8 @@ function BillingComponent() {
           <DialogContent className="sm:max-w-md">
             <form onSubmit={handleApplySeats}>
               <DialogHeader>
-                <DialogTitle className="text-base flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-sky-400" />
+                <DialogTitle className="text-base flex items-center gap-2 text-foreground">
+                  <Sparkles className="h-4 w-4 text-forest-ink/60" />
                   Mid-Cycle Seat Proration Simulator
                 </DialogTitle>
                 <DialogDescription className="text-xs">
@@ -367,7 +367,7 @@ function BillingComponent() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="seats-input">Target Seat Count:</Label>
-                      <span className="font-mono text-sm font-bold text-sky-400">{targetSeats} seats</span>
+                      <span className="font-mono text-sm font-bold text-forest-ink">{targetSeats} seats</span>
                     </div>
                     <Input
                       id="seats-input"
@@ -381,8 +381,8 @@ function BillingComponent() {
                     />
                   </div>
 
-                  <div className="p-3.5 rounded bg-sky-950/20 border border-sky-500/30 space-y-2">
-                    <span className="font-mono text-[10px] uppercase text-sky-400 tracking-wider font-bold">
+                  <div className="p-3.5 rounded bg-sticky-note-mint/30 border border-sticky-note-mint/60 space-y-2">
+                    <span className="font-mono text-[10px] uppercase text-forest-ink tracking-wider font-bold">
                       Real-Time Proration Breakdown
                     </span>
                     <div className="space-y-1 text-xs">

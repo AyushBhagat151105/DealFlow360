@@ -50,12 +50,12 @@ export const Route = createFileRoute("/workspace/pipeline")({
 });
 
 const COLUMNS: Array<{ status: QuoteStatus; label: string; badgeClass: string }> = [
-  { status: "DRAFT", label: "Draft", badgeClass: "border-slate-500/30 text-slate-400 bg-slate-500/10" },
-  { status: "PENDING_APPROVAL", label: "In Review", badgeClass: "border-amber-500/30 text-amber-500 bg-amber-500/10" },
-  { status: "APPROVED", label: "Approved", badgeClass: "border-emerald-500/30 text-emerald-500 bg-emerald-500/10" },
-  { status: "UNDER_NEGOTIATION", label: "In Negotiation", badgeClass: "border-blue-500/30 text-blue-400 bg-blue-500/10" },
-  { status: "CONFIRMED", label: "Confirmed", badgeClass: "border-purple-500/30 text-purple-400 bg-purple-500/10" },
-  { status: "FULFILLED", label: "Fulfilled", badgeClass: "border-teal-500/30 text-teal-400 bg-teal-500/10" },
+  { status: "DRAFT", label: "Draft", badgeClass: "border-pencil-gray/40 text-forest-ink/60 bg-whisper-gray" },
+  { status: "PENDING_APPROVAL", label: "In Review", badgeClass: "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/50" },
+  { status: "APPROVED", label: "Approved", badgeClass: "border-sticky-note-mint/60 text-forest-ink bg-sticky-note-mint" },
+  { status: "UNDER_NEGOTIATION", label: "In Negotiation", badgeClass: "border-sticky-note-teal/60 text-forest-ink bg-sticky-note-teal" },
+  { status: "CONFIRMED", label: "Confirmed", badgeClass: "border-sticky-note-blush/60 text-forest-ink bg-sticky-note-blush" },
+  { status: "FULFILLED", label: "Fulfilled", badgeClass: "border-pencil-gray/40 text-forest-ink/50 bg-whisper-gray" },
 ];
 
 function PipelineComponent() {
@@ -227,7 +227,7 @@ function PipelineComponent() {
                 variant="outline"
                 size="sm"
                 onClick={handleExportPipelineCsv}
-                className="h-9 text-xs gap-1.5"
+                className="h-9 text-xs gap-1.5 border-pencil-gray text-forest-ink hover:bg-whisper-gray"
               >
                 <Download className="h-3.5 w-3.5 text-primary" />
                 <span>Export Pipeline (.csv)</span>
@@ -236,13 +236,13 @@ function PipelineComponent() {
                 variant="outline"
                 size="sm"
                 onClick={() => quotesQuery.refetch()}
-                className="h-9 text-xs gap-1.5"
+                className="h-9 text-xs gap-1.5 border-pencil-gray text-forest-ink hover:bg-whisper-gray"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${quotesQuery.isFetching ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
               </Button>
               <Link to="/workspace/builder">
-                <Button size="sm" className="h-9 text-xs font-semibold gap-1.5">
+                <Button size="sm" className="h-9 text-xs font-semibold gap-1.5 bg-forest-ink text-cream-paper">
                   <FileText className="h-3.5 w-3.5" />
                   <span>Create Quotation</span>
                 </Button>
@@ -262,7 +262,7 @@ function PipelineComponent() {
 
             <Card className="bg-card border-border p-4">
               <span className="text-xs text-muted-foreground block font-medium">Active Deals</span>
-              <span className="text-2xl font-black font-mono text-emerald-500">
+              <span className="text-2xl font-black font-mono text-foreground">
                 {activeDealsCount} <span className="text-xs font-normal text-muted-foreground">quotes</span>
               </span>
               <p className="text-[10px] text-muted-foreground pt-1">{pendingApprovalsCount} awaiting approval review</p>
@@ -270,7 +270,7 @@ function PipelineComponent() {
 
             <Card className="bg-card border-border p-4">
               <span className="text-xs text-muted-foreground block font-medium">In Negotiation Value</span>
-              <span className="text-2xl font-black font-mono text-blue-500">
+              <span className="text-2xl font-black font-mono text-foreground">
                 ${inNegotiationValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
               </span>
               <p className="text-[10px] text-muted-foreground pt-1">Customer counter proposals</p>
@@ -278,7 +278,7 @@ function PipelineComponent() {
 
             <Card className="bg-card border-border p-4">
               <span className="text-xs text-muted-foreground block font-medium">Avg Blended Margin</span>
-              <span className="text-2xl font-black font-mono text-purple-500">
+              <span className="text-2xl font-black font-mono text-foreground">
                 {avgMargin.toFixed(1)}%
               </span>
               <p className="text-[10px] text-muted-foreground pt-1">Gross margin performance</p>
@@ -292,7 +292,7 @@ function PipelineComponent() {
               placeholder="Search by Quote # or Customer Name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 text-xs bg-background border-border max-w-xs"
+              className="h-8 text-xs bg-whisper-gray border-pencil-gray/60 text-forest-ink placeholder:text-forest-ink/30 max-w-xs"
             />
             <span className="text-xs text-muted-foreground ml-auto font-mono">
               Showing {filteredQuotes.length} of {effectiveQuotes.length} total quotes • Drag cards or change stage dropdown
@@ -327,12 +327,12 @@ function PipelineComponent() {
                     handleDropOnColumn(column.status, quoteId);
                   }
                 }}
-                className={`w-80 flex-shrink-0 border bg-card/70 rounded-xl flex flex-col transition-all duration-200 shadow-sm ${isTarget
+                className={`w-80 flex-shrink-0 border bg-card rounded-xl flex flex-col transition-all duration-200 shadow-sm ${isTarget
                     ? "border-primary ring-2 ring-primary/30 bg-primary/5 shadow-md"
-                    : "border-border"
+                    : "border-pencil-gray/40"
                   }`}
               >
-                <div className="flex items-center justify-between border-b border-border p-3.5 bg-muted/40 rounded-t-xl">
+                <div className="flex items-center justify-between border-b border-pencil-gray/40 p-3.5 bg-whisper-gray rounded-t-xl">
                   <div className="flex items-center gap-2">
                     <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">{column.label}</h2>
                     <Badge variant="outline" className={`text-[10px] font-mono px-1.5 py-0 ${column.badgeClass}`}>
@@ -349,7 +349,7 @@ function PipelineComponent() {
                     <div
                       className={`h-32 flex items-center justify-center text-center p-3 text-xs rounded-lg border border-dashed transition-colors ${isTarget
                           ? "border-primary text-primary font-medium bg-primary/10"
-                          : "border-border/60 text-muted-foreground/60"
+                          : "border-pencil-gray/40 text-muted-foreground/60"
                         }`}
                     >
                       {isTarget ? "Drop Quote Here" : "No quotes in stage"}
@@ -412,7 +412,7 @@ function DealCard({
       onDragStart={(e) => onDragStart(e, quote.id)}
       onDragEnd={onDragEnd}
       onClick={() => onSelectQuote(quote.id)}
-      className={`w-full rounded-lg border-border bg-card shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-grab active:cursor-grabbing group select-none relative ${isDragging ? "opacity-30 scale-95 border-dashed border-primary bg-primary/5" : ""
+      className={`w-full rounded-xl border-pencil-gray/40 bg-card shadow-sm hover:shadow-sm hover:border-forest-ink/30 transition-all cursor-grab active:cursor-grabbing group select-none relative ${isDragging ? "opacity-30 scale-95 border-dashed border-primary bg-primary/5" : ""
         }`}
     >
       <CardContent className="space-y-3 p-3.5">
@@ -433,23 +433,23 @@ function DealCard({
           </Badge>
         </div>
 
-        <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/60">
+        <div className="flex items-center justify-between gap-2 pt-1 border-t border-pencil-gray/30">
           <div>
             <span className="font-mono text-sm font-extrabold text-foreground block">
               ${quote.totalSubtotal.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </span>
             <span className="text-[10px] text-muted-foreground font-mono">
-              Margin: <span className="font-semibold text-emerald-500">{quote.totalMarginPercent.toFixed(1)}%</span>
+              Margin: <span className="font-semibold text-foreground">{quote.totalMarginPercent.toFixed(1)}%</span>
             </span>
           </div>
 
           <Badge
             variant="outline"
             className={`text-[10px] px-1.5 py-0.5 flex-shrink-0 ${quote.requiredApprovalLevel === "NONE"
-                ? "border-emerald-500/30 text-emerald-500"
+                ? "border-sticky-note-mint/60 text-forest-ink bg-sticky-note-mint/40"
                 : quote.requiredApprovalLevel === "SALES_MANAGER"
-                  ? "border-amber-500/30 text-amber-500"
-                  : "border-red-500/30 text-red-500"
+                  ? "border-highlighter-yellow/60 text-forest-ink bg-highlighter-yellow/40"
+                  : "border-terracotta/30 text-terracotta bg-terracotta/10"
               }`}
           >
             {quote.requiredApprovalLevel === "NONE" ? "Auto-Approved" : quote.requiredApprovalLevel}
@@ -462,7 +462,7 @@ function DealCard({
           <select
             value={quote.status}
             onChange={(e) => onStatusChange(quote.id, e.target.value as QuoteStatus)}
-            className="h-6 text-[10px] font-mono bg-muted/60 border border-border rounded px-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary max-w-[150px]"
+            className="h-6 text-[10px] font-mono bg-whisper-gray border border-pencil-gray/60 rounded px-1.5 text-forest-ink focus:outline-none focus:ring-1 focus:ring-primary max-w-[150px]"
           >
             {COLUMNS.map((col) => (
               <option key={col.status} value={col.status}>
@@ -473,12 +473,12 @@ function DealCard({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-pencil-gray/30" onClick={(e) => e.stopPropagation()}>
           <Button
             variant="outline"
             size="xs"
             onClick={() => onSelectQuote(quote.id)}
-            className="h-7 text-[11px] gap-1 px-2 flex-1"
+            className="h-7 text-[11px] gap-1 px-2 flex-1 border-pencil-gray text-forest-ink hover:bg-whisper-gray"
           >
             <Eye className="h-3 w-3" />
             <span>Details</span>
@@ -489,7 +489,7 @@ function DealCard({
               <Button
                 variant="ghost"
                 size="xs"
-                className="h-7 text-[11px] gap-1 text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 px-2"
+                className="h-7 text-[11px] gap-1 text-forest-ink hover:text-forest-ink/70 px-2"
                 title="Open Customer Portal"
               >
                 <ExternalLink className="h-3 w-3" />
@@ -530,7 +530,7 @@ function QuoteDetailModal({
   if (isLoading || !quote) {
     return (
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-xl bg-card border-border">
+        <DialogContent className="sm:max-w-xl bg-cream-paper border-pencil-gray/60">
           <div className="py-8 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <RefreshCw className="h-4 w-4 animate-spin text-primary" />
             <span>Loading quotation details...</span>
@@ -547,14 +547,14 @@ function QuoteDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto bg-card text-card-foreground border-border space-y-4 p-6">
+      <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto bg-cream-paper text-foreground border-pencil-gray/60 space-y-4 p-6">
         <DialogHeader>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-pencil-gray/30 pb-3">
             <div>
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-primary" />
                 <span className="text-sm font-bold text-foreground">{quote.customerName}</span>
-                <Badge variant="outline" className="text-[10px] font-mono">
+                <Badge variant="outline" className="text-[10px] font-mono border-pencil-gray/40 text-forest-ink/60">
                   Tier: {quote.customerTier}
                 </Badge>
               </div>
@@ -568,7 +568,7 @@ function QuoteDetailModal({
 
             <div className="text-right">
               <span className="text-xs text-muted-foreground block font-medium">Total Quotation Subtotal</span>
-              <span className="text-2xl font-black font-mono text-emerald-500">
+              <span className="text-2xl font-black font-mono text-foreground">
                 ${quote.totalSubtotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
@@ -577,9 +577,9 @@ function QuoteDetailModal({
 
         {/* Customer Portal Link Highlight */}
         {quote.portalAccessToken && (
-          <div className="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg flex items-center justify-between gap-3">
+          <div className="bg-sticky-note-mint/30 border border-sticky-note-mint/60 p-3 rounded-lg flex items-center justify-between gap-3">
             <div className="space-y-0.5">
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-forest-ink flex items-center gap-1.5">
                 <ShieldCheck className="h-4 w-4" />
                 <span>Customer Portal Magic Access Link Ready</span>
               </span>
@@ -588,7 +588,7 @@ function QuoteDetailModal({
               </p>
             </div>
             <Link to="/portal/quote/$token" params={{ token: quote.portalAccessToken }} target="_blank">
-              <Button size="xs" className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5">
+              <Button size="xs" className="bg-forest-ink text-cream-paper text-xs gap-1.5 hover:bg-forest-ink/90">
                 <ExternalLink className="h-3.5 w-3.5" />
                 <span>Open Portal</span>
               </Button>
@@ -597,7 +597,7 @@ function QuoteDetailModal({
         )}
 
         {/* Stage Changer Section */}
-        <div className="bg-muted/40 p-3 rounded-lg border border-border flex items-center justify-between gap-4">
+        <div className="bg-whisper-gray p-3 rounded-lg border border-pencil-gray/40 flex items-center justify-between gap-4">
           <div>
             <span className="text-xs font-bold text-foreground block">Pipeline Lifecycle Stage</span>
             <span className="text-[11px] text-muted-foreground">Select a new stage to transition this deal</span>
@@ -610,7 +610,7 @@ function QuoteDetailModal({
                 size="xs"
                 variant={quote.status === col.status ? "default" : "outline"}
                 onClick={() => handleStageSelect(col.status)}
-                className="text-[10px] font-mono h-7"
+                className={`text-[10px] font-mono h-7 ${quote.status === col.status ? "bg-forest-ink text-cream-paper" : "border-pencil-gray text-forest-ink hover:bg-whisper-gray"}`}
               >
                 {col.label}
               </Button>
@@ -620,23 +620,23 @@ function QuoteDetailModal({
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-muted/40 p-3 rounded border border-border">
+          <div className="bg-whisper-gray p-3 rounded border border-pencil-gray/40">
             <span className="text-[11px] text-muted-foreground block">Blended Margin</span>
-            <span className="text-lg font-bold font-mono text-purple-500">
+            <span className="text-lg font-bold font-mono text-foreground">
               {quote.totalMarginPercent.toFixed(1)}%
             </span>
           </div>
 
-          <div className="bg-muted/40 p-3 rounded border border-border">
+          <div className="bg-whisper-gray p-3 rounded border border-pencil-gray/40">
             <span className="text-[11px] text-muted-foreground block">Risk Score</span>
             <span className="text-lg font-bold font-mono text-foreground">
               {quote.blendedRiskScore} pts
             </span>
           </div>
 
-          <div className="bg-muted/40 p-3 rounded border border-border">
+          <div className="bg-whisper-gray p-3 rounded border border-pencil-gray/40">
             <span className="text-[11px] text-muted-foreground block">Approval Level</span>
-            <span className="text-xs font-semibold font-mono text-amber-500">
+            <span className="text-xs font-semibold font-mono text-foreground">
               {quote.requiredApprovalLevel}
             </span>
           </div>
@@ -645,9 +645,9 @@ function QuoteDetailModal({
         {/* Line Items Schedule */}
         <div className="space-y-2">
           <h3 className="text-xs font-bold text-foreground">Line Items Schedule</h3>
-          <div className="border border-border rounded-lg overflow-hidden">
+          <div className="border border-pencil-gray/40 rounded-lg overflow-hidden">
             <Table>
-              <TableHeader className="bg-muted/50">
+              <TableHeader className="bg-whisper-gray">
                 <TableRow>
                   <TableHead className="text-xs font-bold">Item Description</TableHead>
                   <TableHead className="text-xs font-bold text-center">Qty</TableHead>
@@ -659,7 +659,7 @@ function QuoteDetailModal({
               </TableHeader>
               <TableBody>
                 {quote.lines.map((line) => (
-                  <TableRow key={line.id}>
+                  <TableRow key={line.id} className="hover:bg-whisper-gray/50 border-pencil-gray/30">
                     <TableCell className="text-xs font-medium text-foreground">{line.productName}</TableCell>
                     <TableCell className="text-center font-mono text-xs">{line.quantity}</TableCell>
                     <TableCell className="text-right font-mono text-xs">
@@ -671,7 +671,7 @@ function QuoteDetailModal({
                     <TableCell className="text-right font-mono font-semibold text-xs">
                       ${line.lineSubtotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-purple-500 font-semibold">
+                    <TableCell className="text-right font-mono text-xs text-foreground font-semibold">
                       {(((line.lineSubtotal - line.costPrice * line.quantity) / (line.lineSubtotal || 1)) * 100).toFixed(1)}%
                     </TableCell>
                   </TableRow>
@@ -682,21 +682,21 @@ function QuoteDetailModal({
         </div>
 
         {/* Action Footer */}
-        <DialogFooter className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
+        <DialogFooter className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-pencil-gray/30">
           <div className="flex items-center gap-2">
             <Link to="/workspace/fulfillment/$id" params={{ id: quote.id }}>
-              <Button variant="outline" size="sm" className="text-xs">
+              <Button variant="outline" size="sm" className="text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray">
                 Fulfillment
               </Button>
             </Link>
             <Link to="/workspace/billing/$id" params={{ id: quote.id }}>
-              <Button variant="outline" size="sm" className="text-xs">
+              <Button variant="outline" size="sm" className="text-xs border-pencil-gray text-forest-ink hover:bg-whisper-gray">
                 Billing
               </Button>
             </Link>
           </div>
 
-          <Button variant="ghost" size="sm" onClick={onClose} className="text-xs">
+          <Button variant="ghost" size="sm" onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">
             Close
           </Button>
         </DialogFooter>

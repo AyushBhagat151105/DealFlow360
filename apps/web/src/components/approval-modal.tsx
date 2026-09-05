@@ -36,9 +36,9 @@ import type { Quote } from "@/lib/api-types";
 import { useAuthStore } from "@/stores/auth-store";
 
 const RISK_BADGE: Record<string, string> = {
-  NONE: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-  SALES_MANAGER: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
-  FINANCE: "bg-destructive/15 text-destructive border-destructive/30",
+  NONE: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
+  SALES_MANAGER: "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60",
+  FINANCE: "bg-terracotta/10 text-terracotta border-terracotta/30",
 };
 
 type ApprovalModalProps = {
@@ -191,13 +191,12 @@ export function ApprovalModal({
             </Table>
             <div className="flex justify-end text-xs pt-1 border-t border-border">
               <span className="text-muted-foreground mr-2">Total Blended Margin:</span>
-              <span className={`font-mono font-bold ${
-                quote.totalMarginPercent >= 30
+              <span className={`font-mono font-bold ${quote.totalMarginPercent >= 30
                   ? "text-emerald-500"
                   : quote.totalMarginPercent >= 15
-                  ? "text-amber-500"
-                  : "text-destructive"
-              }`}>
+                    ? "text-amber-500"
+                    : "text-destructive"
+                }`}>
                 {quote.totalMarginPercent.toFixed(1)}%
               </span>
             </div>
@@ -247,8 +246,8 @@ export function ApprovalModal({
                   {quote.requiredApprovalLevel === "NONE"
                     ? "Auto-Approved"
                     : quote.requiredApprovalLevel === "SALES_MANAGER"
-                    ? "Sales Manager"
-                    : "Finance Sign-Off"}
+                      ? "Sales Manager"
+                      : "Finance Sign-Off"}
                 </Badge>
               </div>
             </div>

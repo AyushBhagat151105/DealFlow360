@@ -57,11 +57,11 @@ export function CartTable({
   cartProductIds,
 }: CartTableProps) {
   return (
-    <Card className="border-slate-800 bg-[#0d141b] shadow-[inset_0_0_0_1px_rgba(148,163,184,0.05)]">
+    <Card className="border-pencil-gray/40 bg-card shadow-none">
       <CardHeader className="p-4 pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-            <ShoppingCart className="h-4 w-4 text-sky-400" />
+          <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+            <ShoppingCart className="h-4 w-4 text-forest-ink/60" />
             Line Items
             {cart.length > 0 && (
               <Badge variant="secondary" className="text-[10px] font-mono ml-1">
@@ -149,7 +149,7 @@ export function CartTable({
                           value={line.discountPercent}
                           onChange={(e) => onUpdateDiscount(line.productId, e.target.value)}
                           className={`h-7 w-20 text-right font-mono text-xs ${
-                            isDiscountAboveCeiling ? "border-amber-500/60 text-amber-600" : ""
+                            isDiscountAboveCeiling ? "border-terracotta/60 text-terracotta" : ""
                           }`}
                         />
                         <span className="text-xs text-muted-foreground">%</span>
@@ -162,10 +162,10 @@ export function CartTable({
                       <span
                         className={`text-xs font-mono font-bold ${
                           isBelowThreshold
-                            ? "text-destructive"
+                            ? "text-terracotta"
                             : lineMargin < 30
-                            ? "text-amber-500"
-                            : "text-emerald-500"
+                            ? "text-forest-ink/60"
+                            : "text-forest-ink"
                         }`}
                       >
                         {lineMargin.toFixed(1)}%

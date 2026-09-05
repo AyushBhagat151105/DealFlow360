@@ -26,10 +26,10 @@ import { useUsers, useUpdateUserRole, useDeleteUser } from "@/hooks/use-catalog"
 import type { UserItem } from "@/lib/api-types";
 
 const ROLE_BADGE_STYLES: Record<string, string> = {
-  admin: "bg-purple-500/10 text-purple-700 border-purple-200 dark:border-purple-800 dark:text-purple-400",
-  finance: "bg-emerald-500/10 text-emerald-700 border-emerald-200 dark:border-emerald-800 dark:text-emerald-400",
-  manager: "bg-blue-500/10 text-blue-700 border-blue-200 dark:border-blue-800 dark:text-blue-400",
-  rep: "bg-muted text-muted-foreground border-border",
+  admin: "bg-sticky-note-blush text-forest-ink border-sticky-note-blush/60",
+  finance: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
+  manager: "bg-highlighter-yellow text-forest-ink border-highlighter-yellow/60",
+  rep: "bg-sticky-note-teal text-forest-ink border-sticky-note-teal/60",
 };
 
 export function UsersTab() {

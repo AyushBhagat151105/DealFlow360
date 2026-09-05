@@ -55,11 +55,13 @@ function Tabs({
   );
 }
 
-function TabsList({ className, ...props }: React.ComponentProps<"div">) {
+interface TabsListProps extends React.ComponentProps<"div"> { }
+
+function TabsList({ className, ...props }: TabsListProps) {
   return (
     <div
       className={cn(
-        "inline-flex h-9 items-center justify-center rounded-none bg-muted p-1 text-muted-foreground border border-border/40",
+        "inline-flex h-9 items-center justify-center rounded-md bg-whisper-gray p-1 text-muted-foreground border border-pencil-gray/40",
         className
       )}
       {...props}
@@ -81,10 +83,10 @@ function TabsTrigger({ className, value, children, onClick, ...props }: TabsTrig
       role="tab"
       aria-selected={isActive}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap px-3 py-1 text-xs font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none",
+        "inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-1 text-xs font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none",
         isActive
-          ? "bg-background text-foreground shadow-xs font-semibold"
-          : "hover:bg-background/50 hover:text-foreground",
+          ? "bg-forest-ink text-cream-paper shadow-xs font-semibold"
+          : "hover:bg-cream-paper/70 hover:text-foreground text-forest-ink/70",
         className
       )}
       onClick={(e) => {

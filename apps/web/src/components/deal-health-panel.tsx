@@ -42,10 +42,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SEVERITY_BADGES: Record<string, string> = {
-  LOW: "bg-blue-500/15 text-blue-500 border-blue-500/30",
-  MEDIUM: "bg-amber-500/15 text-amber-500 border-amber-500/30",
-  HIGH: "bg-orange-500/15 text-orange-500 border-orange-500/30",
-  CRITICAL: "bg-destructive/15 text-destructive border-destructive/30",
+  LOW: "bg-whisper-gray text-forest-ink/70 border-pencil-gray/40",
+  MEDIUM: "bg-highlighter-yellow/40 text-forest-ink border-highlighter-yellow/60",
+  HIGH: "bg-terracotta/10 text-terracotta border-terracotta/30",
+  CRITICAL: "bg-terracotta/20 text-terracotta border-terracotta/50 font-bold",
 };
 
 export function DealHealthPanel() {
@@ -226,9 +226,8 @@ export function DealHealthPanel() {
                         <TableCell>
                           <Badge
                             variant="outline"
-                            className={`text-[10px] font-mono px-1.5 py-0 ${
-                              SEVERITY_BADGES[alt.severity] || "border-border text-foreground"
-                            }`}
+                            className={`text-[10px] font-mono px-1.5 py-0 ${SEVERITY_BADGES[alt.severity] || "border-border text-foreground"
+                              }`}
                           >
                             {alt.severity}
                           </Badge>
