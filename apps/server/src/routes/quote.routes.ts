@@ -7,6 +7,7 @@ import {
   submitApprovalController,
   reviewQuoteController,
 } from "../controllers/quote.controller";
+import { sendQuotePortalLinkController } from "../controllers/portal.controller";
 import { getQuoteUpsellSuggestionsController } from "../controllers/upsell.controller";
 import { requireAuth, requireRole, optionalAuth } from "../middlewares/auth";
 import {
@@ -15,6 +16,7 @@ import {
   listQuotesQuerySchema,
   reviewQuoteSchema,
 } from "../validators/quote.validator";
+import { sendPortalLinkSchema } from "../validators/portal.validator";
 
 export const quoteRoutes = new OpenAPIHono();
 
@@ -146,6 +148,29 @@ const upsellSuggestionsRoute = createRoute({
   },
 });
 
+const sendQuotePortalLinkRoute = createRoute({
+  method: "post",
+  path: "/{id}/send-portal-link",
+  tags: ["Quotes"],
+  summary: "Dispatch quotation magic link directly to customer email",
+  request: {
+    params: z.object({
+      id: z.string().openapi({ param: { name: "id", in: "path" } }),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: sendPortalLinkSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: { description: "Quotation magic link dispatched successfully" },
+    404: { description: "Quotation not found" },
+  },
+});
+
 quoteRoutes.openapi(calculatePreviewRoute, async (c) => {
   await optionalAuth(c, async () => { });
   return calculatePreviewController(c);
@@ -180,4 +205,9 @@ quoteRoutes.openapi(reviewQuoteRoute, async (c) => {
 quoteRoutes.openapi(upsellSuggestionsRoute, async (c) => {
   await requireAuth(c, async () => { });
   return getQuoteUpsellSuggestionsController(c);
+});
+
+quoteRoutes.openapi(sendQuotePortalLinkRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return sendQuotePortalLinkController(c);
 });
