@@ -230,10 +230,14 @@ export interface DealHealthAlert {
   quoteId: string;
   quoteNumber: string;
   customerName: string;
-  repName: string;
-  type: "STALLED_DEAL" | "DISCOUNT_ANOMALY" | "DELIVERY_SLIPPAGE";
-  severity: "LOW" | "MEDIUM" | "HIGH";
+  repName?: string;
+  type: string;
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   message: string;
+  metricDelta?: number | null;
+  isNudged?: boolean;
+  isEscalated?: boolean;
+  escalatedTo?: string | null;
   createdAt: string;
 }
 
@@ -259,3 +263,39 @@ export type UserItem = {
   role: string;
   createdAt: string;
 };
+
+export type RequestMagicLinkInput = {
+  email: string;
+  quoteNumber?: string;
+};
+
+export type SendPortalLinkInput = {
+  recipientEmail: string;
+  customMessage?: string;
+};
+
+export type SubmitCounterInput = {
+  authorName: string;
+  proposedDiscounts: Array<{
+    lineId: string;
+    counterDiscountPercent: number;
+  }>;
+  comment?: string;
+};
+
+export type SalesReportItem = {
+  quoteNumber: string;
+  customerName: string;
+  customerTier: CustomerTier;
+  status: QuoteStatus;
+  totalAmount: number;
+  totalCost: number;
+  totalMarginPercent: number;
+  blendedRiskScore: number;
+  requiredApprovalLevel: ApprovalLevel;
+  lineCount: number;
+  createdAt: string;
+};
+
+
+
