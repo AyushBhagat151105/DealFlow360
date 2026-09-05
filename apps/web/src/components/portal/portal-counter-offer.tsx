@@ -116,10 +116,13 @@ export function PortalCounterOffer({ token, lines }: PortalCounterOfferProps) {
                               min="0"
                               max="100"
                               step="0.5"
-                              value={currentVal}
+                              value={currentVal === 0 ? "" : currentVal}
+                              placeholder="0"
+                              onFocus={(e) => e.target.select()}
                               onChange={(e) => handleCounterDiscountChange(line.id, e.target.value)}
                               className="h-8 w-24 text-right font-mono text-xs"
                             />
+
                             <span className="text-xs font-mono text-muted-foreground">%</span>
                           </div>
                         </TableCell>

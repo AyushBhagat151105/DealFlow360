@@ -213,23 +213,7 @@ export function AppSidebar() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-pencil-gray/40" />
 
-            <DropdownMenuLabel className="text-[10px] font-mono uppercase tracking-[0.1em] text-forest-ink/40 py-1">
-              Switch Role (Demo)
-            </DropdownMenuLabel>
-            {(Object.values(USER_ROLES) as typeof USER_ROLES[UserRole][]).map((role) => (
-              <DropdownMenuItem
-                key={role.id}
-                onClick={() => handleRoleSwitch(role.id)}
-                className={`gap-2 cursor-pointer text-xs text-forest-ink focus:bg-whisper-gray focus:text-forest-ink ${user.role === role.id ? "font-semibold" : ""}`}
-              >
-                <Badge className={`text-[9px] px-1.5 py-0 h-4 border-0 ${ROLE_BADGE_COLORS[role.id]}`}>
-                  {role.badge}
-                </Badge>
-                <span>{role.name}</span>
-              </DropdownMenuItem>
-            ))}
 
-            <DropdownMenuSeparator className="bg-pencil-gray/40" />
             <DropdownMenuItem
               onClick={handleSignOut}
               className="gap-2 text-xs text-terracotta focus:bg-terracotta/10 focus:text-terracotta cursor-pointer"

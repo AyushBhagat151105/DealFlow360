@@ -146,12 +146,15 @@ export function CartTable({
                           min="0"
                           max="100"
                           step="0.5"
-                          value={line.discountPercent}
+                          value={line.discountPercent === 0 ? "" : line.discountPercent}
+                          placeholder="0"
+                          onFocus={(e) => e.target.select()}
                           onChange={(e) => onUpdateDiscount(line.productId, e.target.value)}
                           className={`h-7 w-20 text-right font-mono text-xs ${
                             isDiscountAboveCeiling ? "border-terracotta/60 text-terracotta" : ""
                           }`}
                         />
+
                         <span className="text-xs text-muted-foreground">%</span>
                       </div>
                     </TableCell>

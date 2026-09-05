@@ -210,8 +210,8 @@ function PipelineComponent() {
     );
 
   return (
-    <main className="min-h-full overflow-y-auto bg-background text-foreground pb-12">
-      <div className="mx-auto max-w-[1800px] space-y-6 p-6">
+    <main className="min-h-full min-w-0 overflow-y-auto bg-background text-foreground pb-12">
+      <div className="w-full min-w-0 max-w-full space-y-6 p-4 sm:p-6">
         {/* Header & KPI Summary */}
         <header className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -300,8 +300,16 @@ function PipelineComponent() {
           </div>
         </header>
 
-        {/* Kanban Board Horizontal Flex Container with Fixed Width Columns */}
-        <div className="flex gap-4 overflow-x-auto pb-6 items-start min-h-[600px] w-full">
+        {/* Kanban Board Horizontal Flex Container with Fixed Width Columns & Mouse Wheel Scroll Support */}
+        <div
+          className="kanban-scroll flex min-w-0 w-full max-w-full gap-4 overflow-x-scroll overflow-y-hidden pb-6 pt-1 items-start min-h-[600px] select-none overscroll-x-contain"
+          onWheel={(e) => {
+            if (e.deltaY && !e.deltaX) {
+              e.currentTarget.scrollLeft += e.deltaY;
+            }
+          }}
+        >
+
           {COLUMNS.map((column) => {
             const columnQuotes = filteredQuotes.filter((quote) => quote.status === column.status);
             const columnTotal = columnQuotes.reduce((sum, q) => sum + q.totalSubtotal, 0);
@@ -344,7 +352,7 @@ function PipelineComponent() {
                   </span>
                 </div>
 
-                <div className="p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-300px)] min-h-[180px]">
+                <div className="kanban-column-scroll p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-300px)] min-h-[180px]">
                   {columnQuotes.length === 0 ? (
                     <div
                       className={`h-32 flex items-center justify-center text-center p-3 text-xs rounded-lg border border-dashed transition-colors ${isTarget
