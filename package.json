@@ -1,0 +1,58 @@
+{
+  "name": "DealFlow360",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "dotenv": "^17.4.2",
+      "zod": "^4.4.3",
+      "typescript": "^6.0.3",
+      "@types/bun": "^1.4.0",
+      "better-auth": "1.6.22",
+      "dodopayments": "^2.47.0",
+      "react": "^19.2.8",
+      "@types/react": "^19.2.18",
+      "vitest": "4.1.8",
+      "@vitest/ui": "4.1.8",
+      "@vitest/coverage-v8": "4.1.8",
+      "jsdom": "^29.1.1",
+      "@prisma/client": "^7.9.1"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @DealFlow360/db db:push",
+    "db:studio": "turbo -F @DealFlow360/db db:studio",
+    "db:generate": "turbo -F @DealFlow360/db db:generate",
+    "db:migrate": "turbo -F @DealFlow360/db db:migrate",
+    "db:start": "turbo -F @DealFlow360/db db:start",
+    "db:watch": "turbo -F @DealFlow360/db db:watch",
+    "db:stop": "turbo -F @DealFlow360/db db:stop",
+    "db:down": "turbo -F @DealFlow360/db db:down",
+    "test": "bun run --filter web test && bun run --filter server test",
+    "ruler:apply": "bunx @intellectronica/ruler@latest apply --local-only"
+  },
+  "dependencies": {
+    "@DealFlow360/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@DealFlow360/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "turbo": "2.10.11",
+    "typescript": "catalog:"
+  },
+  "overrides": {
+    "kysely": "0.28.17"
+  },
+  "packageManager": "bun@1.4.0"
+}

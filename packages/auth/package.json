@@ -1,0 +1,30 @@
+{
+  "name": "@DealFlow360/auth",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@DealFlow360/db": "workspace:*",
+    "@DealFlow360/env": "workspace:*",
+    "@better-auth/prisma-adapter": "1.6.22",
+    "better-auth": "catalog:",
+    "dodopayments": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@DealFlow360/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
