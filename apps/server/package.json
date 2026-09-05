@@ -7,6 +7,7 @@
     "check-types": "tsc -b",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "test": "vitest run --passWithNoTests",
+    "seed": "bun --env-file=.env src/scripts/seed.ts",
     "dev": "bun run --hot src/index.ts",
     "start": "bun run dist/index.js"
   },

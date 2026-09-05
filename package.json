@@ -30,6 +30,7 @@
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
     "db:push": "turbo -F @DealFlow360/db db:push",
+    "db:seed": "turbo -F server seed",
     "db:studio": "turbo -F @DealFlow360/db db:studio",
     "db:generate": "turbo -F @DealFlow360/db db:generate",
     "db:migrate": "turbo -F @DealFlow360/db db:migrate",
