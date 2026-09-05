@@ -5,6 +5,11 @@ import prisma, {
 import { NotFoundError, ValidationError } from "../utils/errors";
 import { calculateQuotePricing } from "./pricing.service";
 import { generateOrderInvoicesAndSubscriptions } from "./billing.service";
+import {
+  sendQuoteMagicLink,
+  sendCounterOfferAlert,
+  sendOrderConfirmationReceipt,
+} from "../lib/email";
 
 export async function getPortalQuote(token: string) {
   const quote = await prisma.quotation.findUnique({
@@ -122,6 +127,7 @@ export async function submitPortalCounterOffer(
     where: { portalAccessToken: token },
     include: {
       lines: true,
+      customer: true,
     },
   });
 
@@ -156,6 +162,7 @@ export async function submitPortalCounterOffer(
   );
 
   return prisma.$transaction(async (tx) => {
+  const updatedQuote = await prisma.$transaction(async (tx) => {
     for (const line of quote.lines) {
       const proposed = discountMap.get(line.id);
       if (proposed !== undefined) {
@@ -183,6 +190,7 @@ export async function submitPortalCounterOffer(
     const nextStep = requiresApproval ? "SALES_MANAGER" : null;
 
     const updatedQuote = await tx.quotation.update({
+    const result = await tx.quotation.update({
       where: { id: quote.id },
       data: {
         totalAmount: pricing.totalSubtotal,
@@ -220,12 +228,41 @@ export async function submitPortalCounterOffer(
     });
 
     return updatedQuote;
+    return result;
   });
+
+  const discountSummary = proposedDiscounts
+    .map((d) => `Line ${d.lineId.slice(-4)}: ${d.counterDiscountPercent}%`)
+    .join(", ");
+
+  let repEmail = "rep@dealflow360.internal";
+  if (quote.repUserId) {
+    const repUser = await prisma.user.findUnique({ where: { id: quote.repUserId } });
+    if (repUser?.email) repEmail = repUser.email;
+  } else {
+    const firstRep = await prisma.member.findFirst({
+      where: { role: { in: ["rep", "manager", "admin"] } },
+      include: { user: true },
+    });
+    if (firstRep?.user?.email) repEmail = firstRep.user.email;
+  }
+
+  await sendCounterOfferAlert({
+    repEmail,
+    customerName: quote.customer.name,
+    quoteNumber: quote.quoteNumber,
+    blendedRiskScore: pricing.blendedRiskScore,
+    customerComment: comment,
+    proposedDiscountSummary: discountSummary,
+  });
+
+  return updatedQuote;
 }
 
 export async function confirmPortalQuote(token: string) {
   const quote = await prisma.quotation.findUnique({
     where: { portalAccessToken: token },
+    include: { customer: true },
   });
 
   if (!quote) {
@@ -244,6 +281,141 @@ export async function confirmPortalQuote(token: string) {
   });
 
   await generateOrderInvoicesAndSubscriptions(quote.id);
+  const billingResult = await generateOrderInvoicesAndSubscriptions(quote.id);
+
+  await sendOrderConfirmationReceipt({
+    customerEmail: quote.customer.email,
+    customerName: quote.customer.contactName || quote.customer.name,
+    quoteNumber: quote.quoteNumber,
+    totalAmount: quote.totalAmount,
+    token: quote.portalAccessToken,
+    invoiceCount: billingResult.invoice ? 1 : 0,
+    subscriptionCount: billingResult.contracts.length,
+  });
 
   return updatedQuote;
+}
+
+export async function sendQuotePortalLink(
+  quoteIdentifier: string,
+  recipientOverride?: string,
+  customMessage?: string,
+) {
+  const quote = await prisma.quotation.findFirst({
+    where: {
+      OR: [
+        { id: quoteIdentifier },
+        { portalAccessToken: quoteIdentifier },
+        { quoteNumber: quoteIdentifier },
+      ],
+    },
+    include: {
+      customer: true,
+      lines: true,
+    },
+  });
+
+  if (!quote) {
+    throw new NotFoundError("Quotation", quoteIdentifier);
+  }
+
+  const recipient = recipientOverride || quote.customer.email;
+
+  const emailResult = await sendQuoteMagicLink({
+    quoteId: quote.id,
+    recipientEmail: recipient,
+    customerName: quote.customer.contactName || quote.customer.name,
+    quoteNumber: quote.quoteNumber,
+    totalAmount: quote.totalAmount,
+    token: quote.portalAccessToken,
+    customMessage,
+    lineItemCount: quote.lines.length,
+  });
+
+  await prisma.approvalAuditLog.create({
+    data: {
+      quotationId: quote.id,
+      action: ApprovalAction.SUBMIT,
+      actorName: "Sales Rep",
+      actorRole: "rep",
+      reason: `Customer portal magic link dispatched to ${recipient}.${emailResult.error ? ` (Delivery notice: ${emailResult.error})` : ""}`,
+    },
+  });
+
+  return {
+    quoteNumber: quote.quoteNumber,
+    recipient,
+    token: quote.portalAccessToken,
+    delivered: emailResult.success,
+    deliveryError: emailResult.error,
+  };
+}
+
+export async function requestCustomerMagicLink(email: string, quoteNumber?: string) {
+  const customer = await prisma.customer.findUnique({
+    where: { email },
+    include: {
+      quotes: {
+        where: {
+          status: {
+            notIn: [QuotationStatus.REJECTED],
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+        include: { lines: true },
+      },
+    },
+  });
+
+  if (customer && customer.quotes.length > 0) {
+    const targetQuote = quoteNumber
+      ? customer.quotes.find((q) => q.quoteNumber === quoteNumber) || customer.quotes[0]
+      : customer.quotes[0];
+
+    if (targetQuote) {
+      await sendQuoteMagicLink({
+        quoteId: targetQuote.id,
+        recipientEmail: customer.email,
+        customerName: customer.contactName || customer.name,
+        quoteNumber: targetQuote.quoteNumber,
+        totalAmount: targetQuote.totalAmount,
+        token: targetQuote.portalAccessToken,
+        lineItemCount: targetQuote.lines.length,
+      });
+    }
+  }
+
+  return {
+    success: true,
+    message: "If an active quotation exists for this email address, a secure magic link has been dispatched to your inbox.",
+  };
+}
+
+export async function verifyPortalToken(token: string) {
+  const quote = await prisma.quotation.findUnique({
+    where: { portalAccessToken: token },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          name: true,
+          contactName: true,
+          email: true,
+          tier: true,
+        },
+      },
+    },
+  });
+
+  if (!quote) {
+    throw new NotFoundError("Quotation token", token);
+  }
+
+  return {
+    valid: true,
+    quoteNumber: quote.quoteNumber,
+    customerName: quote.customer.name,
+    status: quote.status,
+    totalAmount: quote.totalAmount,
+  };
 }

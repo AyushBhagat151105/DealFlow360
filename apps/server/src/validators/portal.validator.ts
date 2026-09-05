@@ -19,3 +19,13 @@ export const submitCounterOfferSchema = z.object({
     .min(1, "At least one line discount counter is required"),
   comment: z.string().optional(),
 });
+
+export const requestMagicLinkSchema = z.object({
+  email: z.string().email("Valid email address is required"),
+  quoteNumber: z.string().optional(),
+});
+
+export const sendPortalLinkSchema = z.object({
+  recipientEmail: z.string().email().optional(),
+  customMessage: z.string().max(500).optional(),
+});

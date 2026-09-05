@@ -6,10 +6,15 @@ import {
   addPortalComment,
   submitPortalCounterOffer,
   confirmPortalQuote,
+  sendQuotePortalLink,
+  requestCustomerMagicLink,
+  verifyPortalToken,
 } from "../services/portal.service";
 import {
   addPortalCommentSchema,
   submitCounterOfferSchema,
+  requestMagicLinkSchema,
+  sendPortalLinkSchema,
 } from "../validators/portal.validator";
 
 export async function getPortalQuoteController(c: Context) {
@@ -61,4 +66,40 @@ export async function confirmPortalQuoteController(c: Context) {
   }
   const confirmed = await confirmPortalQuote(token);
   return sendSuccess(c, confirmed, 200, "Quotation accepted and confirmed.");
+}
+
+export async function sendQuotePortalLinkController(c: Context) {
+  const token = c.req.param("token") || c.req.param("id");
+  if (!token) {
+    throw new ValidationError("Quotation identifier is required.");
+  }
+  let body: Record<string, unknown> = {};
+  try {
+    body = await c.req.json();
+  } catch {
+    body = {};
+  }
+  const validated = sendPortalLinkSchema.parse(body);
+  const result = await sendQuotePortalLink(
+    token,
+    validated.recipientEmail,
+    validated.customMessage,
+  );
+  return sendSuccess(c, result, 200, "Customer portal magic link dispatched.");
+}
+
+export async function requestMagicLinkController(c: Context) {
+  const body = await c.req.json();
+  const validated = requestMagicLinkSchema.parse(body);
+  const result = await requestCustomerMagicLink(validated.email, validated.quoteNumber);
+  return sendSuccess(c, result, 200, result.message);
+}
+
+export async function verifyPortalTokenController(c: Context) {
+  const token = c.req.param("token");
+  if (!token) {
+    throw new ValidationError("Portal token is required.");
+  }
+  const result = await verifyPortalToken(token);
+  return sendSuccess(c, result, 200, "Portal token is valid.");
 }
