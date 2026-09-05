@@ -10,13 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SuccessRouteImport } from './routes/success'
+import { Route as WorkspaceApprovalsRouteImport } from './routes/workspace/approvals'
+import { Route as WorkspaceBuilderRouteImport } from './routes/workspace/builder'
+import { Route as WorkspacePipelineRouteImport } from './routes/workspace/pipeline'
+import { Route as PortalQuoteTokenRouteImport } from './routes/portal/quote.$token'
+import { Route as WorkspaceBillingIdRouteImport } from './routes/workspace/billing.$id'
+import { Route as WorkspaceFulfillmentIdRouteImport } from './routes/workspace/fulfillment.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -34,39 +46,131 @@ const SuccessRoute = SuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkspaceApprovalsRoute = WorkspaceApprovalsRouteImport.update({
+  id: '/workspace/approvals',
+  path: '/workspace/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkspaceBuilderRoute = WorkspaceBuilderRouteImport.update({
+  id: '/workspace/builder',
+  path: '/workspace/builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkspacePipelineRoute = WorkspacePipelineRouteImport.update({
+  id: '/workspace/pipeline',
+  path: '/workspace/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalQuoteTokenRoute = PortalQuoteTokenRouteImport.update({
+  id: '/portal/quote/$token',
+  path: '/portal/quote/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkspaceBillingIdRoute = WorkspaceBillingIdRouteImport.update({
+  id: '/workspace/billing/$id',
+  path: '/workspace/billing/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkspaceFulfillmentIdRoute = WorkspaceFulfillmentIdRouteImport.update({
+  id: '/workspace/fulfillment/$id',
+  path: '/workspace/fulfillment/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
+  '/workspace/approvals': typeof WorkspaceApprovalsRoute
+  '/workspace/builder': typeof WorkspaceBuilderRoute
+  '/workspace/pipeline': typeof WorkspacePipelineRoute
+  '/portal/quote/$token': typeof PortalQuoteTokenRoute
+  '/workspace/billing/$id': typeof WorkspaceBillingIdRoute
+  '/workspace/fulfillment/$id': typeof WorkspaceFulfillmentIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
+  '/workspace/approvals': typeof WorkspaceApprovalsRoute
+  '/workspace/builder': typeof WorkspaceBuilderRoute
+  '/workspace/pipeline': typeof WorkspacePipelineRoute
+  '/portal/quote/$token': typeof PortalQuoteTokenRoute
+  '/workspace/billing/$id': typeof WorkspaceBillingIdRoute
+  '/workspace/fulfillment/$id': typeof WorkspaceFulfillmentIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
+  '/workspace/approvals': typeof WorkspaceApprovalsRoute
+  '/workspace/builder': typeof WorkspaceBuilderRoute
+  '/workspace/pipeline': typeof WorkspacePipelineRoute
+  '/portal/quote/$token': typeof PortalQuoteTokenRoute
+  '/workspace/billing/$id': typeof WorkspaceBillingIdRoute
+  '/workspace/fulfillment/$id': typeof WorkspaceFulfillmentIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/success'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/dashboard'
+    | '/login'
+    | '/success'
+    | '/workspace/approvals'
+    | '/workspace/builder'
+    | '/workspace/pipeline'
+    | '/portal/quote/$token'
+    | '/workspace/billing/$id'
+    | '/workspace/fulfillment/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/success'
-  id: '__root__' | '/' | '/dashboard' | '/login' | '/success'
+  to:
+    | '/'
+    | '/admin'
+    | '/dashboard'
+    | '/login'
+    | '/success'
+    | '/workspace/approvals'
+    | '/workspace/builder'
+    | '/workspace/pipeline'
+    | '/portal/quote/$token'
+    | '/workspace/billing/$id'
+    | '/workspace/fulfillment/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/dashboard'
+    | '/login'
+    | '/success'
+    | '/workspace/approvals'
+    | '/workspace/builder'
+    | '/workspace/pipeline'
+    | '/portal/quote/$token'
+    | '/workspace/billing/$id'
+    | '/workspace/fulfillment/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   SuccessRoute: typeof SuccessRoute
+  WorkspaceApprovalsRoute: typeof WorkspaceApprovalsRoute
+  WorkspaceBuilderRoute: typeof WorkspaceBuilderRoute
+  WorkspacePipelineRoute: typeof WorkspacePipelineRoute
+  PortalQuoteTokenRoute: typeof PortalQuoteTokenRoute
+  WorkspaceBillingIdRoute: typeof WorkspaceBillingIdRoute
+  WorkspaceFulfillmentIdRoute: typeof WorkspaceFulfillmentIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -76,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -99,14 +210,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workspace/approvals': {
+      id: '/workspace/approvals'
+      path: '/workspace/approvals'
+      fullPath: '/workspace/approvals'
+      preLoaderRoute: typeof WorkspaceApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workspace/builder': {
+      id: '/workspace/builder'
+      path: '/workspace/builder'
+      fullPath: '/workspace/builder'
+      preLoaderRoute: typeof WorkspaceBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workspace/pipeline': {
+      id: '/workspace/pipeline'
+      path: '/workspace/pipeline'
+      fullPath: '/workspace/pipeline'
+      preLoaderRoute: typeof WorkspacePipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/quote/$token': {
+      id: '/portal/quote/$token'
+      path: '/portal/quote/$token'
+      fullPath: '/portal/quote/$token'
+      preLoaderRoute: typeof PortalQuoteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workspace/billing/$id': {
+      id: '/workspace/billing/$id'
+      path: '/workspace/billing/$id'
+      fullPath: '/workspace/billing/$id'
+      preLoaderRoute: typeof WorkspaceBillingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workspace/fulfillment/$id': {
+      id: '/workspace/fulfillment/$id'
+      path: '/workspace/fulfillment/$id'
+      fullPath: '/workspace/fulfillment/$id'
+      preLoaderRoute: typeof WorkspaceFulfillmentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   SuccessRoute: SuccessRoute,
+  WorkspaceApprovalsRoute: WorkspaceApprovalsRoute,
+  WorkspaceBuilderRoute: WorkspaceBuilderRoute,
+  WorkspacePipelineRoute: WorkspacePipelineRoute,
+  PortalQuoteTokenRoute: PortalQuoteTokenRoute,
+  WorkspaceBillingIdRoute: WorkspaceBillingIdRoute,
+  WorkspaceFulfillmentIdRoute: WorkspaceFulfillmentIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
