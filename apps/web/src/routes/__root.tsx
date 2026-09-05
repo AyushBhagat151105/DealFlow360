@@ -1,9 +1,16 @@
-import { HeadContent, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Outlet,
+  createRootRouteWithContext,
+  useRouterState,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { authClient } from "@/lib/auth-client";
+import { useAuthStore } from "@/stores/auth-store";
 
 import "../index.css";
 
@@ -14,11 +21,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "DealFlow360",
+        title: "DealFlow360 — Enterprise B2B Quotation Engine",
       },
       {
         name: "description",
-        content: "DealFlow360 is a web application",
+        content:
+          "Enterprise B2B Quotation, Blended Margin Governance, Multi-Warehouse Auto-Split & Hybrid Billing Engine",
       },
     ],
     links: [
@@ -31,6 +39,15 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootComponent() {
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
+  const { data: session } = authClient.useSession();
+  const storeIsAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const isAuthenticated = Boolean(session?.user || storeIsAuthenticated);
+  const isPublicPage = pathname === "/login" || pathname.startsWith("/portal/");
+  const showHeader = isAuthenticated && !isPublicPage;
+
   return (
     <>
       <HeadContent />
@@ -41,8 +58,8 @@ function RootComponent() {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        <div className="grid grid-rows-[auto_1fr] h-svh">
-          <Header />
+        <div className="grid grid-rows-[auto_1fr] h-svh bg-background text-foreground">
+          {showHeader && <Header />}
           <Outlet />
         </div>
         <Toaster richColors />

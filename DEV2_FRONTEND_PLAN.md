@@ -49,16 +49,16 @@
 ## 2. 16-Hour Step-by-Step Execution Checklist
 
 ### Block 1: Hours 0 – 3 (Shell, Layout, Navigation & UI Primitives)
-- [ ] Review [API_CONTRACTS.md](./API_CONTRACTS.md) for data shapes.
-- [ ] Set up required shadcn/ui components:
+- [x] Review [API_CONTRACTS.md](./API_CONTRACTS.md) for data shapes.
+- [x] Set up required shadcn/ui components:
   - Check existing UI primitives in `apps/web/src/components/ui/`.
   - Ensure Button, Card, Badge, Table, Dialog, Sheet, Tabs, Input, Label, Tooltip, Sonner, and Separator are ready.
-- [ ] Build global Top Navigation Header (`apps/web/src/components/header.tsx`):
+- [x] Build global Top Navigation Header (`apps/web/src/components/header.tsx`):
   - Brand Logo ("DealFlow360").
   - Navigation tabs: Quotations, Pipeline, Deal Health, Admin.
-  - **Demo Quick-Switch bar**: Select Role (Rep, Manager, Finance, Admin) + "Open Active Customer Portal" button.
-- [ ] Set up HTTP client & TanStack Query wrapper in `apps/web/src/lib/http-client.ts` and `apps/web/src/hooks/use-catalog.ts`.
-- [ ] Create mock data fallback in `apps/web/src/lib/mock-data.ts` matching [API_CONTRACTS.md](./API_CONTRACTS.md) Section 5 so UI development proceeds unblocked even before backend endpoints are deployed.
+  - Active Role Context Selector + Customer Portal launch button.
+- [x] Set up HTTP client & TanStack Query wrapper in `apps/web/src/lib/http-client.ts` and `apps/web/src/hooks/use-catalog.ts`.
+- [x] Create mock data fallback in `apps/web/src/lib/mock-data.ts` matching [API_CONTRACTS.md](./API_CONTRACTS.md) Section 5 so UI development proceeds unblocked even before backend endpoints are deployed.
 
 ---
 
