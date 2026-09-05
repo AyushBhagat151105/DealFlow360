@@ -1,4 +1,4 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   getPortalQuoteController,
   addPortalCommentController,
@@ -11,6 +11,8 @@ import {
 import {
   addPortalCommentSchema,
   submitCounterOfferSchema,
+  confirmPortalQuoteSchema,
+  portalTokenParamSchema,
   requestMagicLinkSchema,
   sendPortalLinkSchema,
 } from "../validators/portal.validator";
@@ -23,9 +25,7 @@ const getPortalQuoteRoute = createRoute({
   tags: ["Customer Portal"],
   summary: "Get sanitized customer portal quotation (costs and margins omitted)",
   request: {
-    params: z.object({
-      token: z.string().openapi({ param: { name: "token", in: "path" } }),
-    }),
+    params: portalTokenParamSchema,
   },
   responses: {
     200: { description: "Sanitized quotation details for customer review" },
@@ -38,9 +38,7 @@ const addPortalCommentRoute = createRoute({
   tags: ["Customer Portal"],
   summary: "Add customer comment or note to quotation or line item",
   request: {
-    params: z.object({
-      token: z.string().openapi({ param: { name: "token", in: "path" } }),
-    }),
+    params: portalTokenParamSchema,
     body: {
       content: {
         "application/json": {
@@ -60,9 +58,7 @@ const submitPortalCounterRoute = createRoute({
   tags: ["Customer Portal"],
   summary: "Propose customer discount counter-offer (triggers risk re-evaluation and approval re-entry)",
   request: {
-    params: z.object({
-      token: z.string().openapi({ param: { name: "token", in: "path" } }),
-    }),
+    params: portalTokenParamSchema,
     body: {
       content: {
         "application/json": {
@@ -82,15 +78,11 @@ const confirmPortalQuoteRoute = createRoute({
   tags: ["Customer Portal"],
   summary: "Customer 1-click quotation acceptance and confirmation",
   request: {
-    params: z.object({
-      token: z.string().openapi({ param: { name: "token", in: "path" } }),
-    }),
+    params: portalTokenParamSchema,
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            customerSignature: z.string().optional(),
-          }),
+          schema: confirmPortalQuoteSchema,
         },
       },
     },
@@ -125,9 +117,7 @@ const sendQuotePortalLinkRoute = createRoute({
   tags: ["Customer Portal"],
   summary: "Dispatch quotation magic link directly to customer email",
   request: {
-    params: z.object({
-      token: z.string().openapi({ param: { name: "token", in: "path" } }),
-    }),
+    params: portalTokenParamSchema,
     body: {
       content: {
         "application/json": {
@@ -148,9 +138,7 @@ const verifyPortalTokenRoute = createRoute({
   tags: ["Customer Portal"],
   summary: "Verify customer portal access token validity",
   request: {
-    params: z.object({
-      token: z.string().openapi({ param: { name: "token", in: "path" } }),
-    }),
+    params: portalTokenParamSchema,
   },
   responses: {
     200: { description: "Portal token is valid" },

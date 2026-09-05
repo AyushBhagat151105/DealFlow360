@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { sendSuccess } from "../utils/api-response";
-import { ValidationError } from "../utils/errors";
 import {
   getCatalogProducts,
   getCatalogCustomers,
@@ -22,6 +21,15 @@ import {
   listProductsQuerySchema,
   listCustomersQuerySchema,
   listUsersQuerySchema,
+  createProductSchema,
+  createCustomerSchema,
+  updateCustomerSchema,
+  createWarehouseSchema,
+  updateCeilingSchema,
+  updateUserRoleSchema,
+  idParamSchema,
+  customerTierParamSchema,
+  categoryParamSchema,
 } from "../validators/catalog.validator";
 
 export async function getProductsController(c: Context) {
@@ -55,65 +63,51 @@ export async function getCeilingsController(c: Context) {
 
 export async function createProductController(c: Context) {
   const body = await c.req.json();
-  const created = await createProduct(body);
+  const validated = createProductSchema.parse(body);
+  const created = await createProduct(validated);
   return sendSuccess(c, created, 201, "Product created successfully.");
 }
 
 export async function createCustomerController(c: Context) {
   const body = await c.req.json();
-  const created = await createCustomer(body);
+  const validated = createCustomerSchema.parse(body);
+  const created = await createCustomer(validated);
   return sendSuccess(c, created, 201, "Customer created successfully.");
 }
 
 export async function createWarehouseController(c: Context) {
   const body = await c.req.json();
-  const created = await createWarehouse(body);
+  const validated = createWarehouseSchema.parse(body);
+  const created = await createWarehouse(validated);
   return sendSuccess(c, created, 201, "Warehouse created successfully.");
 }
 
 export async function updateCustomerTierCeilingController(c: Context) {
-  const tier = c.req.param("tier");
-  if (!tier) {
-    throw new ValidationError("Customer tier is required.");
-  }
+  const { tier } = customerTierParamSchema.parse({ tier: c.req.param("tier") });
   const body = await c.req.json();
-  const ceiling = Number(body?.ceilingPercent);
-  if (isNaN(ceiling) || ceiling < 0 || ceiling > 100) {
-    throw new ValidationError("Valid ceiling percentage (0-100) is required.");
-  }
-  const updated = await updateCustomerTierCeiling(tier as never, ceiling);
+  const { ceilingPercent } = updateCeilingSchema.parse(body);
+  const updated = await updateCustomerTierCeiling(tier, ceilingPercent);
   return sendSuccess(c, updated, 200, "Customer tier ceiling updated.");
 }
 
 export async function updateCategoryCeilingController(c: Context) {
-  const category = c.req.param("category");
-  if (!category) {
-    throw new ValidationError("Category is required.");
-  }
+  const { category } = categoryParamSchema.parse({ category: c.req.param("category") });
   const body = await c.req.json();
-  const ceiling = Number(body?.ceilingPercent);
-  if (isNaN(ceiling) || ceiling < 0 || ceiling > 100) {
-    throw new ValidationError("Valid ceiling percentage (0-100) is required.");
-  }
-  const updated = await updateCategoryCeiling(category as never, ceiling);
+  const { ceilingPercent } = updateCeilingSchema.parse(body);
+  const updated = await updateCategoryCeiling(category, ceilingPercent);
   return sendSuccess(c, updated, 200, "Category ceiling updated.");
 }
 
 export async function updateCustomerController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("Customer ID is required.");
-  }
+  const { id } = idParamSchema.parse({ id: c.req.param("id") });
   const body = await c.req.json();
-  const updated = await updateCustomer(id, body);
+  const validated = updateCustomerSchema.parse(body);
+  const updated = await updateCustomer(id, validated);
   return sendSuccess(c, updated, 200, "Customer updated successfully.");
 }
 
 export async function deleteCustomerController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("Customer ID is required.");
-  }
+  const { id } = idParamSchema.parse({ id: c.req.param("id") });
   await deleteCustomer(id);
   return sendSuccess(c, { id }, 200, "Customer deleted successfully.");
 }
@@ -126,23 +120,15 @@ export async function getUsersController(c: Context) {
 }
 
 export async function updateUserRoleController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("User ID is required.");
-  }
+  const { id } = idParamSchema.parse({ id: c.req.param("id") });
   const body = await c.req.json();
-  if (!body.role) {
-    throw new ValidationError("Role is required.");
-  }
-  const updated = await updateUserRole(id, body.role);
+  const { role } = updateUserRoleSchema.parse(body);
+  const updated = await updateUserRole(id, role);
   return sendSuccess(c, updated, 200, "User role updated successfully.");
 }
 
 export async function deleteUserController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("User ID is required.");
-  }
+  const { id } = idParamSchema.parse({ id: c.req.param("id") });
   await deleteUser(id);
   return sendSuccess(c, { id }, 200, "User deleted successfully.");
 }

@@ -8,6 +8,12 @@ import {
   exportSalesReportController,
 } from "../controllers/deal-health.controller";
 import { requireAuth, requireRole } from "../middlewares/auth";
+import {
+  escalateAlertSchema,
+  salesReportQuerySchema,
+  salesAnalyticsQuerySchema,
+  exportSalesReportQuerySchema,
+} from "../validators/deal-health.validator";
 
 export const dealHealthRoutes = new OpenAPIHono();
 
@@ -26,6 +32,9 @@ const getSalesReportRoute = createRoute({
   path: "/reports/sales",
   tags: ["Deal Health"],
   summary: "Export aggregated sales performance and discount margin reports",
+  request: {
+    query: salesReportQuerySchema,
+  },
   responses: {
     200: { description: "Sales performance metrics report" },
   },
@@ -55,6 +64,13 @@ const escalateAlertRoute = createRoute({
     params: z.object({
       alertId: z.string().openapi({ param: { name: "alertId", in: "path" } }),
     }),
+    body: {
+      content: {
+        "application/json": {
+          schema: escalateAlertSchema,
+        },
+      },
+    },
   },
   responses: {
     200: { description: "Alert escalated to management" },
@@ -66,6 +82,9 @@ const getSalesAnalyticsReportRoute = createRoute({
   path: "/reports/analytics",
   tags: ["Deal Health"],
   summary: "Get aggregated sales analytics: category revenue share, tier discount ceilings vs actuals, and rep performance",
+  request: {
+    query: salesAnalyticsQuerySchema,
+  },
   responses: {
     200: { description: "Aggregated sales analytics report" },
   },
@@ -76,6 +95,9 @@ const exportSalesReportRoute = createRoute({
   path: "/reports/export",
   tags: ["Deal Health"],
   summary: "Export quotation performance and deal metrics in CSV or JSON format",
+  request: {
+    query: exportSalesReportQuerySchema,
+  },
   responses: {
     200: { description: "Downloadable CSV or JSON export" },
   },

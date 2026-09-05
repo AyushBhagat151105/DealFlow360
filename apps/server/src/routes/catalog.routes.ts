@@ -1,4 +1,4 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   getProductsController,
   getCustomersController,
@@ -17,11 +17,19 @@ import {
   deleteUserController,
 } from "../controllers/catalog.controller";
 import { requireAuth, requireRole, optionalAuth } from "../middlewares/auth";
-
 import {
   listProductsQuerySchema,
   listCustomersQuerySchema,
   listUsersQuerySchema,
+  createProductSchema,
+  createCustomerSchema,
+  updateCustomerSchema,
+  createWarehouseSchema,
+  updateCeilingSchema,
+  updateUserRoleSchema,
+  idParamSchema,
+  customerTierParamSchema,
+  categoryParamSchema,
 } from "../validators/catalog.validator";
 
 export const catalogRoutes = new OpenAPIHono();
@@ -91,20 +99,7 @@ const createProductRoute = createRoute({
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            sku: z.string().describe("Unique product SKU code"),
-            name: z.string().describe("Product display name"),
-            description: z.string().optional().default(""),
-            category: z.enum(["HARDWARE", "SOFTWARE_SUBSCRIPTION", "SERVICE"]),
-            unit: z.string().optional().default("unit"),
-            basePrice: z.number().optional().describe("Base / list price"),
-            listPrice: z.number().optional().describe("Alternative field for selling price"),
-            costPrice: z.number().optional().describe("Internal standard unit cost"),
-            standardCost: z.number().optional().describe("Alternative field for internal cost"),
-            taxRate: z.number().optional().default(10.0),
-            isPromoted: z.boolean().optional().default(false),
-            minMarginThreshold: z.number().optional().default(15.0),
-          }),
+          schema: createProductSchema,
         },
       },
     },
@@ -124,14 +119,7 @@ const createCustomerRoute = createRoute({
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            name: z.string().describe("Company or organization name"),
-            contactName: z.string().optional().describe("Primary contact person"),
-            email: z.string().email().describe("Primary contact email"),
-            phone: z.string().optional().describe("Phone number"),
-            address: z.string().optional().describe("Physical or billing address"),
-            tier: z.enum(["STANDARD", "BRONZE", "SILVER", "GOLD"]).optional().default("BRONZE"),
-          }),
+          schema: createCustomerSchema,
         },
       },
     },
@@ -151,14 +139,7 @@ const createWarehouseRoute = createRoute({
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            code: z.string().describe("Unique warehouse code e.g. CHI-01"),
-            name: z.string().describe("Warehouse facility name"),
-            location: z.string().optional().describe("City or state location"),
-            shippingCostWeight: z.number().optional().default(1.0).describe("Fulfillment preference weight"),
-            preferenceWeight: z.number().optional().default(1.0).describe("Alternative field for preference weight"),
-            isPrimary: z.boolean().optional().default(false),
-          }),
+          schema: createWarehouseSchema,
         },
       },
     },
@@ -175,21 +156,18 @@ const updateCustomerTierCeilingRoute = createRoute({
   tags: ["Catalog"],
   summary: "Update customer tier maximum discount ceiling",
   request: {
-    params: z.object({
-      tier: z.string().openapi({ param: { name: "tier", in: "path" } }),
-    }),
+    params: customerTierParamSchema,
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            ceilingPercent: z.number().min(0).max(100),
-          }),
+          schema: updateCeilingSchema,
         },
       },
     },
   },
   responses: {
     200: { description: "Tier ceiling updated successfully" },
+    400: { description: "Validation error" },
   },
 });
 
@@ -199,21 +177,18 @@ const updateCategoryCeilingRoute = createRoute({
   tags: ["Catalog"],
   summary: "Update product category maximum discount ceiling",
   request: {
-    params: z.object({
-      category: z.string().openapi({ param: { name: "category", in: "path" } }),
-    }),
+    params: categoryParamSchema,
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            ceilingPercent: z.number().min(0).max(100),
-          }),
+          schema: updateCeilingSchema,
         },
       },
     },
   },
   responses: {
     200: { description: "Category ceiling updated successfully" },
+    400: { description: "Validation error" },
   },
 });
 
@@ -223,20 +198,11 @@ const updateCustomerRoute = createRoute({
   tags: ["Catalog"],
   summary: "Update customer details",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: idParamSchema,
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            name: z.string().optional(),
-            contactName: z.string().optional(),
-            email: z.string().email().optional(),
-            phone: z.string().optional(),
-            address: z.string().optional(),
-            tier: z.enum(["STANDARD", "BRONZE", "SILVER", "GOLD"]).optional(),
-          }),
+          schema: updateCustomerSchema,
         },
       },
     },
@@ -254,9 +220,7 @@ const deleteCustomerRoute = createRoute({
   tags: ["Catalog"],
   summary: "Delete customer account (Admin only)",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: idParamSchema,
   },
   responses: {
     200: { description: "Customer deleted successfully" },
@@ -283,21 +247,18 @@ const updateUserRoleRoute = createRoute({
   tags: ["Catalog"],
   summary: "Update user role (Admin only)",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: idParamSchema,
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            role: z.enum(["rep", "manager", "finance", "admin"]),
-          }),
+          schema: updateUserRoleSchema,
         },
       },
     },
   },
   responses: {
     200: { description: "User role updated successfully" },
+    400: { description: "Validation error" },
     404: { description: "User not found" },
   },
 });
@@ -308,9 +269,7 @@ const deleteUserRoute = createRoute({
   tags: ["Catalog"],
   summary: "Delete user account (Admin only)",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: idParamSchema,
   },
   responses: {
     200: { description: "User deleted successfully" },

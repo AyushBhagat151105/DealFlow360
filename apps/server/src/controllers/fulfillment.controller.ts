@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { sendSuccess } from "../utils/api-response";
-import { ValidationError } from "../utils/errors";
 import {
   computeWarehouseSplit,
   confirmFulfillmentSplit,
@@ -9,33 +8,26 @@ import {
 import {
   confirmFulfillmentSchema,
   replenishStockSchema,
+  warehouseIdParamSchema,
+  fulfillmentQuoteIdParamSchema,
 } from "../validators/fulfillment.validator";
 
 export async function getFulfillmentSplitController(c: Context) {
-  const quoteId = c.req.param("id");
-  if (!quoteId) {
-    throw new ValidationError("Quotation ID is required.");
-  }
-  const plan = await computeWarehouseSplit(quoteId);
+  const { id } = fulfillmentQuoteIdParamSchema.parse({ id: c.req.param("id") });
+  const plan = await computeWarehouseSplit(id);
   return sendSuccess(c, plan);
 }
 
 export async function confirmFulfillmentController(c: Context) {
-  const quoteId = c.req.param("id");
-  if (!quoteId) {
-    throw new ValidationError("Quotation ID is required.");
-  }
+  const { id } = fulfillmentQuoteIdParamSchema.parse({ id: c.req.param("id") });
   const body = await c.req.json().catch(() => ({}));
   const validated = confirmFulfillmentSchema.parse(body);
-  const result = await confirmFulfillmentSplit(quoteId, validated.overrides);
+  const result = await confirmFulfillmentSplit(id, validated.overrides);
   return sendSuccess(c, result, 200, "Fulfillment split confirmed.");
 }
 
 export async function replenishStockController(c: Context) {
-  const warehouseId = c.req.param("warehouseId");
-  if (!warehouseId) {
-    throw new ValidationError("Warehouse ID is required.");
-  }
+  const { warehouseId } = warehouseIdParamSchema.parse({ warehouseId: c.req.param("warehouseId") });
   const body = await c.req.json();
   const validated = replenishStockSchema.parse(body);
   const result = await replenishWarehouseStock(

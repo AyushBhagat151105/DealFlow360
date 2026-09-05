@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { sendSuccess } from "../utils/api-response";
-import { ValidationError } from "../utils/errors";
 import {
   generateOrderInvoicesAndSubscriptions,
   getQuoteBilling,
@@ -17,31 +16,25 @@ import {
   modifySeatsSchema,
   listInvoicesQuerySchema,
   exportInvoicesQuerySchema,
+  invoiceIdParamSchema,
+  contractIdParamSchema,
+  billingIdParamSchema,
 } from "../validators/billing.validator";
 
 export async function getQuoteBillingController(c: Context) {
-  const quoteId = c.req.param("id");
-  if (!quoteId) {
-    throw new ValidationError("Quotation ID is required.");
-  }
-  const billing = await getQuoteBilling(quoteId);
+  const { id } = billingIdParamSchema.parse({ id: c.req.param("id") });
+  const billing = await getQuoteBilling(id);
   return sendSuccess(c, billing);
 }
 
 export async function generateBillingController(c: Context) {
-  const quoteId = c.req.param("id");
-  if (!quoteId) {
-    throw new ValidationError("Quotation ID is required.");
-  }
-  const result = await generateOrderInvoicesAndSubscriptions(quoteId);
+  const { id } = billingIdParamSchema.parse({ id: c.req.param("id") });
+  const result = await generateOrderInvoicesAndSubscriptions(id);
   return sendSuccess(c, result, 201, "Billing and subscriptions generated.");
 }
 
 export async function recordPaymentController(c: Context) {
-  const invoiceId = c.req.param("invoiceId");
-  if (!invoiceId) {
-    throw new ValidationError("Invoice ID is required.");
-  }
+  const { invoiceId } = invoiceIdParamSchema.parse({ invoiceId: c.req.param("invoiceId") });
   const body = await c.req.json();
   const validated = recordPaymentSchema.parse(body);
   const result = await recordInvoicePayment({
@@ -54,10 +47,7 @@ export async function recordPaymentController(c: Context) {
 }
 
 export async function modifySubscriptionSeatsController(c: Context) {
-  const contractId = c.req.param("contractId");
-  if (!contractId) {
-    throw new ValidationError("Contract ID is required.");
-  }
+  const { contractId } = contractIdParamSchema.parse({ contractId: c.req.param("contractId") });
   const body = await c.req.json();
   const validated = modifySeatsSchema.parse(body);
   const result = await modifySubscriptionSeats(contractId, validated.newSeatCount);
@@ -65,10 +55,7 @@ export async function modifySubscriptionSeatsController(c: Context) {
 }
 
 export async function cancelSubscriptionController(c: Context) {
-  const contractId = c.req.param("contractId");
-  if (!contractId) {
-    throw new ValidationError("Contract ID is required.");
-  }
+  const { contractId } = contractIdParamSchema.parse({ contractId: c.req.param("contractId") });
   const result = await cancelSubscription(contractId);
   return sendSuccess(c, result, 200, "Subscription cancelled.");
 }
@@ -81,19 +68,13 @@ export async function listInvoicesController(c: Context) {
 }
 
 export async function getInvoiceByIdController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("Invoice ID is required.");
-  }
+  const { id } = billingIdParamSchema.parse({ id: c.req.param("id") });
   const invoice = await getInvoiceById(id);
   return sendSuccess(c, invoice);
 }
 
 export async function getInvoicePrintHtmlController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("Invoice ID is required.");
-  }
+  const { id } = billingIdParamSchema.parse({ id: c.req.param("id") });
   const html = await generateInvoicePrintHtml(id);
   return c.html(html);
 }

@@ -40,6 +40,15 @@ export const reviewQuoteSchema = z.object({
   actorRole: z.string().optional().default("manager"),
 });
 
+export const submitApprovalSchema = z.object({
+  actorName: z.string().optional().default("Sales Rep"),
+  actorRole: z.string().optional().default("rep"),
+});
+
+export const quoteIdParamSchema = z.object({
+  id: z.string().min(1, "Quotation ID is required"),
+});
+
 export const listQuotesQuerySchema = z.object({
   status: z
     .enum([
@@ -60,3 +69,9 @@ export const listQuotesQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).optional(),
   all: z.coerce.boolean().optional(),
 });
+
+export type CalculatePreviewInput = z.infer<typeof calculatePreviewSchema>;
+export type CreateQuoteInput = z.infer<typeof createQuoteSchema>;
+export type ReviewQuoteInput = z.infer<typeof reviewQuoteSchema>;
+export type SubmitApprovalInput = z.infer<typeof submitApprovalSchema>;
+export type ListQuotesQueryInput = z.infer<typeof listQuotesQuerySchema>;

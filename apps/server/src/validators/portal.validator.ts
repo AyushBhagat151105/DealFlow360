@@ -20,6 +20,14 @@ export const submitCounterOfferSchema = z.object({
   comment: z.string().optional(),
 });
 
+export const confirmPortalQuoteSchema = z.object({
+  customerSignature: z.string().optional(),
+});
+
+export const portalTokenParamSchema = z.object({
+  token: z.string().min(1, "Portal token is required"),
+});
+
 export const requestMagicLinkSchema = z.object({
   email: z.string().email("Valid email address is required"),
   quoteNumber: z.string().optional(),
@@ -29,3 +37,9 @@ export const sendPortalLinkSchema = z.object({
   recipientEmail: z.string().email().optional(),
   customMessage: z.string().max(500).optional(),
 });
+
+export type AddPortalCommentInput = z.infer<typeof addPortalCommentSchema>;
+export type SubmitCounterOfferInput = z.infer<typeof submitCounterOfferSchema>;
+export type ConfirmPortalQuoteInput = z.infer<typeof confirmPortalQuoteSchema>;
+export type RequestMagicLinkInput = z.infer<typeof requestMagicLinkSchema>;
+export type SendPortalLinkInput = z.infer<typeof sendPortalLinkSchema>;

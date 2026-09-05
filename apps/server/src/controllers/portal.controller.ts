@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { sendSuccess } from "../utils/api-response";
-import { ValidationError } from "../utils/errors";
 import {
   getPortalQuote,
   addPortalComment,
@@ -13,24 +12,20 @@ import {
 import {
   addPortalCommentSchema,
   submitCounterOfferSchema,
+  confirmPortalQuoteSchema,
+  portalTokenParamSchema,
   requestMagicLinkSchema,
   sendPortalLinkSchema,
 } from "../validators/portal.validator";
 
 export async function getPortalQuoteController(c: Context) {
-  const token = c.req.param("token");
-  if (!token) {
-    throw new ValidationError("Portal token is required.");
-  }
+  const { token } = portalTokenParamSchema.parse({ token: c.req.param("token") });
   const quote = await getPortalQuote(token);
   return sendSuccess(c, quote);
 }
 
 export async function addPortalCommentController(c: Context) {
-  const token = c.req.param("token");
-  if (!token) {
-    throw new ValidationError("Portal token is required.");
-  }
+  const { token } = portalTokenParamSchema.parse({ token: c.req.param("token") });
   const body = await c.req.json();
   const validated = addPortalCommentSchema.parse(body);
   const comment = await addPortalComment(
@@ -44,10 +39,7 @@ export async function addPortalCommentController(c: Context) {
 }
 
 export async function submitPortalCounterController(c: Context) {
-  const token = c.req.param("token");
-  if (!token) {
-    throw new ValidationError("Portal token is required.");
-  }
+  const { token } = portalTokenParamSchema.parse({ token: c.req.param("token") });
   const body = await c.req.json();
   const validated = submitCounterOfferSchema.parse(body);
   const updated = await submitPortalCounterOffer(
@@ -60,19 +52,16 @@ export async function submitPortalCounterController(c: Context) {
 }
 
 export async function confirmPortalQuoteController(c: Context) {
-  const token = c.req.param("token");
-  if (!token) {
-    throw new ValidationError("Portal token is required.");
-  }
+  const { token } = portalTokenParamSchema.parse({ token: c.req.param("token") });
+  const body = await c.req.json().catch(() => ({}));
+  confirmPortalQuoteSchema.parse(body);
   const confirmed = await confirmPortalQuote(token);
   return sendSuccess(c, confirmed, 200, "Quotation accepted and confirmed.");
 }
 
 export async function sendQuotePortalLinkController(c: Context) {
   const token = c.req.param("token") || c.req.param("id");
-  if (!token) {
-    throw new ValidationError("Quotation identifier is required.");
-  }
+  const { token: validatedToken } = portalTokenParamSchema.parse({ token });
   let body: Record<string, unknown> = {};
   try {
     body = await c.req.json();
@@ -81,7 +70,7 @@ export async function sendQuotePortalLinkController(c: Context) {
   }
   const validated = sendPortalLinkSchema.parse(body);
   const result = await sendQuotePortalLink(
-    token,
+    validatedToken,
     validated.recipientEmail,
     validated.customMessage,
   );
@@ -96,10 +85,7 @@ export async function requestMagicLinkController(c: Context) {
 }
 
 export async function verifyPortalTokenController(c: Context) {
-  const token = c.req.param("token");
-  if (!token) {
-    throw new ValidationError("Portal token is required.");
-  }
+  const { token } = portalTokenParamSchema.parse({ token: c.req.param("token") });
   const result = await verifyPortalToken(token);
   return sendSuccess(c, result, 200, "Portal token is valid.");
 }

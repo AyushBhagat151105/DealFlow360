@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { sendSuccess } from "../utils/api-response";
-import { ValidationError } from "../utils/errors";
 import {
   getDealHealthOverview,
   nudgeDealRep,
@@ -9,6 +8,13 @@ import {
   getSalesAnalyticsReport,
   exportSalesReportCsv,
 } from "../services/deal-health.service";
+import {
+  alertIdParamSchema,
+  escalateAlertSchema,
+  salesReportQuerySchema,
+  salesAnalyticsQuerySchema,
+  exportSalesReportQuerySchema,
+} from "../validators/deal-health.validator";
 
 export async function getDealHealthOverviewController(c: Context) {
   const overview = await getDealHealthOverview();
@@ -16,79 +22,63 @@ export async function getDealHealthOverviewController(c: Context) {
 }
 
 export async function nudgeDealRepController(c: Context) {
-  const alertId = c.req.param("alertId");
-  if (!alertId) {
-    throw new ValidationError("Alert ID is required.");
-  }
+  const { alertId } = alertIdParamSchema.parse({ alertId: c.req.param("alertId") });
   const updated = await nudgeDealRep(alertId);
   return sendSuccess(c, updated, 200, "Nudge dispatched to sales representative.");
 }
 
 export async function escalateDealAlertController(c: Context) {
-  const alertId = c.req.param("alertId");
-  if (!alertId) {
-    throw new ValidationError("Alert ID is required.");
-  }
+  const { alertId } = alertIdParamSchema.parse({ alertId: c.req.param("alertId") });
   const body = await c.req.json().catch(() => ({}));
-  const targetRole = (body?.targetRole as string) ?? "VP_SALES";
+  const { targetRole } = escalateAlertSchema.parse(body);
   const updated = await escalateDealAlert(alertId, targetRole);
   return sendSuccess(c, updated, 200, `Alert escalated to ${targetRole}.`);
 }
 
 export async function getSalesReportController(c: Context) {
-  const query = c.req.query();
+  const query = salesReportQuerySchema.parse(c.req.query());
   const startDate = query.startDate ? new Date(query.startDate) : undefined;
   const endDate = query.endDate ? new Date(query.endDate) : undefined;
-  const repUserId = query.repUserId;
-  const status = query.status as never;
-  const category = query.category as never;
 
   const data = await getSalesReportData({
     startDate,
     endDate,
-    repUserId,
-    status,
-    category,
+    repUserId: query.repUserId,
+    status: query.status,
+    category: query.category,
   });
 
   return sendSuccess(c, data);
 }
 
 export async function getSalesAnalyticsReportController(c: Context) {
-  const query = c.req.query();
+  const query = salesAnalyticsQuerySchema.parse(c.req.query());
   const startDate = query.startDate ? new Date(query.startDate) : undefined;
   const endDate = query.endDate ? new Date(query.endDate) : undefined;
-  const repUserId = query.repUserId;
-  const status = query.status as never;
-  const category = query.category as never;
 
   const report = await getSalesAnalyticsReport({
     startDate,
     endDate,
-    repUserId,
-    status,
-    category,
+    repUserId: query.repUserId,
+    status: query.status,
+    category: query.category,
   });
 
   return sendSuccess(c, report);
 }
 
 export async function exportSalesReportController(c: Context) {
-  const query = c.req.query();
-  const format = query.format ?? "csv";
+  const query = exportSalesReportQuerySchema.parse(c.req.query());
   const startDate = query.startDate ? new Date(query.startDate) : undefined;
   const endDate = query.endDate ? new Date(query.endDate) : undefined;
-  const repUserId = query.repUserId;
-  const status = query.status as never;
-  const category = query.category as never;
 
-  if (format === "csv") {
+  if (query.format === "csv") {
     const csv = await exportSalesReportCsv({
       startDate,
       endDate,
-      repUserId,
-      status,
-      category,
+      repUserId: query.repUserId,
+      status: query.status,
+      category: query.category,
     });
 
     return c.text(csv, 200, {
@@ -100,9 +90,9 @@ export async function exportSalesReportController(c: Context) {
   const data = await getSalesReportData({
     startDate,
     endDate,
-    repUserId,
-    status,
-    category,
+    repUserId: query.repUserId,
+    status: query.status,
+    category: query.category,
   });
 
   return sendSuccess(c, data);

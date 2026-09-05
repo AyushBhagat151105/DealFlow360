@@ -1,9 +1,6 @@
 import type { Context } from "hono";
 import { sendSuccess } from "../utils/api-response";
-import { ValidationError } from "../utils/errors";
-import {
-  calculateQuotePricing,
-} from "../services/pricing.service";
+import { calculateQuotePricing } from "../services/pricing.service";
 import {
   createQuote,
   listQuotes,
@@ -16,6 +13,8 @@ import {
   createQuoteSchema,
   listQuotesQuerySchema,
   reviewQuoteSchema,
+  submitApprovalSchema,
+  quoteIdParamSchema,
 } from "../validators/quote.validator";
 
 export async function calculatePreviewController(c: Context) {
@@ -41,31 +40,21 @@ export async function listQuotesController(c: Context) {
 }
 
 export async function getQuoteByIdController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("Quotation ID is required.");
-  }
+  const { id } = quoteIdParamSchema.parse({ id: c.req.param("id") });
   const quote = await getQuoteById(id);
   return sendSuccess(c, quote);
 }
 
 export async function submitApprovalController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("Quotation ID is required.");
-  }
+  const { id } = quoteIdParamSchema.parse({ id: c.req.param("id") });
   const body = await c.req.json().catch(() => ({}));
-  const actorName = (body?.actorName as string) ?? "Sales Rep";
-  const actorRole = (body?.actorRole as string) ?? "rep";
+  const { actorName, actorRole } = submitApprovalSchema.parse(body);
   const updated = await submitQuoteForApproval(id, actorName, actorRole);
   return sendSuccess(c, updated, 200, "Quotation submitted for approval.");
 }
 
 export async function reviewQuoteController(c: Context) {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new ValidationError("Quotation ID is required.");
-  }
+  const { id } = quoteIdParamSchema.parse({ id: c.req.param("id") });
   const body = await c.req.json();
   const validated = reviewQuoteSchema.parse(body);
   const updated = await reviewQuote(

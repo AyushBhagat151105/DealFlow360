@@ -1,13 +1,25 @@
 import { z } from "zod";
 
 export const recordPaymentSchema = z.object({
-  amount: z.number().positive("Payment amount must be positive"),
-  paymentMethod: z.enum(["CREDIT_CARD", "WIRE_TRANSFER", "CASH"]),
+  amount: z.coerce.number().positive("Payment amount must be positive"),
+  paymentMethod: z.string().min(1, "Payment method is required"),
   reference: z.string().optional(),
 });
 
 export const modifySeatsSchema = z.object({
-  newSeatCount: z.number().int().positive("Seats must be at least 1"),
+  newSeatCount: z.coerce.number().int().positive("Seats must be at least 1"),
+});
+
+export const invoiceIdParamSchema = z.object({
+  invoiceId: z.string().min(1, "Invoice ID is required"),
+});
+
+export const contractIdParamSchema = z.object({
+  contractId: z.string().min(1, "Contract ID is required"),
+});
+
+export const billingIdParamSchema = z.object({
+  id: z.string().min(1, "ID is required"),
 });
 
 export const listInvoicesQuerySchema = z.object({
@@ -30,3 +42,8 @@ export const exportInvoicesQuerySchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 });
+
+export type RecordPaymentInput = z.infer<typeof recordPaymentSchema>;
+export type ModifySeatsInput = z.infer<typeof modifySeatsSchema>;
+export type ListInvoicesQueryInput = z.infer<typeof listInvoicesQuerySchema>;
+export type ExportInvoicesQueryInput = z.infer<typeof exportInvoicesQuerySchema>;

@@ -1,4 +1,4 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   getFulfillmentSplitController,
   confirmFulfillmentController,
@@ -8,6 +8,8 @@ import { requireAuth, requireRole } from "../middlewares/auth";
 import {
   confirmFulfillmentSchema,
   replenishStockSchema,
+  warehouseIdParamSchema,
+  fulfillmentQuoteIdParamSchema,
 } from "../validators/fulfillment.validator";
 
 export const fulfillmentRoutes = new OpenAPIHono();
@@ -18,9 +20,7 @@ const getFulfillmentSplitRoute = createRoute({
   tags: ["Fulfillment"],
   summary: "Compute multi-warehouse split using greedy minimum-shipment heuristic",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: fulfillmentQuoteIdParamSchema,
   },
   responses: {
     200: { description: "Computed multi-warehouse fulfillment split" },
@@ -33,9 +33,7 @@ const confirmFulfillmentRoute = createRoute({
   tags: ["Fulfillment"],
   summary: "Confirm fulfillment allocations and reserve warehouse inventory",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: fulfillmentQuoteIdParamSchema,
     body: {
       content: {
         "application/json": {
@@ -55,9 +53,7 @@ const replenishStockRoute = createRoute({
   tags: ["Fulfillment"],
   summary: "Replenish warehouse inventory stock levels",
   request: {
-    params: z.object({
-      warehouseId: z.string().openapi({ param: { name: "warehouseId", in: "path" } }),
-    }),
+    params: warehouseIdParamSchema,
     body: {
       content: {
         "application/json": {

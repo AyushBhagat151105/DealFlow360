@@ -1,4 +1,4 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   calculatePreviewController,
   createQuoteController,
@@ -15,6 +15,8 @@ import {
   createQuoteSchema,
   listQuotesQuerySchema,
   reviewQuoteSchema,
+  submitApprovalSchema,
+  quoteIdParamSchema,
 } from "../validators/quote.validator";
 import { sendPortalLinkSchema } from "../validators/portal.validator";
 
@@ -77,9 +79,7 @@ const getQuoteByIdRoute = createRoute({
   tags: ["Quotes"],
   summary: "Get quotation details with line items and audit history",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: quoteIdParamSchema,
   },
   responses: {
     200: { description: "Quotation details" },
@@ -92,16 +92,11 @@ const submitApprovalRoute = createRoute({
   tags: ["Quotes"],
   summary: "Submit quotation for approval (or auto-approve if risk score is 0)",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: quoteIdParamSchema,
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            actorName: z.string().optional(),
-            actorRole: z.string().optional(),
-          }),
+          schema: submitApprovalSchema,
         },
       },
     },
@@ -117,9 +112,7 @@ const reviewQuoteRoute = createRoute({
   tags: ["Quotes"],
   summary: "Review quotation (Manager / Finance approval or rejection)",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: quoteIdParamSchema,
     body: {
       content: {
         "application/json": {
@@ -139,9 +132,7 @@ const upsellSuggestionsRoute = createRoute({
   tags: ["Quotes"],
   summary: "Get intelligent upsell and cross-sell recommendations with margin delta %",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: quoteIdParamSchema,
   },
   responses: {
     200: { description: "Upsell recommendations with live margin delta" },
@@ -154,9 +145,7 @@ const sendQuotePortalLinkRoute = createRoute({
   tags: ["Quotes"],
   summary: "Dispatch quotation magic link directly to customer email",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: quoteIdParamSchema,
     body: {
       content: {
         "application/json": {

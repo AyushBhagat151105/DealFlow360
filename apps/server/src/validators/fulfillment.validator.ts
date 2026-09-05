@@ -16,3 +16,15 @@ export const replenishStockSchema = z.object({
   quantityAdded: z.number().int().positive("Quantity must be greater than zero"),
   variantId: z.string().optional().nullable(),
 });
+
+export const warehouseIdParamSchema = z.object({
+  warehouseId: z.string().min(1, "Warehouse ID is required"),
+});
+
+export const fulfillmentQuoteIdParamSchema = z.object({
+  id: z.string().min(1, "Quotation ID is required"),
+});
+
+export type ManualAllocationOverrideInput = z.infer<typeof manualAllocationOverrideSchema>;
+export type ConfirmFulfillmentInput = z.infer<typeof confirmFulfillmentSchema>;
+export type ReplenishStockInput = z.infer<typeof replenishStockSchema>;

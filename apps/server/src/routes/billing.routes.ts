@@ -1,4 +1,4 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   getQuoteBillingController,
   generateBillingController,
@@ -16,6 +16,9 @@ import {
   modifySeatsSchema,
   listInvoicesQuerySchema,
   exportInvoicesQuerySchema,
+  invoiceIdParamSchema,
+  contractIdParamSchema,
+  billingIdParamSchema,
 } from "../validators/billing.validator";
 
 export const billingRoutes = new OpenAPIHono();
@@ -26,9 +29,7 @@ const getQuoteBillingRoute = createRoute({
   tags: ["Billing"],
   summary: "Get invoices and subscription contracts for a quotation",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: billingIdParamSchema,
   },
   responses: {
     200: { description: "Quote billing records (invoices and contracts)" },
@@ -41,9 +42,7 @@ const generateBillingRoute = createRoute({
   tags: ["Billing"],
   summary: "Auto-generate split invoices (one-time vs recurring) and subscription contracts",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: billingIdParamSchema,
   },
   responses: {
     201: { description: "Invoices and subscription contracts generated" },
@@ -56,9 +55,7 @@ const recordPaymentRoute = createRoute({
   tags: ["Billing"],
   summary: "Record payment against an invoice (updates status to PAID)",
   request: {
-    params: z.object({
-      invoiceId: z.string().openapi({ param: { name: "invoiceId", in: "path" } }),
-    }),
+    params: invoiceIdParamSchema,
     body: {
       content: {
         "application/json": {
@@ -78,9 +75,7 @@ const modifySubscriptionSeatsRoute = createRoute({
   tags: ["Billing"],
   summary: "Modify subscription seats with daily proration for mid-cycle changes",
   request: {
-    params: z.object({
-      contractId: z.string().openapi({ param: { name: "contractId", in: "path" } }),
-    }),
+    params: contractIdParamSchema,
     body: {
       content: {
         "application/json": {
@@ -100,9 +95,7 @@ const cancelSubscriptionRoute = createRoute({
   tags: ["Billing"],
   summary: "Cancel subscription contract and issue credit note for unused balance",
   request: {
-    params: z.object({
-      contractId: z.string().openapi({ param: { name: "contractId", in: "path" } }),
-    }),
+    params: contractIdParamSchema,
   },
   responses: {
     200: { description: "Subscription cancelled and credit note generated" },
@@ -141,9 +134,7 @@ const getInvoiceByIdRoute = createRoute({
   tags: ["Billing"],
   summary: "Get single invoice details with line items and payment ledger",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: billingIdParamSchema,
   },
   responses: {
     200: { description: "Invoice details" },
@@ -157,9 +148,7 @@ const getInvoicePrintHtmlRoute = createRoute({
   tags: ["Billing"],
   summary: "Get branded, printable HTML invoice template",
   request: {
-    params: z.object({
-      id: z.string().openapi({ param: { name: "id", in: "path" } }),
-    }),
+    params: billingIdParamSchema,
   },
   responses: {
     200: { description: "Printable HTML invoice page" },
