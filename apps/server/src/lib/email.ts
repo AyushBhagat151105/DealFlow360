@@ -20,20 +20,9 @@ export type SendEmailOptions = {
 };
 
 export async function sendEmail(options: SendEmailOptions) {
-  const { to, subject, html, text, react, from, replyTo } = options;
-  const fromAddress = from || env.RESEND_FROM_EMAIL;
   const { to, subject, html, text, react, from, replyTo, idempotencyKey } = options;
   const fromAddress = from || env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
-  const { data, error } = await resend.emails.send({
-    from: fromAddress,
-    to: Array.isArray(to) ? to : [to],
-    subject,
-    html,
-    text,
-    react,
-    replyTo,
-  });
   const { data, error } = await resend.emails.send(
     {
       from: fromAddress,
@@ -48,11 +37,9 @@ export async function sendEmail(options: SendEmailOptions) {
   );
 
   if (error) {
-    throw new Error(`Failed to send email: ${error.message}`);
     return { success: false, error: error.message, data: null };
   }
 
-  return { success: true, data };
   return { success: true, data, error: null };
 }
 

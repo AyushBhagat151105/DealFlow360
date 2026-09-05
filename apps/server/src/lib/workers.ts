@@ -1,14 +1,10 @@
 import { Worker, type Job } from "bullmq";
-import { connection, type EmailJobData, type NotificationJobData } from "./queue.js";
 import { connection, type EmailJobData, type NotificationJobData } from "./queue";
 import { sendEmail } from "./email";
 
 export const emailWorker = new Worker<EmailJobData>(
   "email",
   async (job: Job<EmailJobData>) => {
-    const { to } = job.data;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return { sent: true, to, timestamp: new Date().toISOString() };
     const { to, subject, body } = job.data;
     const result = await sendEmail({
       to,
