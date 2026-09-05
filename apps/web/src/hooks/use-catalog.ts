@@ -1,6 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { httpClient } from "@/lib/http-client";
-import type { Customer, Product, Warehouse } from "@/lib/api-types";
+import type {
+  CreateCustomerInput,
+  CreateProductInput,
+  CreateWarehouseInput,
+  Customer,
+  Product,
+  ReplenishStockInput,
+  SubscriptionPlan,
+  Warehouse,
+} from "@/lib/api-types";
 
 export function useProducts() {
   return useQuery<Product[]>({
@@ -31,3 +40,67 @@ export function useWarehouses() {
     },
   });
 }
+
+export function useSubscriptionPlans() {
+  return useQuery<SubscriptionPlan[]>({
+    queryKey: ["catalog", "plans"],
+    queryFn: async () => {
+      const response = await httpClient.get<{ data: SubscriptionPlan[] }>("/api/catalog/plans");
+      return response.data.data;
+    },
+  });
+}
+
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CreateProductInput) => {
+      const response = await httpClient.post<{ data: Product }>("/api/catalog/products", input);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalog", "products"] });
+    },
+  });
+}
+
+export function useCreateCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CreateCustomerInput) => {
+      const response = await httpClient.post<{ data: Customer }>("/api/catalog/customers", input);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalog", "customers"] });
+    },
+  });
+}
+
+export function useCreateWarehouse() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CreateWarehouseInput) => {
+      const response = await httpClient.post<{ data: Warehouse }>("/api/catalog/warehouses", input);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalog", "warehouses"] });
+    },
+  });
+}
+
+export function useReplenishStock() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ warehouseId, ...input }: ReplenishStockInput & { warehouseId: string }) => {
+      const response = await httpClient.post(`/api/fulfillment/warehouses/${warehouseId}/replenish`, input);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalog", "warehouses"] });
+      queryClient.invalidateQueries({ queryKey: ["catalog", "products"] });
+    },
+  });
+}
+

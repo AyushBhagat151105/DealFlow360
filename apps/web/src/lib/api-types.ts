@@ -1,5 +1,5 @@
-export type ProductCategory = "HARDWARE" | "SERVICE" | "SUBSCRIPTION";
-export type CustomerTier = "BRONZE" | "SILVER" | "GOLD";
+export type ProductCategory = "HARDWARE" | "SERVICE" | "SUBSCRIPTION" | "SOFTWARE_SUBSCRIPTION";
+export type CustomerTier = "STANDARD" | "BRONZE" | "SILVER" | "GOLD";
 export type QuoteStatus =
   | "DRAFT"
   | "PENDING_APPROVAL"
@@ -14,24 +14,67 @@ export interface Product {
   id: string;
   sku: string;
   name: string;
-  description: string;
+  description?: string;
   category: ProductCategory;
   costPrice: number;
   basePrice: number;
-  taxRate: number;
-  isPromoted: boolean;
-  minMarginThreshold: number;
-  totalStock: number;
+  taxRate?: number;
+  isPromoted?: boolean;
+  minMarginThreshold?: number;
+  totalStock?: number;
 }
 
 export interface Customer {
   id: string;
   name: string;
-  contactName: string;
+  contactName?: string;
+  company?: string;
   email: string;
   tier: CustomerTier;
-  allowedDiscountCeiling: number;
-  historicalAvgDiscount: number;
+  allowedDiscountCeiling?: number;
+  historicalAvgDiscount?: number;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  code?: string;
+  billingInterval: string;
+  unitPrice: number;
+  description?: string;
+}
+
+export interface CreateProductInput {
+  name: string;
+  sku: string;
+  category: ProductCategory;
+  listPrice: number;
+  standardCost: number;
+  description?: string;
+  taxRate?: number;
+  isPromoted?: boolean;
+  minMarginThreshold?: number;
+}
+
+export interface CreateCustomerInput {
+  name: string;
+  email: string;
+  contactName?: string;
+  company?: string;
+  tier: CustomerTier;
+}
+
+export interface CreateWarehouseInput {
+  name: string;
+  code: string;
+  location: string;
+  preferenceWeight?: number;
+}
+
+export interface ReplenishStockInput {
+  productId: string;
+  quantityAdded: number;
+  variantId?: string | null;
 }
 
 export interface WarehouseStock {
@@ -44,8 +87,9 @@ export interface Warehouse {
   id: string;
   code: string;
   name: string;
-  shippingCostWeight: number;
-  stocks: WarehouseStock[];
+  location?: string;
+  shippingCostWeight?: number;
+  stocks?: WarehouseStock[];
 }
 
 export interface QuoteLine {

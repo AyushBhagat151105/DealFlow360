@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import type { Customer, Product, UpsellSuggestion } from "@/lib/api-types";
+import type { Customer, Product, ProductCategory, UpsellSuggestion } from "@/lib/api-types";
 import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/workspace/builder")({
@@ -50,7 +50,7 @@ interface CartLine {
   productId: string;
   productName: string;
   sku: string;
-  category: "HARDWARE" | "SERVICE" | "SUBSCRIPTION";
+  category: ProductCategory;
   quantity: number;
   unitPrice: number;
   costPrice: number;
@@ -80,7 +80,7 @@ function calcBlendedRiskScore(
     if (lineMargin < line.minMarginThreshold) {
       score += Math.ceil(line.minMarginThreshold - lineMargin);
     }
-    if (customer && line.discountPercent > customer.allowedDiscountCeiling) {
+    if (customer && customer.allowedDiscountCeiling !== undefined && line.discountPercent > customer.allowedDiscountCeiling) {
       score += 3;
     }
   }
@@ -233,7 +233,7 @@ function BuilderComponent() {
           quantity: 1,
           unitPrice: product.basePrice,
           costPrice: product.costPrice,
-          minMarginThreshold: product.minMarginThreshold,
+          minMarginThreshold: product.minMarginThreshold ?? 15,
           discountPercent: 0,
         },
       ];
@@ -505,6 +505,7 @@ function BuilderComponent() {
                         const isBelowThreshold = lineMargin < line.minMarginThreshold;
                         const isDiscountAboveCeiling =
                           selectedCustomer &&
+                          selectedCustomer.allowedDiscountCeiling !== undefined &&
                           line.discountPercent > selectedCustomer.allowedDiscountCeiling;
 
                         return (
@@ -668,7 +669,9 @@ function BuilderComponent() {
                     {cart.some(
                       (l) =>
                         calcLineMarginPercent(l) < l.minMarginThreshold ||
-                        (selectedCustomer && l.discountPercent > selectedCustomer.allowedDiscountCeiling)
+                        (selectedCustomer &&
+                          selectedCustomer.allowedDiscountCeiling !== undefined &&
+                          l.discountPercent > selectedCustomer.allowedDiscountCeiling)
                     ) && (
                       <div className="text-[11px] bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-2.5 rounded-none space-y-1">
                         <p className="font-semibold">Discount Ceiling Violations:</p>
@@ -676,7 +679,9 @@ function BuilderComponent() {
                           .filter(
                             (l) =>
                               calcLineMarginPercent(l) < l.minMarginThreshold ||
-                              (selectedCustomer && l.discountPercent > selectedCustomer.allowedDiscountCeiling)
+                              (selectedCustomer &&
+                                selectedCustomer.allowedDiscountCeiling !== undefined &&
+                                l.discountPercent > selectedCustomer.allowedDiscountCeiling)
                           )
                           .map((l) => (
                             <p key={l.productId} className="font-mono">
