@@ -49,68 +49,76 @@
 
 ---
 
-### Block 2: Hours 3 – 7 (Core Engines & Quotation APIs)
-- [ ] Implement `apps/server/src/utils/api-response.ts`:
-  - `sendSuccess(c, data, message?)`
-  - `sendError(c, code, message, statusCode, details?)`
-- [ ] Implement `apps/server/src/services/pricing.service.ts`:
-  - `calculateLineMargin(price, cost, discountPercent)`
-  - `calculateBlendedRiskScore(lines, customerTier)` implementing the exact formula from [API_CONTRACTS.md](./API_CONTRACTS.md).
-- [ ] Create `apps/server/src/validators/quote.validator.ts`:
-  - `calculatePreviewSchema`
-  - `createQuoteSchema`
-  - `reviewQuoteSchema`
-- [ ] Create `apps/server/src/controllers/quote.controller.ts` and `apps/server/src/routes/quote.routes.ts`:
+### Block 2: Hours 3 – 7 (Core Engines & Quotation APIs) [COMPLETED]
+- [x] Implement `apps/server/src/utils/api-response.ts`:
+  - `sendSuccess(c, data, statusCode?, message?)`
+  - `sendError(c, code, message, statusCode?, details?)`
+- [x] Implement `apps/server/src/middlewares/auth.ts` (Better Auth session guard + Bearer token fallback + RBAC requireRole).
+- [x] Implement `apps/server/src/services/pricing.service.ts`:
+  - `calculateQuotePricing` implementing exact Blended Risk Score formula and line margins.
+- [x] Create `apps/server/src/validators/quote.validator.ts`:
+  - `calculatePreviewSchema`, `createQuoteSchema`, `reviewQuoteSchema`, `listQuotesQuerySchema`.
+- [x] Create `apps/server/src/controllers/quote.controller.ts` and `apps/server/src/routes/quote.routes.ts`:
   - `POST /api/quotes/calculate-preview` (Used by Quotation Builder for live reactive margin bar)
   - `POST /api/quotes` (Create new quote)
   - `GET /api/quotes` (List quotes with filter params)
   - `GET /api/quotes/:id` (Get quote details with line items and audit history)
   - `POST /api/quotes/:id/submit-approval` (Transitions to `PENDING_APPROVAL` or auto-approves if risk = 0)
-  - `POST /api/quotes/:id/review` (Approves as Manager/Finance or returns for revision)
-- [ ] Implement `apps/server/src/services/fulfillment.service.ts`:
+  - `POST /api/quotes/:id/review` (Approves as Manager/Finance or returns for revision with RBAC guard)
+- [x] Implement `apps/server/src/services/fulfillment.service.ts`:
   - `computeWarehouseSplit(quoteId)` using the Greedy Minimum-Shipment Heuristic.
-  - `allocateWarehouseStock(quoteId, allocations)`
-- [ ] Mount quote routes in `apps/server/src/index.ts`.
+  - `confirmFulfillmentSplit(quoteId, overrides)`
+  - `replenishWarehouseStock(warehouseId, productId, quantityAdded)`
+- [x] Mount catalog, quote, and fulfillment routes in `apps/server/src/index.ts`.
 
 ---
 
-### Block 3: Hours 7 – 10 (Fulfillment, Billing & Customer Portal APIs)
-- [ ] Implement `apps/server/src/services/billing.service.ts`:
+### Block 3: Hours 7 – 10 (Fulfillment, Billing & Customer Portal APIs) [COMPLETED]
+- [x] Implement `apps/server/src/services/billing.service.ts`:
   - `generateOrderInvoicesAndSubscriptions(quoteId)` (Splits one-time vs recurring lines).
-  - `calculateDailyProration(contractId, newSeatCount)`.
-  - `recordInvoicePayment(invoiceId, amount, method)`.
-- [ ] Create billing & fulfillment routes:
-  - `GET /api/quotes/:id/fulfillment-split`
-  - `POST /api/quotes/:id/fulfillment-split/confirm`
-  - `POST /api/warehouses/:id/replenish`
-  - `GET /api/quotes/:id/billing`
-  - `POST /api/invoices/:id/payment`
-  - `POST /api/subscriptions/:id/modify-seats`
-- [ ] Implement `apps/server/src/services/upsell.service.ts`:
-  - `getUpsellSuggestions(quoteId)` computing live `marginDeltaPercent`.
+  - `modifySubscriptionSeats(contractId, newSeatCount)` (Daily proration calculation).
+  - `cancelSubscription(contractId)` (Credit note generation).
+  - `recordInvoicePayment(input)`.
+- [x] Create billing & fulfillment routes:
+  - `GET /api/fulfillment/quotes/:id/fulfillment-split`
+  - `POST /api/fulfillment/quotes/:id/fulfillment-split/confirm`
+  - `POST /api/fulfillment/warehouses/:warehouseId/replenish`
+  - `GET /api/billing/quotes/:id`
+  - `POST /api/billing/quotes/:id/generate`
+  - `POST /api/billing/invoices/:invoiceId/payment`
+  - `POST /api/billing/subscriptions/:contractId/modify-seats`
+  - `POST /api/billing/subscriptions/:contractId/cancel`
+- [x] Implement `apps/server/src/services/upsell.service.ts`:
+  - `getQuoteUpsellSuggestions(quoteId)` computing live `marginDeltaPercent`.
   - `GET /api/quotes/:id/upsell-suggestions`.
-- [ ] Implement Customer Portal Endpoints in `apps/server/src/routes/portal.routes.ts`:
+- [x] Implement Customer Portal Endpoints in `apps/server/src/routes/portal.routes.ts`:
   - `GET /api/portal/quote/:token` (Strips confidential cost/margin fields).
   - `POST /api/portal/quote/:token/comment` (Appends customer line comment).
   - `POST /api/portal/quote/:token/counter` (Re-calculates risk, triggers re-approval if bounds breached).
-  - `POST /api/portal/quote/:token/confirm` (Final customer sign-off).
+  - `POST /api/portal/quote/:token/confirm` (1-click customer confirmation).
+- [x] Implement Deal Health Endpoints in `apps/server/src/routes/deal-health.routes.ts`:
+  - `GET /api/deal-health/overview`
+  - `POST /api/deal-health/alerts/:alertId/nudge`
+  - `POST /api/deal-health/alerts/:alertId/escalate`
 
 ---
 
-### Block 4: Hours 10 – 13 (Deal Health Anomaly Detector & Reporting)
-- [ ] Implement `apps/server/src/services/deal-health.service.ts`:
+### Block 4: Hours 10 – 13 (Deal Health Anomaly Detector & Reporting) [COMPLETED]
+- [x] Implement `apps/server/src/services/deal-health.service.ts`:
   - Stalled deals query: quotes with status in `['DRAFT', 'UNDER_NEGOTIATION']` and `updatedAt < now - 3 days`.
   - Discount anomaly query: quote average discount $> 1.5 \times$ rep's historical discount rate.
   - Delivery slippage query: hardware items with backorders or lead time $> 7$ days.
-- [ ] Implement endpoints:
-  - `GET /api/dashboard/deal-health`
-  - `POST /api/dashboard/alerts/:id/nudge` (Logs activity event)
-  - `POST /api/dashboard/alerts/:id/escalate` (Assigns escalation flag)
-  - `GET /api/dashboard/reports/export` (Returns JSON or CSV payload for reports table)
-- [ ] Implement Admin Catalog endpoints:
+- [x] Implement endpoints in `apps/server/src/routes/deal-health.routes.ts`:
+  - `GET /api/deal-health/overview`
+  - `GET /api/deal-health/kpis`
+  - `POST /api/deal-health/alerts/:id/nudge`
+  - `POST /api/deal-health/alerts/:id/escalate`
+  - `GET /api/deal-health/reports/export`
+- [x] Implement Admin Catalog endpoints in `apps/server/src/routes/catalog.routes.ts`:
   - `GET /api/catalog/products`, `POST /api/catalog/products`
   - `GET /api/catalog/customers`, `POST /api/catalog/customers`
   - `GET /api/catalog/warehouses`, `GET /api/catalog/plans`
+- [x] Mount all routes and Scalar/OpenAPI documentation (`/doc`, `/scalar`, `/docs`, `/llms.txt`) in `apps/server/src/index.ts`.
 
 ---
 
