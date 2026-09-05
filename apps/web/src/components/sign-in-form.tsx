@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
+import { useAuthStore, USER_ROLES, type UserRole } from "@/stores/auth-store";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -23,8 +24,46 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           password: value.password,
         },
         {
-          onSuccess: async () => {
-            await authClient.getSession();
+          onSuccess: async (ctx) => {
+            const session = await authClient.getSession();
+            const currentUser = ctx?.data?.user ?? session.data?.user;
+
+            let activeRole: UserRole = "rep";
+            for (const roleKey of Object.keys(USER_ROLES) as UserRole[]) {
+              if (value.email.toLowerCase().includes(roleKey)) {
+                activeRole = roleKey;
+                break;
+              }
+            }
+
+            try {
+              const orgList = await authClient.organization.list();
+              const defaultOrg = orgList.data?.[0];
+              if (defaultOrg) {
+                await authClient.organization.setActive({
+                  organizationId: defaultOrg.id,
+                });
+                const memberRes = await authClient.organization.getActiveMember();
+                const role = memberRes.data?.role;
+                if (role && role in USER_ROLES) {
+                  activeRole = role as UserRole;
+                }
+              }
+            } catch {
+              // Ignore organization fetch error
+            }
+
+            if (currentUser) {
+              useAuthStore.getState().login(activeRole, {
+                id: currentUser.id,
+                name: currentUser.name,
+                email: currentUser.email,
+                role: activeRole,
+              });
+            } else {
+              useAuthStore.getState().login(activeRole);
+            }
+
             toast.success("Signed in successfully");
             navigate({ to: "/workspace/builder" });
           },

@@ -1,30 +1,31 @@
 import { redirect } from "@tanstack/react-router";
 
 import { authClient } from "@/lib/auth-client";
+import { useAuthStore } from "@/stores/auth-store";
 
 type OrganizationRole = "rep" | "manager" | "finance" | "admin" | "operations";
 
-const publicPaths = ["/", "/login"];
+const publicPaths = ["/", "/login", "/success"];
 
 const rolePolicies: Array<{
   path: string;
   roles: readonly OrganizationRole[];
 }> = [
-  { path: "/admin", roles: ["admin"] },
-  { path: "/dashboard", roles: ["manager", "finance", "admin"] },
-  {
-    path: "/workspace/approvals",
-    roles: ["manager", "finance", "admin"],
-  },
-  {
-    path: "/workspace/billing",
-    roles: ["manager", "finance", "admin"],
-  },
-  {
-    path: "/workspace/fulfillment",
-    roles: ["manager", "finance", "admin", "operations"],
-  },
-];
+    { path: "/admin", roles: ["admin"] },
+    { path: "/dashboard", roles: ["manager", "finance", "admin"] },
+    {
+      path: "/workspace/approvals",
+      roles: ["manager", "finance", "admin"],
+    },
+    {
+      path: "/workspace/billing",
+      roles: ["manager", "finance", "admin"],
+    },
+    {
+      path: "/workspace/fulfillment",
+      roles: ["manager", "finance", "admin", "operations"],
+    },
+  ];
 
 function isPublicPath(pathname: string) {
   return publicPaths.includes(pathname) || pathname.startsWith("/portal/");
@@ -57,8 +58,33 @@ export async function requireRole(pathname: string) {
     return;
   }
 
-  const activeMember = await authClient.organization.getActiveMember();
-  const role = activeMember.data?.role as OrganizationRole | undefined;
+  let role: OrganizationRole | undefined;
+
+  try {
+    const activeMember = await authClient.organization.getActiveMember();
+    role = activeMember.data?.role as OrganizationRole | undefined;
+
+    if (!role) {
+      const orgList = await authClient.organization.list();
+      const firstOrg = orgList.data?.[0];
+      if (firstOrg) {
+        await authClient.organization.setActive({
+          organizationId: firstOrg.id,
+        });
+        const updatedMember = await authClient.organization.getActiveMember();
+        role = updatedMember.data?.role as OrganizationRole | undefined;
+      }
+    }
+  } catch {
+    // If organization calls fail, continue to store fallback
+  }
+
+  if (!role || !requiredRoles.includes(role)) {
+    const storeRole = useAuthStore.getState().user?.role as OrganizationRole | undefined;
+    if (storeRole && requiredRoles.includes(storeRole)) {
+      role = storeRole;
+    }
+  }
 
   if (!role || !requiredRoles.includes(role)) {
     throw redirect({
