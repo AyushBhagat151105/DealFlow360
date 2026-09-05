@@ -19,4 +19,3 @@ export const submitCounterOfferSchema = z.object({
     .min(1, "At least one line discount counter is required"),
   comment: z.string().optional(),
 });
-

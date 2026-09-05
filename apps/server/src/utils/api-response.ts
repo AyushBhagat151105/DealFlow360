@@ -43,4 +43,3 @@ export function sendError(
   };
   return c.json(payload, statusCode);
 }
-

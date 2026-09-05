@@ -167,22 +167,25 @@ export interface QuotePreview {
   lines: QuotePreviewLine[];
 }
 
-export interface FulfillmentAllocation {
-  warehouseId: string;
+export type FulfillmentAllocation = {
+  quotationLineId?: string;
+  warehouseId: string | null;
   warehouseName: string;
   productId: string;
   productName: string;
+  quantityRequested?: number;
   quantityAllocated: number;
   quantityBackordered: number;
   status: "ALLOCATED" | "PARTIALLY_ALLOCATED" | "BACKORDER" | "SHIPPED";
-}
+};
 
-export interface FulfillmentPlan {
+export type FulfillmentPlan = {
+  quoteId?: string;
   totalRequiredShipments: number;
   totalEstimatedShippingCost: number;
   hasBackorders: boolean;
   allocations: FulfillmentAllocation[];
-}
+};
 
 export interface BillingInvoiceLine {
   description: string;
@@ -243,3 +246,16 @@ export interface DealHealthOverview {
   };
   alerts: DealHealthAlert[];
 }
+
+export type UpdateCustomerInput = Partial<CreateCustomerInput> & {
+  phone?: string;
+  address?: string;
+};
+
+export type UserItem = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+};

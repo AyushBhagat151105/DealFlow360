@@ -202,7 +202,6 @@ function CustomerPortalComponent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-16">
-      {/* Top Banner Header for Customer View */}
       <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur-md px-4 sm:px-8 py-3.5 shadow-sm">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -265,10 +264,7 @@ function CustomerPortalComponent() {
           </div>
         </div>
       </header>
-
-      {/* Main Container */}
       <main className="max-w-6xl mx-auto px-4 sm:px-8 pt-6 space-y-6">
-        {/* Quotation Header Details Card */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="p-5 pb-4">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -306,8 +302,6 @@ function CustomerPortalComponent() {
             </CardContent>
           )}
         </Card>
-
-        {/* Tabbed Interactive Section: Line Summary, Counter Offer, Activity Log */}
         <Tabs defaultValue="lines" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-md bg-muted p-1">
             <TabsTrigger value="lines" className="text-xs font-medium gap-1.5">
@@ -323,8 +317,6 @@ function CustomerPortalComponent() {
               <span>Comments & Q&A</span>
             </TabsTrigger>
           </TabsList>
-
-          {/* TAB 1: LINE ITEMS TABLE (Zero Cost/Margin Leakage) */}
           <TabsContent value="lines" className="space-y-4 pt-4">
             <Card className="border-border bg-card">
               <CardHeader className="p-4 flex flex-row items-center justify-between">
@@ -402,8 +394,6 @@ function CustomerPortalComponent() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* TAB 2: COUNTER DISCOUNT PROPOSAL FORM */}
           <TabsContent value="counter" className="space-y-4 pt-4">
             <Card className="border-border bg-card">
               <CardHeader className="p-4">
@@ -458,8 +448,6 @@ function CustomerPortalComponent() {
                       </Table>
                     </div>
                   </div>
-
-                  {/* Summary Comparison */}
                   <div className="bg-muted/40 p-4 rounded-md border border-border flex flex-wrap items-center justify-between gap-4">
                     <div>
                       <span className="text-xs text-muted-foreground block">Recalculated Counter Subtotal</span>
@@ -515,8 +503,6 @@ function CustomerPortalComponent() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* TAB 3: COMMENTS & Q&A */}
           <TabsContent value="activity" className="space-y-4 pt-4">
             <Card className="border-border bg-card">
               <CardHeader className="p-4 flex flex-row items-center justify-between">
@@ -559,8 +545,6 @@ function CustomerPortalComponent() {
           </TabsContent>
         </Tabs>
       </main>
-
-      {/* LINE ITEM COMMENT DIALOG */}
       <Dialog open={commentModalOpen} onOpenChange={setCommentModalOpen}>
         <DialogContent className="sm:max-w-md bg-card text-card-foreground border-border">
           <DialogHeader>
@@ -612,8 +596,6 @@ function CustomerPortalComponent() {
           </form>
         </DialogContent>
       </Dialog>
-
-      {/* CONFIRM QUOTATION SIGNATURE DIALOG */}
       <Dialog open={confirmModalOpen} onOpenChange={setConfirmModalOpen}>
         <DialogContent className="sm:max-w-md bg-card text-card-foreground border-border">
           <DialogHeader>

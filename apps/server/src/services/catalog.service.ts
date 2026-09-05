@@ -2,7 +2,7 @@ import prisma, {
   CustomerTier,
   ProductCategory,
 } from "@DealFlow360/db";
-import { ValidationError } from "../utils/errors";
+import { NotFoundError, ValidationError } from "../utils/errors";
 
 export async function getCatalogProducts() {
   const products = await prisma.product.findMany({
@@ -153,6 +153,120 @@ export async function createCustomer(input: CreateCustomerInput) {
   });
 }
 
+export type UpdateCustomerInput = Partial<CreateCustomerInput>;
+
+export async function updateCustomer(id: string, input: UpdateCustomerInput) {
+  const existing = await prisma.customer.findUnique({ where: { id } });
+  if (!existing) {
+    throw new NotFoundError("Customer", id);
+  }
+
+  let tier = existing.tier;
+  if (input.tier) {
+    const rawTier = String(input.tier).toUpperCase();
+    if (rawTier === "SILVER") tier = CustomerTier.SILVER;
+    else if (rawTier === "GOLD") tier = CustomerTier.GOLD;
+    else tier = CustomerTier.BRONZE;
+  }
+
+  return prisma.customer.update({
+    where: { id },
+    data: {
+      name: input.name ?? existing.name,
+      contactName: input.contactName !== undefined ? input.contactName : existing.contactName,
+      email: input.email ?? existing.email,
+      phone: input.phone !== undefined ? input.phone : existing.phone,
+      address: input.address !== undefined ? input.address : existing.address,
+      tier,
+    },
+  });
+}
+
+export async function deleteCustomer(id: string) {
+  const existing = await prisma.customer.findUnique({ where: { id } });
+  if (!existing) {
+    throw new NotFoundError("Customer", id);
+  }
+
+  const quoteCount = await prisma.quotation.count({ where: { customerId: id } });
+  if (quoteCount > 0) {
+    throw new ValidationError(`Cannot delete customer with ${quoteCount} associated quotation(s).`);
+  }
+
+  return prisma.customer.delete({ where: { id } });
+}
+
+export type UserResponse = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: Date;
+};
+
+export async function listUsers(): Promise<UserResponse[]> {
+  const users = await prisma.user.findMany({
+    include: {
+      members: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return users.map((u) => {
+    const memberRole = u.members[0]?.role || "rep";
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: memberRole,
+      createdAt: u.createdAt,
+    };
+  });
+}
+
+export async function updateUserRole(userId: string, role: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { members: true },
+  });
+
+  if (!user) {
+    throw new NotFoundError("User", userId);
+  }
+
+  const firstMember = user.members[0];
+  if (firstMember) {
+    await prisma.member.update({
+      where: { id: firstMember.id },
+      data: { role },
+    });
+  } else {
+    const org = await prisma.organization.findFirst();
+    if (org) {
+      await prisma.member.create({
+        data: {
+          id: `mem_${Date.now()}`,
+          userId,
+          organizationId: org.id,
+          role,
+        },
+      });
+    }
+  }
+
+  return { id: user.id, name: user.name, email: user.email, role };
+}
+
+export async function deleteUser(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new NotFoundError("User", userId);
+  }
+
+  await prisma.user.delete({ where: { id: userId } });
+  return { success: true };
+}
+
 export type CreateWarehouseInput = {
   code: string;
   name: string;
@@ -212,4 +326,3 @@ export async function updateCategoryCeiling(category: string, ceilingPercent: nu
     },
   });
 }
-

@@ -1,6 +1,7 @@
 import { redirect } from "@tanstack/react-router";
 
 import { authClient } from "@/lib/auth-client";
+import { useAuthStore } from "@/stores/auth-store";
 
 type OrganizationRole = "rep" | "manager" | "finance" | "admin" | "operations";
 
@@ -10,21 +11,21 @@ const rolePolicies: Array<{
   path: string;
   roles: readonly OrganizationRole[];
 }> = [
-  { path: "/admin", roles: ["admin"] },
-  { path: "/dashboard", roles: ["manager", "finance", "admin"] },
-  {
-    path: "/workspace/approvals",
-    roles: ["manager", "finance", "admin"],
-  },
-  {
-    path: "/workspace/billing",
-    roles: ["manager", "finance", "admin"],
-  },
-  {
-    path: "/workspace/fulfillment",
-    roles: ["manager", "finance", "admin", "operations"],
-  },
-];
+    { path: "/admin", roles: ["admin"] },
+    { path: "/dashboard", roles: ["manager", "finance", "admin"] },
+    {
+      path: "/workspace/approvals",
+      roles: ["manager", "finance", "admin"],
+    },
+    {
+      path: "/workspace/billing",
+      roles: ["manager", "finance", "admin"],
+    },
+    {
+      path: "/workspace/fulfillment",
+      roles: ["manager", "finance", "admin", "operations"],
+    },
+  ];
 
 function isPublicPath(pathname: string) {
   return publicPaths.includes(pathname) || pathname.startsWith("/portal/");
@@ -58,7 +59,7 @@ export async function requireRole(pathname: string) {
   }
 
   const activeMember = await authClient.organization.getActiveMember();
-  const role = activeMember.data?.role as OrganizationRole | undefined;
+  const role = (activeMember.data?.role || useAuthStore.getState().user.role) as OrganizationRole | undefined;
 
   if (!role || !requiredRoles.includes(role)) {
     throw redirect({

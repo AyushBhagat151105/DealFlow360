@@ -128,4 +128,3 @@ billingRoutes.openapi(cancelSubscriptionRoute, async (c) => {
   await requireRole(["manager", "finance", "admin"])(c, async () => { });
   return cancelSubscriptionController(c);
 });
-

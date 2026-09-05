@@ -56,4 +56,3 @@ export const listQuotesQuerySchema = z.object({
   repUserId: z.string().optional(),
   search: z.string().optional(),
 });
-

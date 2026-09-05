@@ -10,6 +10,11 @@ import {
   createWarehouseController,
   updateCustomerTierCeilingController,
   updateCategoryCeilingController,
+  updateCustomerController,
+  deleteCustomerController,
+  getUsersController,
+  updateUserRoleController,
+  deleteUserController,
 } from "../controllers/catalog.controller";
 import { requireAuth, requireRole, optionalAuth } from "../middlewares/auth";
 
@@ -200,11 +205,110 @@ const updateCategoryCeilingRoute = createRoute({
   },
 });
 
+const updateCustomerRoute = createRoute({
+  method: "patch",
+  path: "/customers/{id}",
+  tags: ["Catalog"],
+  summary: "Update customer details",
+  request: {
+    params: z.object({
+      id: z.string().openapi({ param: { name: "id", in: "path" } }),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            name: z.string().optional(),
+            contactName: z.string().optional(),
+            email: z.string().email().optional(),
+            phone: z.string().optional(),
+            address: z.string().optional(),
+            tier: z.enum(["STANDARD", "BRONZE", "SILVER", "GOLD"]).optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: { description: "Customer updated successfully" },
+    400: { description: "Validation error" },
+    404: { description: "Customer not found" },
+  },
+});
+
+const deleteCustomerRoute = createRoute({
+  method: "delete",
+  path: "/customers/{id}",
+  tags: ["Catalog"],
+  summary: "Delete customer account (Admin only)",
+  request: {
+    params: z.object({
+      id: z.string().openapi({ param: { name: "id", in: "path" } }),
+    }),
+  },
+  responses: {
+    200: { description: "Customer deleted successfully" },
+    404: { description: "Customer not found" },
+  },
+});
+
+const getUsersRoute = createRoute({
+  method: "get",
+  path: "/users",
+  tags: ["Catalog"],
+  summary: "List all workspace team members and roles",
+  responses: {
+    200: { description: "List of workspace users" },
+  },
+});
+
+const updateUserRoleRoute = createRoute({
+  method: "patch",
+  path: "/users/{id}/role",
+  tags: ["Catalog"],
+  summary: "Update user role (Admin only)",
+  request: {
+    params: z.object({
+      id: z.string().openapi({ param: { name: "id", in: "path" } }),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            role: z.enum(["rep", "manager", "finance", "admin"]),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: { description: "User role updated successfully" },
+    404: { description: "User not found" },
+  },
+});
+
+const deleteUserRoute = createRoute({
+  method: "delete",
+  path: "/users/{id}",
+  tags: ["Catalog"],
+  summary: "Delete user account (Admin only)",
+  request: {
+    params: z.object({
+      id: z.string().openapi({ param: { name: "id", in: "path" } }),
+    }),
+  },
+  responses: {
+    200: { description: "User deleted successfully" },
+    404: { description: "User not found" },
+  },
+});
+
 catalogRoutes.use("/products", optionalAuth);
 catalogRoutes.use("/customers", optionalAuth);
 catalogRoutes.use("/warehouses", optionalAuth);
 catalogRoutes.use("/plans", optionalAuth);
 catalogRoutes.use("/ceilings", optionalAuth);
+catalogRoutes.use("/users", optionalAuth);
 
 catalogRoutes.openapi(getProductsRoute, getProductsController);
 catalogRoutes.openapi(getCustomersRoute, getCustomersController);
@@ -221,6 +325,17 @@ catalogRoutes.openapi(createProductRoute, async (c) => {
 catalogRoutes.openapi(createCustomerRoute, async (c) => {
   await requireAuth(c, async () => { });
   return createCustomerController(c);
+});
+
+catalogRoutes.openapi(updateCustomerRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return updateCustomerController(c);
+});
+
+catalogRoutes.openapi(deleteCustomerRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  await requireRole(["admin"])(c, async () => { });
+  return deleteCustomerController(c);
 });
 
 catalogRoutes.openapi(createWarehouseRoute, async (c) => {
@@ -241,3 +356,19 @@ catalogRoutes.openapi(updateCategoryCeilingRoute, async (c) => {
   return updateCategoryCeilingController(c);
 });
 
+catalogRoutes.openapi(getUsersRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  return getUsersController(c);
+});
+
+catalogRoutes.openapi(updateUserRoleRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  await requireRole(["admin"])(c, async () => { });
+  return updateUserRoleController(c);
+});
+
+catalogRoutes.openapi(deleteUserRoute, async (c) => {
+  await requireAuth(c, async () => { });
+  await requireRole(["admin"])(c, async () => { });
+  return deleteUserController(c);
+});

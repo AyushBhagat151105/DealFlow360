@@ -79,4 +79,3 @@ dealHealthRoutes.openapi(escalateAlertRoute, async (c) => {
   await requireRole(["manager", "finance", "admin"])(c, async () => { });
   return escalateDealAlertController(c);
 });
-

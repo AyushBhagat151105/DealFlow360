@@ -77,4 +77,3 @@ export async function reviewQuoteController(c: Context) {
   );
   return sendSuccess(c, updated, 200, `Quotation ${validated.action.toLowerCase()} completed.`);
 }
-

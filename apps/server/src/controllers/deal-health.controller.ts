@@ -51,4 +51,3 @@ export async function getSalesReportController(c: Context) {
 
   return sendSuccess(c, data);
 }
-

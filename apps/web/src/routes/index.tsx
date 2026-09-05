@@ -58,7 +58,6 @@ function HomeComponent() {
   return (
     <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background via-background to-muted/30">
       <div className="container mx-auto max-w-6xl px-4 py-12 space-y-12">
-        {/* Hero Section */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <Badge
             variant="outline"
@@ -94,8 +93,6 @@ function HomeComponent() {
             </Link>
           </div>
         </div>
-
-        {/* Core Modules Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {features.map((feat) => {
             const Icon = feat.icon;
@@ -124,8 +121,6 @@ function HomeComponent() {
             );
           })}
         </div>
-
-        {/* System Capabilities Bar */}
         <div className="rounded-lg border border-border bg-card/60 backdrop-blur-sm p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
           <div className="space-y-1">
             <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold text-lg">

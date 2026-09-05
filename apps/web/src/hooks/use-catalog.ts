@@ -9,6 +9,8 @@ import type {
   ReplenishStockInput,
   SubscriptionPlan,
   Warehouse,
+  UpdateCustomerInput,
+  UserItem,
 } from "@/lib/api-types";
 
 export function useProducts() {
@@ -104,3 +106,64 @@ export function useReplenishStock() {
   });
 }
 
+export function useUpdateCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateCustomerInput }) => {
+      const response = await httpClient.patch<{ data: Customer }>(`/api/catalog/customers/${id}`, data);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalog", "customers"] });
+    },
+  });
+}
+
+export function useDeleteCustomer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await httpClient.delete<{ data: { id: string } }>(`/api/catalog/customers/${id}`);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalog", "customers"] });
+    },
+  });
+}
+
+export function useUsers() {
+  return useQuery<UserItem[]>({
+    queryKey: ["catalog", "users"],
+    queryFn: async () => {
+      const response = await httpClient.get<{ data: UserItem[] }>("/api/catalog/users");
+      return response.data.data;
+    },
+  });
+}
+
+export function useUpdateUserRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, role }: { id: string; role: string }) => {
+      const response = await httpClient.patch<{ data: UserItem }>(`/api/catalog/users/${id}/role`, { role });
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalog", "users"] });
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await httpClient.delete<{ data: { id: string } }>(`/api/catalog/users/${id}`);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalog", "users"] });
+    },
+  });
+}

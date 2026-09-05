@@ -1,34 +1,30 @@
 import { Queue, type ConnectionOptions } from "bullmq";
+import { env } from "@DealFlow360/env/server";
 
 export const connection: ConnectionOptions = {
-  host: process.env.REDIS_HOST || "localhost",
-  port: Number(process.env.REDIS_PORT) || 6379,
-  password: process.env.REDIS_PASSWORD || undefined,
+  host: env.REDIS_HOST,
+  port: env.REDIS_PORT,
+  password: env.REDIS_PASSWORD,
   maxRetriesPerRequest: null,
 };
 
-/**
- * Example queue for background job processing
- * @see https://docs.bullmq.io/
- */
 export const emailQueue = new Queue("email", { connection });
 export const notificationQueue = new Queue("notification", { connection });
 
-// Define job data types
-export interface EmailJobData {
+export type EmailJobData = {
   to: string;
   subject: string;
   body: string;
   templateId?: string;
-}
+};
 
-export interface NotificationJobData {
+export type NotificationJobData = {
   userId: string;
   type: "push" | "in-app" | "sms";
   title: string;
   message: string;
   data?: Record<string, unknown>;
-}
+};
 
 /**
  * Add an email job to the queue

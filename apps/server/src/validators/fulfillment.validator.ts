@@ -16,4 +16,3 @@ export const replenishStockSchema = z.object({
   quantityAdded: z.number().int().positive("Quantity must be greater than zero"),
   variantId: z.string().optional().nullable(),
 });
-

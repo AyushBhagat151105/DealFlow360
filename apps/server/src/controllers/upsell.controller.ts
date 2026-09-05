@@ -11,4 +11,3 @@ export async function getQuoteUpsellSuggestionsController(c: Context) {
   const suggestions = await getQuoteUpsellSuggestions(quoteId);
   return sendSuccess(c, suggestions);
 }
-

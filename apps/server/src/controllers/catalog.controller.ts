@@ -9,9 +9,14 @@ import {
   getDiscountCeilingsMatrix,
   createProduct,
   createCustomer,
+  updateCustomer,
+  deleteCustomer,
   createWarehouse,
   updateCustomerTierCeiling,
   updateCategoryCeiling,
+  listUsers,
+  updateUserRole,
+  deleteUser,
 } from "../services/catalog.service";
 
 export async function getProductsController(c: Context) {
@@ -85,3 +90,48 @@ export async function updateCategoryCeilingController(c: Context) {
   return sendSuccess(c, updated, 200, "Category ceiling updated.");
 }
 
+export async function updateCustomerController(c: Context) {
+  const id = c.req.param("id");
+  if (!id) {
+    throw new ValidationError("Customer ID is required.");
+  }
+  const body = await c.req.json();
+  const updated = await updateCustomer(id, body);
+  return sendSuccess(c, updated, 200, "Customer updated successfully.");
+}
+
+export async function deleteCustomerController(c: Context) {
+  const id = c.req.param("id");
+  if (!id) {
+    throw new ValidationError("Customer ID is required.");
+  }
+  await deleteCustomer(id);
+  return sendSuccess(c, { id }, 200, "Customer deleted successfully.");
+}
+
+export async function getUsersController(c: Context) {
+  const users = await listUsers();
+  return sendSuccess(c, users);
+}
+
+export async function updateUserRoleController(c: Context) {
+  const id = c.req.param("id");
+  if (!id) {
+    throw new ValidationError("User ID is required.");
+  }
+  const body = await c.req.json();
+  if (!body.role) {
+    throw new ValidationError("Role is required.");
+  }
+  const updated = await updateUserRole(id, body.role);
+  return sendSuccess(c, updated, 200, "User role updated successfully.");
+}
+
+export async function deleteUserController(c: Context) {
+  const id = c.req.param("id");
+  if (!id) {
+    throw new ValidationError("User ID is required.");
+  }
+  await deleteUser(id);
+  return sendSuccess(c, { id }, 200, "User deleted successfully.");
+}

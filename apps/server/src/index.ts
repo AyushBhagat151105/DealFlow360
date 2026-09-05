@@ -88,6 +88,6 @@ app.get("/", (c) => {
 export { app };
 
 export default {
-  port: process.env.PORT ? Number(process.env.PORT) : 3000,
+  port: env.PORT,
   fetch: app.fetch,
 };
