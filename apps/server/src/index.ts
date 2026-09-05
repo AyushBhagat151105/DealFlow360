@@ -19,27 +19,23 @@ app.use(
   }),
 );
 
-// Better Auth handler
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
-// OpenAPI 3.1 Document Specification
 app.doc("/doc", {
   openapi: "3.1.0",
   info: {
     title: "DealFlow360 API Reference",
     version: "1.0.0",
-    description:
-      "Intelligent, Self-Governing Sales Operations Platform API (Odoo 2026 Grand Finale)",
+    description: "DealFlow360 Sales Operations Engine API",
   },
   servers: [
     {
       url: "http://localhost:3001",
-      description: "Local Development Server",
+      description: "Development Server",
     },
   ],
 });
 
-// Interactive Scalar API Documentation UI
 app.get(
   "/scalar",
   Scalar({
@@ -50,7 +46,6 @@ app.get(
 );
 app.get("/docs", (c) => c.redirect("/scalar"));
 
-// Machine-readable Markdown Documentation for LLMs & AI Coding Agents
 app.get("/llms.txt", async (c) => {
   const doc = app.getOpenAPI31Document({
     openapi: "3.1.0",

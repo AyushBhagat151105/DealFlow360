@@ -34,18 +34,18 @@
 
 ## 2. 16-Hour Step-by-Step Execution Checklist
 
-### Block 1: Hours 0 – 3 (Schema, Migration & Seed Data)
-- [ ] Review [API_CONTRACTS.md](./API_CONTRACTS.md) for enums and field types.
-- [ ] Add all models to `packages/db/prisma/schema/schema.prisma`.
-- [ ] Run `bun run db:push` or `bun run db:migrate` against PostgreSQL (`docker-compose up -d db`).
-- [ ] Create `packages/db/prisma/seed.ts` to populate:
+### Block 1: Hours 0 – 3 (Schema, Migration & Seed Data) [COMPLETED]
+- [x] Review [API_CONTRACTS.md](./API_CONTRACTS.md) for enums and field types.
+- [x] Add all models to `packages/db/prisma/schema/schema.prisma`.
+- [x] Run `bun run db:push` or `bun run db:migrate` against PostgreSQL (`docker-compose up -d db`).
+- [x] Create `apps/server/src/scripts/seed.ts` to populate:
   - 4 Users: Rep (`rep@dealflow360.com`), Manager (`manager@dealflow360.com`), Finance (`finance@dealflow360.com`), Admin (`admin@dealflow360.com`).
   - 3 Customers: Acme Corp (Gold - 15%), Beta Industries (Silver - 10%), StartupX (Bronze - 5%).
-  - 3 Products: Enterprise Pro Laptop 16" (Hardware), Onboarding & Setup (Service), DealFlow Cloud Platform (Subscription).
+  - 4 Products: Enterprise Pro Laptop 16" (Hardware), Thunderbolt Dock (Hardware), Onboarding & Setup (Service), DealFlow Cloud Platform (Subscription).
   - 2 Warehouses: Main Warehouse (Chicago, 10 laptops, weight 1.0), East Depot (NYC, 5 laptops, weight 1.5).
   - 2 Subscription Plans: Monthly ($60/mo, daily proration), Annual ($600/yr).
-- [ ] Run `bun run db:seed` and verify database records in Prisma Studio (`bun run db:studio`).
-- [ ] Notify Dev 2 that the database schema and seed data are ready.
+- [x] Run `bun run db:seed` and verify database records in Prisma Studio (`bun run db:studio`).
+- [x] Verified database counts: 4 users, 3 customers, 4 products, 2 warehouses, 2 plans, 2 quotes, 2 alerts.
 
 ---
 
