@@ -9,14 +9,26 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
-  trustedOrigins: [env.CORS_ORIGIN],
+  trustedOrigins: [
+    env.CORS_ORIGIN,
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "http://192.168.9.200:5173",
+    "http://192.168.9.200:3000",
+    "http://192.168.9.200:3001",
+    "http://192.168.9.22:5173"
+  ],
   emailAndPassword: {
     enabled: true,
   },
   advanced: {
     defaultCookieAttributes: {
-      sameSite: "none",
-      secure: true,
+      sameSite: "lax",
+      secure: false,
       httpOnly: true,
     },
   },
