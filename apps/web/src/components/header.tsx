@@ -112,27 +112,6 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
-            <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 px-1.5">Demo Role:</span>
-            {(Object.keys(USER_ROLES) as UserRole[]).map((roleKey) => {
-              const roleItem = USER_ROLES[roleKey];
-              const isSelected = user.role === roleKey;
-              return (
-                <button
-                  key={roleKey}
-                  type="button"
-                  onClick={() => handleRoleSwitch(roleKey)}
-                  className={`px-2 py-1 text-xs rounded font-medium transition-all ${isSelected
-                      ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-sm"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                    }`}
-                >
-                  {roleItem.badge}
-                </button>
-              );
-            })}
-          </div>
-
           <Button
             variant="outline"
             size="sm"
