@@ -23,12 +23,9 @@ import {
 import { useSalesAnalyticsReport, type SalesReportFilters } from "@/hooks/use-deal-health";
 import { exportToCsv } from "@/lib/export-utils";
 import type { ProductCategory, QuoteStatus } from "@/lib/api-types";
+import { currencyFormatterNoDecimals } from "@/lib/currency";
 
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+const currency = currencyFormatterNoDecimals;
 
 const CATEGORIES: ProductCategory[] = ["HARDWARE", "SOFTWARE_SUBSCRIPTION", "SERVICE", "SUBSCRIPTION"];
 const STAGES: QuoteStatus[] = [
@@ -327,10 +324,10 @@ export function SalesReportsView() {
                         <Badge
                           variant="secondary"
                           className={`font-mono text-xs ${cat.marginPercent >= 40
-                              ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
-                              : cat.marginPercent >= 20
-                                ? "bg-blue-500/15 text-blue-500 border-blue-500/30"
-                                : "bg-amber-500/15 text-amber-500 border-amber-500/30"
+                            ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
+                            : cat.marginPercent >= 20
+                              ? "bg-blue-500/15 text-blue-500 border-blue-500/30"
+                              : "bg-amber-500/15 text-amber-500 border-amber-500/30"
                             }`}
                         >
                           {cat.marginPercent.toFixed(1)}%
@@ -483,8 +480,8 @@ export function SalesReportsView() {
                       <Badge
                         variant="secondary"
                         className={`font-mono text-xs ${rep.avgMarginPercent >= 35
-                            ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
-                            : "bg-amber-500/15 text-amber-500 border-amber-500/30"
+                          ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
+                          : "bg-amber-500/15 text-amber-500 border-amber-500/30"
                           }`}
                       >
                         {rep.avgMarginPercent.toFixed(1)}%

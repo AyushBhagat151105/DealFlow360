@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { UpsellDrawer } from "@/components/upsell-drawer";
 import type { Customer, ProductCategory, UpsellSuggestion } from "@/lib/api-types";
+import { formatCurrency } from "@/lib/currency";
 
 export type CartLine = {
   productId: string;
@@ -137,7 +138,7 @@ export function CartTable({
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                      ${line.unitPrice.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      {formatCurrency(line.unitPrice)}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -150,26 +151,24 @@ export function CartTable({
                           placeholder="0"
                           onFocus={(e) => e.target.select()}
                           onChange={(e) => onUpdateDiscount(line.productId, e.target.value)}
-                          className={`h-7 w-20 text-right font-mono text-xs ${
-                            isDiscountAboveCeiling ? "border-terracotta/60 text-terracotta" : ""
-                          }`}
+                          className={`h-7 w-20 text-right font-mono text-xs ${isDiscountAboveCeiling ? "border-terracotta/60 text-terracotta" : ""
+                            }`}
                         />
 
                         <span className="text-xs text-muted-foreground">%</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-mono font-bold text-xs">
-                      ${lineTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      {formatCurrency(lineTotal)}
                     </TableCell>
                     <TableCell className="text-right">
                       <span
-                        className={`text-xs font-mono font-bold ${
-                          isBelowThreshold
+                        className={`text-xs font-mono font-bold ${isBelowThreshold
                             ? "text-terracotta"
                             : lineMargin < 30
-                            ? "text-forest-ink/60"
-                            : "text-forest-ink"
-                        }`}
+                              ? "text-forest-ink/60"
+                              : "text-forest-ink"
+                          }`}
                       >
                         {lineMargin.toFixed(1)}%
                       </span>

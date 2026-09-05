@@ -349,7 +349,7 @@ export function ProductsTab() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label htmlFor="p-cost">Standard Cost ($) *</Label>
+                  <Label htmlFor="p-cost">Standard Cost (₹) *</Label>
                   <Input
                     id="p-cost"
                     type="number"
@@ -362,7 +362,7 @@ export function ProductsTab() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="p-list">Base List Price ($) *</Label>
+                  <Label htmlFor="p-list">Base List Price (₹) *</Label>
                   <Input
                     id="p-list"
                     type="number"

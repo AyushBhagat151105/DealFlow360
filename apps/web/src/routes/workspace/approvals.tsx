@@ -28,6 +28,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { ApprovalModal } from "@/components/approval-modal";
 import { DealHealthPanel } from "@/components/deal-health-panel";
 import { TablePagination } from "@/components/ui/pagination";
+import { formatCurrency } from "@/lib/currency";
 
 export const Route = createFileRoute("/workspace/approvals")({
   component: ApprovalsComponent,
@@ -233,25 +234,25 @@ function ApprovalsComponent() {
                                   <TableCell>
                                     <Badge
                                       className={`text-[10px] px-1.5 py-0 border ${quote.customerTier === "GOLD"
-                                          ? "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60"
-                                          : quote.customerTier === "SILVER"
-                                            ? "bg-whisper-gray text-forest-ink/60 border-pencil-gray/40"
-                                            : "bg-terracotta/10 text-terracotta border-terracotta/30"
+                                        ? "bg-highlighter-yellow/50 text-forest-ink border-highlighter-yellow/60"
+                                        : quote.customerTier === "SILVER"
+                                          ? "bg-whisper-gray text-forest-ink/60 border-pencil-gray/40"
+                                          : "bg-terracotta/10 text-terracotta border-terracotta/30"
                                         }`}
                                     >
                                       {quote.customerTier}
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="text-right font-mono font-bold text-xs">
-                                    ${quote.totalSubtotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                    {formatCurrency(quote.totalSubtotal)}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <span
                                       className={`text-xs font-mono font-bold ${quote.totalMarginPercent >= 30
-                                          ? "text-forest-ink"
-                                          : quote.totalMarginPercent >= 15
-                                            ? "text-forest-ink/60"
-                                            : "text-terracotta"
+                                        ? "text-forest-ink"
+                                        : quote.totalMarginPercent >= 15
+                                          ? "text-forest-ink/60"
+                                          : "text-terracotta"
                                         }`}
                                     >
                                       {quote.totalMarginPercent.toFixed(1)}%

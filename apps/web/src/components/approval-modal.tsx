@@ -34,6 +34,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Quote } from "@/lib/api-types";
 import { useAuthStore } from "@/stores/auth-store";
+import { formatCurrency } from "@/lib/currency";
 
 const RISK_BADGE: Record<string, string> = {
   NONE: "bg-sticky-note-mint text-forest-ink border-sticky-note-mint/60",
@@ -176,7 +177,7 @@ export function ApprovalModal({
                       <TableCell className="text-center font-mono text-xs">{line.quantity}</TableCell>
                       <TableCell className="text-right font-mono text-xs">{line.discountPercent}%</TableCell>
                       <TableCell className="text-right font-mono font-bold text-xs">
-                        ${line.lineSubtotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        {formatCurrency(line.lineSubtotal)}
                       </TableCell>
                       <TableCell className="text-right">
                         <span className={`text-xs font-mono font-bold ${isBad ? "text-destructive" : "text-emerald-500"}`}>
@@ -192,10 +193,10 @@ export function ApprovalModal({
             <div className="flex justify-end text-xs pt-1 border-t border-border">
               <span className="text-muted-foreground mr-2">Total Blended Margin:</span>
               <span className={`font-mono font-bold ${quote.totalMarginPercent >= 30
-                  ? "text-emerald-500"
-                  : quote.totalMarginPercent >= 15
-                    ? "text-amber-500"
-                    : "text-destructive"
+                ? "text-emerald-500"
+                : quote.totalMarginPercent >= 15
+                  ? "text-amber-500"
+                  : "text-destructive"
                 }`}>
                 {quote.totalMarginPercent.toFixed(1)}%
               </span>

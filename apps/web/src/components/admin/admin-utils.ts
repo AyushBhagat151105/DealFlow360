@@ -1,8 +1,4 @@
-export const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 2,
-});
+export { currencyFormatter } from "@/lib/currency";
 
 export const TIER_STYLES: Record<string, string> = {
   GOLD: "bg-highlighter-yellow text-forest-ink border-highlighter-yellow/60",
